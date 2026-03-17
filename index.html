@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>33/11 kV Golconda SS — Master Data | TGSPDCL</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -77,201 +76,1575 @@ body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;li
 .sec{margin-bottom:32px}
 .sec-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:11px;padding-bottom:7px;border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
 
-/* ── CHARTS ── */
-.chart-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(340px, 1fr));gap:20px;margin-bottom:32px}
-.chart-box{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:16px;min-height:280px}
-.chart-title{font-size:12px;font-weight:700;margin-bottom:14px;color:var(--tx2);text-transform:uppercase;letter-spacing:0.04em}
+/* ── HIERARCHY FLOW ── */
+/* Each level: 132kV → 33kV incomer → HV bay → PTR → LV bay → feeders */
+.hier-wrap{display:flex;flex-direction:column;gap:0}
 
-/* ── DATA TABLES ── */
-.dtbl{width:100%;border-collapse:collapse;font-size:12px}
-.dtbl th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);text-align:left;padding:8px 11px;border-bottom:0.5px solid var(--bd);background:var(--sf2);white-space:nowrap}
-.dtbl td{padding:8px 11px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
-.dtbl tr:last-child td{border-bottom:none}
-.dtbl tbody tr:hover td{background:var(--sf2)}
+/* Level connector */
+.hier-connector{display:flex;align-items:center;gap:0;margin-left:28px;height:20px}
+.hier-connector::before{content:'';display:block;width:1px;height:100%;background:var(--bd2);margin-left:12px}
 
-/* ── HIERARCHY / CARDS ── */
+/* Level card */
 .lcard{border:0.5px solid var(--bd);border-radius:var(--rl);background:var(--sf);overflow:hidden;margin-bottom:0}
+
+/* Level header strip */
 .lcard-head{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:0.5px solid var(--bd)}
 .lbadge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;letter-spacing:.04em;flex-shrink:0}
 .lcard-title{font-size:13px;font-weight:600;color:var(--tx)}
 .lcard-meta{font-size:11px;color:var(--tx3);margin-left:auto}
+
+/* Level body grid */
 .lcard-body{padding:12px 14px}
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px 20px}
 .dg-item{}
 .dg-l{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:2px}
 .dg-v{font-size:12px;font-weight:500;color:var(--tx);font-family:var(--m)}
+.dg-v.na{color:var(--tx3);font-family:var(--f);font-style:italic;font-size:11px}
 
-/* ── FOOTER ── */
+/* Load bar inside cards */
+.load-inline{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--bd)}
+.load-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);min-width:90px}
+.bar-bg{flex:1;height:6px;background:var(--sf3);border-radius:3px;overflow:hidden}
+.bar-fill{height:6px;border-radius:3px}
+.bar-pct{font-size:11px;font-weight:600;font-family:var(--m);min-width:36px;text-align:right}
+.bar-tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;margin-left:4px}
+
+/* Tally check */
+.tally-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:0.5px solid var(--bd);margin-top:10px}
+.tc{padding:8px 12px;border-right:0.5px solid var(--bd)}
+.tc:last-child{border-right:none}
+.tc-l{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:2px}
+.tc-v{font-size:13px;font-weight:700;font-family:var(--m)}
+
+/* Feeder table */
+.fdr-table{width:100%;border-collapse:collapse}
+.fdr-table th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);text-align:left;padding:7px 12px;border-bottom:0.5px solid var(--bd);background:var(--sf2);white-space:nowrap}
+.fdr-table td{padding:7px 12px;border-bottom:0.5px solid var(--bd);font-size:12px;vertical-align:middle}
+.fdr-table tr:last-child td{border-bottom:none}
+.fdr-table tbody tr{cursor:pointer;transition:background .1s}
+.fdr-table tbody tr:hover td{background:var(--sf2)}
+.fdr-table .tally-tr td{background:var(--sf2);border-top:1px solid var(--bd2);font-weight:600}
+.fdr-table .tally-tr:hover td{background:var(--sf3)}
+.fname{font-weight:500}
+.ftbadge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;margin-right:5px}
+.fnum{font-family:var(--m);font-size:11px}
+.fmx{color:var(--tx3)}
+.fbar-cell{width:100px}
+.fbar-w{display:flex;align-items:center;gap:4px}
+.fbar-bg{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.fbar-f{height:4px;border-radius:2px}
+.fpct{font-size:10px;font-weight:600;font-family:var(--m);min-width:26px;text-align:right}
+
+/* DATA TABLES (inventory/reports) */
+.dtbl{width:100%;border-collapse:collapse;font-size:12px}
+.dtbl th{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);text-align:left;padding:8px 11px;border-bottom:0.5px solid var(--bd);background:var(--sf2);white-space:nowrap}
+.dtbl td{padding:8px 11px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl tbody tr:hover td{background:var(--sf2)}
+.vb{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;font-family:var(--m);display:inline-block}
+.v11{background:var(--amb);color:var(--amf)}
+.v33{background:var(--gnb);color:var(--gnf)}
+.v132{background:var(--blb);color:var(--blf)}
+.v400{background:var(--pkb);color:var(--pkf)}
+.seq{font-size:10px;padding:2px 6px;border-radius:3px;background:var(--sf2);color:var(--tx2);font-family:var(--m);border:0.5px solid var(--bd)}
+.ibox{padding:10px 13px;border-radius:var(--r);border:0.5px solid var(--bd);font-size:12px;margin-top:8px}
+
+/* REPORT CARDS */
+.rep-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:20px}
+.rep-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:15px}
+.rep-card h3{font-size:13px;font-weight:600;margin-bottom:4px}
+.rep-card p{font-size:12px;color:var(--tx2);line-height:1.6;margin-bottom:11px}
+.rep-btn{font-size:12px;padding:5px 13px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)}
+.rep-btn:hover{background:var(--sf2);color:var(--tx)}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.ov.show{display:flex}
+.mod{background:var(--sf);border-radius:var(--rl);width:100%;max-width:460px;border:0.5px solid var(--bd);animation:up .18s ease;max-height:92vh;overflow-y:auto}
+@keyframes up{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mod-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:0.5px solid var(--bd);background:var(--sf2);position:sticky;top:0}
+.mod-title{font-size:13px;font-weight:600}
+.mod-x{border:none;background:none;cursor:pointer;font-size:20px;color:var(--tx2);font-family:var(--f);line-height:1;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center}
+.mod-x:hover{background:var(--bd)}
+.mod-body{padding:14px 16px}
+.dl-r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--bd);gap:14px}
+.dl-r:last-child{border-bottom:none}
+.dl-l{font-size:11px;color:var(--tx2);flex-shrink:0}
+.dl-v{font-size:11px;font-weight:500;text-align:right;font-family:var(--m)}
+.dl-v.nm{font-family:var(--f)}
+
+/* FOOTER */
 .foot{margin-top:44px;padding-top:18px;border-top:0.5px solid var(--bd);display:flex;justify-content:space-between;flex-wrap:wrap;gap:7px}
 .foot p{font-size:11px;color:var(--tx3)}
 
-/* ── MODAL ── */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
-.ov.show{display:flex}
-.mod{background:var(--sf);border-radius:var(--rl);width:100%;max-width:460px;border:0.5px solid var(--bd);max-height:92vh;overflow-y:auto}
-.mod-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:0.5px solid var(--bd);background:var(--sf2)}
-.mod-body{padding:14px 16px}
-.dl-r{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--bd)}
-.dl-l{font-size:11px;color:var(--tx2)}
-.dl-v{font-size:11px;font-weight:500;font-family:var(--m)}
+/* ── SS IDENTITY FORM ── */
+.id-form-grid{display:flex;flex-direction:column;gap:0}
+.id-section-head{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--bl);margin:16px 0 8px;padding-bottom:6px;border-bottom:0.5px solid var(--blb)}
+.id-section-head:first-child{margin-top:0}
+.id-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:4px}
+.id-field{display:flex;flex-direction:column;gap:4px}
+.id-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
+.id-inp{font-size:12px;padding:7px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--m);outline:none;transition:border-color .15s}
+.id-inp:focus{border-color:var(--bl);box-shadow:0 0 0 2px var(--blb)}
+.id-inp::placeholder{color:var(--tx3);font-family:var(--f)}
+.id-inp.id-auto{background:var(--gnb);color:var(--gnf);border-color:var(--gn);font-weight:600}
+.id-inp.id-num{text-align:right}
+.ptr-form-row{display:grid;grid-template-columns:150px 80px 80px 1fr 1fr;gap:10px;align-items:center;padding:8px 12px;border-radius:var(--r);background:var(--sf2);border:0.5px solid var(--bd);margin-bottom:6px}
+.ptr-form-lbl{font-size:11px;font-weight:600;color:var(--tx)}
+.ptr-form-sub{font-size:9px;color:var(--tx3);margin-top:1px}
+/* ── SS IDENTITY SUMMARY CARD ── */
+.id-summary-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.id-sum-header{padding:14px 18px;background:var(--sf2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.id-sum-title{font-size:17px;font-weight:700;color:var(--tx)}
+.id-sum-code{font-size:12px;font-family:var(--m);color:var(--tx2);background:var(--sf3);padding:4px 10px;border-radius:4px}
+.id-sum-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));border-bottom:0.5px solid var(--bd)}
+.id-sum-item{padding:10px 14px;border-right:0.5px solid var(--bd);border-bottom:0.5px solid var(--bd)}
+.id-sum-lbl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:3px}
+.id-sum-val{font-size:13px;font-weight:500;color:var(--tx)}
+.id-kpi-row{display:flex;border-bottom:0.5px solid var(--bd);overflow-x:auto}
+.id-kpi{flex:1;padding:12px 16px;border-right:0.5px solid var(--bd);text-align:center;min-width:100px}
+.id-kpi:last-child{border-right:none}
+.id-kpi-v{font-size:26px;font-weight:700;color:var(--tx);line-height:1}
+.id-kpi-l{font-size:10px;color:var(--tx3);margin-top:3px}
+.ptr-sum-row{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:0.5px solid var(--bd)}
+.ptr-sum-row:last-child{border-bottom:none}
+.ptr-sum-id{font-size:12px;font-weight:600;color:var(--tx);display:flex;align-items:center;gap:8px}
+.ptr-sum-cap{font-size:12px;font-family:var(--m);color:var(--tx2)}
+.ptr-sum-fdrs{font-size:11px;color:var(--tx3)}
 
-@media(max-width:600px){
-  .chart-grid{grid-template-columns:1fr}
-  .kpi-row{grid-template-columns:repeat(2,1fr)}
-}
+/* ── MAINTENANCE SPLIT VIEW ── */
+.maint-section{border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:14px}
+.maint-sec-head{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;background:var(--sf2);cursor:pointer;user-select:none;gap:10px}
+.maint-sec-head:hover{background:var(--sf3)}
+.maint-sec-icon{font-size:11px;font-weight:700;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.maint-sec-title{font-size:13px;font-weight:600;color:var(--tx)}
+.maint-sec-sub{font-size:11px;color:var(--tx3)}
+.maint-sec-toggle{font-size:11px;color:var(--tx3);transition:transform .2s;flex-shrink:0}
+.maint-sec-body{display:none}
+.maint-sec-body.open{display:block}
+.maint-split{display:grid;grid-template-columns:1fr 340px;min-height:0}
+.maint-split-table{grid-template-columns:1fr 300px}
+@media(max-width:900px){.maint-split,.maint-split-table{grid-template-columns:1fr}}
+.maint-prev{border-right:0.5px solid var(--bd)}
+@media(max-width:900px){.maint-prev{border-right:none;border-bottom:0.5px solid var(--bd)}}
+.maint-prev-head{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);padding:8px 14px;background:var(--sf2);border-bottom:0.5px solid var(--bd)}
+.maint-new-panel{display:flex;flex-direction:column;background:var(--sf)}
+.maint-new-head{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--blb);border-bottom:0.5px solid var(--bd)}
+.maint-new-head span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--blf)}
+.maint-save-btn{font-size:11px;padding:4px 12px;border:none;border-radius:var(--r);background:var(--gn);color:#fff;cursor:pointer;font-family:var(--f);font-weight:600}
+.maint-save-btn:hover{opacity:.9}
+.maint-new-body{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;overflow-y:auto;max-height:420px}
+.mf{display:flex;flex-direction:column;gap:3px}
+.ml{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3)}
+.mi{font-size:12px;padding:6px 8px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--m);outline:none;width:100%}
+.mi:focus{border-color:var(--bl);box-shadow:0 0 0 2px var(--blb)}
+.mi::placeholder{color:var(--tx3);font-family:var(--f);font-size:11px}
+select.mi{cursor:pointer}
+.maint-new-log{border-top:0.5px solid var(--bd);padding:10px 14px;max-height:200px;overflow-y:auto;background:var(--sf2)}
+.maint-log-entry{padding:7px 10px;border-radius:var(--r);background:var(--sf);border:0.5px solid var(--bd);margin-bottom:6px;font-size:11px}
+.mle-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.mle-title{font-weight:600;color:var(--tx);font-size:11px}
+.mle-date{font-size:10px;color:var(--tx3);font-family:var(--m)}
+.mle-vals{display:flex;flex-wrap:wrap;gap:4px}
+.mle-val{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--sf2);color:var(--tx2);font-family:var(--m)}
+.mle-del{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--rb);color:var(--rf);cursor:pointer;border:none;font-family:var(--f);margin-left:auto}
+.maint-log-empty{font-size:11px;color:var(--tx3);font-style:italic;text-align:center;padding:8px 0}
+.edit-prefill-btn{font-size:9px;padding:1px 5px;border-radius:2px;background:var(--blb);color:var(--blf);border:none;cursor:pointer;font-family:var(--f)}
+/* card grid */
+.maint-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;padding:12px 14px}
+.maint-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.maint-card-head{padding:8px 12px;background:var(--sf2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:6px}
+.maint-card-title{font-size:11px;font-weight:600;color:var(--tx)}
+.maint-card-body{padding:10px 12px}
+.maint-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:0.5px solid var(--bd);gap:8px}
+.maint-row:last-child{border-bottom:none}
+.maint-lbl{font-size:10px;color:var(--tx2)}
+.maint-val{font-size:11px;font-weight:600;font-family:var(--m);color:var(--tx)}
+.maint-status{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px}
+.ms-ok{background:var(--gnb);color:var(--gnf)}.ms-due{background:var(--amb);color:var(--amf)}.ms-overdue{background:var(--rb);color:var(--rf)}.ms-na{background:var(--sf3);color:var(--tx3)}
+/* schedule */
+.maint-sched-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;padding:12px 14px}
+.maint-sched-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);padding:11px 13px}
+.msc-title{font-size:11px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.msc-date{font-size:11px;font-family:var(--m);color:var(--tx2);margin-bottom:5px}
+.msc-freq{font-size:10px;color:var(--tx3)}
+@media(max-width:600px){.maint-new-body{grid-template-columns:1fr}.maint-grid{grid-template-columns:1fr 1fr}.maint-sched-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:600px){.pg-wrap{padding:14px 10px 44px}.kpi-row{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:repeat(2,1fr)}.tally-strip{grid-template-columns:1fr 1fr}.id-row{grid-template-columns:1fr 1fr}.ptr-form-row{grid-template-columns:1fr 1fr}.id-kpi{min-width:50%}}
 </style>
 </head>
 <body>
 
+<!-- TOPBAR -->
 <div class="tb">
-  <div class="tb-logo"><svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" stroke="#fff" stroke-width="1.4"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M2.8 11.2l1.4-1.4M9.8 4.2l1.4-1.4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div class="tb-logo">
+    <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="2.5" stroke="#fff" stroke-width="1.4"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.8 2.8l1.4 1.4M9.8 9.8l1.4 1.4M2.8 11.2l1.4-1.4M9.8 4.2l1.4-1.4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg>
+  </div>
   <div>
     <div class="tb-n">33/11 kV Golconda SS — Master Data</div>
     <div class="tb-s">TGSPDCL · SCADA Circle · Hyderabad Central · SS Code: 1103921401</div>
   </div>
-  <div class="tb-r"><span class="pill pl">Live</span><button class="pbtn" onclick="window.print()">⎙ Print</button></div>
+  <div class="tb-r">
+    <span class="pill pl">Live</span>
+    <span class="pill pg">TGSPDCL</span>
+    <button class="pbtn" onclick="window.print()">⎙ Print</button>
+  </div>
 </div>
 
 <div class="pg-wrap">
+
+  <!-- HERO -->
   <div class="hero">
     <h1>33/11 kV Golconda Substation</h1>
-    <p>Loading Analytics Dashboard · Sequential Hierarchy: 132 kV → 33 kV → HV → PTR → LV → Feeders</p>
+    <p>Equipment Details Proforma · Sequential Hierarchy: 132 kV → 33 kV → HV → PTR → LV → 11 kV Feeders</p>
     <div class="chips">
       <span class="chip">📍 Golconda, Hyderabad</span>
-      <span class="chip">132 kV: Asifnagar · 400 kV: Raidurgam</span>
+      <span class="chip">132 kV Source: Asifnagar SS · 400 kV: Raidurgam SS</span>
+      <span class="chip">Type: Outdoor</span>
+      <span class="chip">Division: Mehdipatnam</span>
+      <span class="chip">Circle: Hyderabad Central</span>
       <span class="chip">SS Code: 1103921401</span>
     </div>
   </div>
 
+  <!-- KPI -->
   <div class="kpi-row">
     <div class="kpi ac"><div class="kl">Installed Capacity</div><div class="kv">50</div><div class="ks">MVA (4 × 12.5)</div></div>
-    <div class="kpi"><div class="kl">Recorded Peak</div><div class="kv" id="kpi-peak">0.0</div><div class="ks">MVA (Station Total)</div></div>
-    <div class="kpi"><div class="kl">Station Load</div><div class="kv" id="kpi-pct">0%</div><div class="ks">Avg Utilization</div></div>
-    <div class="kpi"><div class="kl">Active Feeders</div><div class="kv">13</div><div class="ks">11 kV Network</div></div>
+    <div class="kpi"><div class="kl">Incoming Sources</div><div class="kv">4</div><div class="ks">2 Regular · 2 Alternate</div></div>
+    <div class="kpi"><div class="kl">HV Bays</div><div class="kv">4</div><div class="ks">HV-I to HV-IV</div></div>
+    <div class="kpi"><div class="kl">LV Bays / PTRs</div><div class="kv">4</div><div class="ks">LV-I to LV-IV</div></div>
+    <div class="kpi"><div class="kl">11 kV Feeders</div><div class="kv">13</div><div class="ks">Across all 4 LV bays</div></div>
+    <div class="kpi"><div class="kl">Stn. Transformer</div><div class="kv">100</div><div class="ks">kVA · Make: ECE</div></div>
   </div>
 
+  <!-- TABS -->
   <div class="tabs">
     <button class="tab active" onclick="st('identity',this)">SS Identity</button>
+    <button class="tab" onclick="st('sld',this)">Single Line Diagram</button>
+    <button class="tab" onclick="st('inventory',this)">SS Inventory / Master Data</button>
     <button class="tab" onclick="st('loading',this)">Loading Details</button>
-    <button class="tab" onclick="st('inventory',this)">SS Inventory</button>
+    <button class="tab" onclick="st('maintenance',this)">Maintenance</button>
+    <button class="tab" onclick="st('reports',this)">Reports of SS</button>
   </div>
 
+  <!-- ══════════════════════════════════════
+       TAB 0 — SS IDENTITY
+       Basic Information only — compact header card
+       ══════════════════════════════════════ -->
   <div class="panel active" id="panel-identity">
+
     <div class="sec">
-      <div class="sec-lbl"><span>Quick Analytics</span></div>
-      <div class="chart-grid">
-        <div class="chart-box">
-          <div class="chart-title">PTR Load Distribution (MVA)</div>
-          <canvas id="chart-ptr-dist"></canvas>
-        </div>
-        <div class="chart-box">
-          <div class="chart-title">Feeder Type Split</div>
-          <canvas id="chart-fdr-types"></canvas>
+      <div class="sec-lbl">
+        <span>Basic Information</span>
+        <button onclick="saveIdentity()" style="font-size:11px;padding:4px 12px;border:0.5px solid var(--gn);border-radius:var(--r);background:var(--gnb);color:var(--gnf);cursor:pointer;font-family:var(--f);font-weight:600">✓ Save Changes</button>
+      </div>
+
+      <div class="id-form-grid">
+        <div class="id-row">
+          <div class="id-field"><label class="id-lbl">SS Name</label><input class="id-inp" id="id-ssname" type="text" value="33/11 KV GOLCONDA SS" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">SS Code</label><input class="id-inp" id="id-sscode" type="text" value="1103921401" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">SS Phone No.</label><input class="id-inp" id="id-phone" type="text" placeholder="Enter phone number" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">Type of SS</label><input class="id-inp" id="id-type" type="text" value="Outdoor" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">SS Location / GPS Coordinates</label><input class="id-inp" id="id-gps" type="text" placeholder="e.g. 17.3616° N, 78.3977° E" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">Operation Circle</label><input class="id-inp" id="id-circle" type="text" value="Hyderabad Central" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">Operation Division</label><input class="id-inp" id="id-division" type="text" value="Mehdipatnam" oninput="syncIdentity()"></div>
+          <div class="id-field"><label class="id-lbl">Op. Sub-Division</label><input class="id-inp" id="id-subdivision" type="text" value="Golconda" oninput="syncIdentity()"></div>
         </div>
       </div>
     </div>
+
+    <!-- PTR LOADING SUMMARY -->
     <div class="sec">
-      <div class="sec-lbl"><span>PTR Loading Overview</span></div>
+      <div class="sec-lbl">
+        <span>PTR Loading Summary</span>
+        <span style="font-weight:400;font-size:10px">Present recorded loads · 33 kV feeding source</span>
+      </div>
       <div id="id-ptr-loading"></div>
     </div>
+
+    <!-- INCOMING SOURCES — rendered dynamically from INC33 + INC33_LOADS data -->
+    <div class="sec">
+      <div class="sec-lbl"><span id="id-inc-title">Incoming Sources</span></div>
+      <div id="id-inc-kpi" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
+      <div id="id-inc-cards" style="display:flex;flex-wrap:wrap;gap:10px"></div>
+    </div>
+
   </div>
 
-  <div class="panel" id="panel-loading">
+  <!-- ══════════════════════════════════════
+       TAB 1 — SS INVENTORY / MASTER DATA
+  ══════════════════════════════════════ -->
+  <div class="panel" id="panel-inventory">
+
+    <!-- PART A: Equipment Hierarchy -->
     <div class="sec">
-      <div class="sec-lbl"><span>Utilization Analytics</span></div>
-      <div class="chart-grid">
-        <div class="chart-box" style="grid-column: span 2;">
-          <div class="chart-title">11 kV Feeder Load Profile (Amps vs Capacity)</div>
-          <canvas id="chart-fdr-load"></canvas>
+      <div class="sec-lbl"><span>Equipment Hierarchy — 132 kV → 33 kV → HV Bay → PTR → LV Bay → 11 kV Feeders</span><span style="font-weight:400">Data source: Master Data Proforma Excel</span></div>
+      <div id="hier-root"></div>
+    </div>
+
+
+    <!-- PART C: 33 kV Incomer -->
+    <div class="sec">
+      <div class="sec-lbl"><span>33 kV Incomer — Breaker & Relay Details</span></div>
+      <table class="dtbl">
+        <thead><tr>
+          <th>Incomer No.</th><th>Name of the Incomer</th><th>Type</th>
+          <th>Breaker Make</th><th>Breaker Sr.No</th><th>MFG Year</th>
+          <th>CTR Available</th><th>CTR Adopted</th>
+          <th>Relay Make</th><th>Relay Type</th><th>Relay Sr.No</th>
+          <th>Meter Make</th><th>Meter Sr.No</th><th>M-CTR</th><th>M-PTR</th><th>Class</th><th>MF</th>
+        </tr></thead>
+        <tbody id="inc33-inv-body"></tbody>
+      </table>
+    </div>
+
+    <!-- PART D: HV Bay -->
+    <div class="sec">
+      <div class="sec-lbl"><span>HV Bay Details — Breaker, Relay & Meter</span></div>
+      <table class="dtbl">
+        <thead><tr><th>HV Bay</th><th>Breaker Make</th><th>Sr.No</th><th>MFG</th><th>CTR Available</th><th>CTR Adopted</th><th>Relay Make</th><th>Relay Type</th><th>Relay Sr.No</th><th>Meter Make</th><th>Meter Sr.No</th><th>M-CTR</th><th>M-PTR</th><th>Class</th><th>MF</th></tr></thead>
+        <tbody id="hv-inv"></tbody>
+      </table>
+    </div>
+
+    <!-- PART E: PTR Details -->
+    <div class="sec">
+      <div class="sec-lbl"><span>PTR Details</span></div>
+      <table class="dtbl">
+        <thead><tr><th>PTR</th><th>Make</th><th>Capacity</th><th>Sr.No</th><th>TMU Make</th><th>TMU Sr.No</th><th>OTI</th><th>WTI</th></tr></thead>
+        <tbody id="ptr-inv"></tbody>
+      </table>
+    </div>
+
+    <!-- PART F: LV Bay -->
+    <div class="sec">
+      <div class="sec-lbl"><span>LV Bay Details — Breaker, Relay & Meter</span></div>
+      <table class="dtbl">
+        <thead><tr><th>LV Bay</th><th>Breaker Make</th><th>Sr.No</th><th>MFG</th><th>CTR Available</th><th>CTR Adopted</th><th>Relay Make</th><th>Relay Type</th><th>Relay Sr.No</th><th>Meter Make</th><th>Meter Sr.No</th><th>M-CTR</th><th>M-PTR</th><th>Class</th><th>MF</th></tr></thead>
+        <tbody id="lv-inv"></tbody>
+      </table>
+    </div>
+
+    <!-- PART G: 11 kV Feeder Details -->
+    <div class="sec">
+      <div class="sec-lbl"><span>11 kV Feeder Details — Breaker, Relay & Meter</span></div>
+      <table class="dtbl">
+        <thead><tr><th>Feeder</th><th>Breaker Make</th><th>Sr.No</th><th>MFG</th><th>CTR Available</th><th>CTR Adopted</th><th>Relay Make</th><th>Relay Type</th><th>Relay Sr.No</th><th>Meter Make</th><th>Meter Sr.No</th><th>M-CTR</th><th>M-PTR</th><th>Class</th><th>MF</th></tr></thead>
+        <tbody id="fdr-inv"></tbody>
+      </table>
+    </div>
+
+    <!-- PART H: Station Auxiliaries -->
+    <div class="sec">
+      <div class="sec-lbl"><span>Station Auxiliaries</span></div>
+      <table class="dtbl">
+        <thead><tr><th>Item</th><th>Make</th><th>Capacity / Sr.No</th><th>MFG / Year</th><th>Details</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Station Transformer</strong></td><td>ECE</td><td>100 kVA</td><td>—</td><td>11 kV / LV auxiliary supply</td></tr>
+          <tr><td><strong>11 kV LAs</strong></td><td>—</td><td>Station Type, Qty: 3</td><td>—</td><td>Available: YES</td></tr>
+          <tr><td><strong>11 kV PT</strong></td><td>—</td><td>Available: YES</td><td>—</td><td>11KV/110V</td></tr>
+          <tr><td><strong>Capacitor Bank</strong></td><td>SHREEM</td><td>2MVAR / Sr: 557777</td><td>MFG: 2000, Inst: 2006</td><td>—</td></tr>
+          <tr><td><strong>Battery Charger</strong></td><td>AMARRAJA</td><td>Sr: 32572</td><td>2012</td><td>—</td></tr>
+          <tr><td><strong>RMU</strong></td><td>—</td><td>Not Available (NO-)</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB SLD — SINGLE LINE DIAGRAM
+       Faithful to PDF: vertical layout, left feeders, right incomers
+       4 PTRs × 12.5MVA, 13 feeders, 3 incomers
+       ══════════════════════════════════════ -->
+  <div class="panel" id="panel-sld">
+
+    <div class="sec-lbl" style="margin-bottom:12px">
+      <span>Single Line Diagram — 33/11 kV Golconda SS · 4 PTRs · 13 Feeders · 3 Incomer Sources</span>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button onclick="zoomSLD(1.2)" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">＋ Zoom In</button>
+        <button onclick="zoomSLD(0.83)" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">－ Zoom Out</button>
+        <button onclick="resetZoom()" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">⟳ Reset</button>
+        <button onclick="window.print()" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--gn);border-radius:var(--r);background:var(--gnb);color:var(--gnf);cursor:pointer;font-family:var(--f);font-weight:600">⎙ Print SLD</button>
+      </div>
+    </div>
+
+    <!-- LEGEND -->
+    <div style="display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;padding:9px 14px;background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);font-size:11px;color:var(--tx2)">
+      <span><span style="display:inline-block;width:22px;height:4px;background:#1a7a5c;border-radius:2px;vertical-align:middle;margin-right:4px"></span>33 kV Bus/Line</span>
+      <span><span style="display:inline-block;width:22px;height:3px;background:#a32d2d;vertical-align:middle;margin-right:4px"></span>OH Feeder</span>
+      <span><span style="display:inline-block;width:22px;height:3px;background:#0c447c;border-top:2px dashed #0c447c;vertical-align:middle;margin-right:4px"></span>UG/Cable Feeder</span>
+      <span><span style="display:inline-block;width:22px;height:3px;background:#854f0b;vertical-align:middle;margin-right:4px"></span>11 kV Bus/LV</span>
+      <span>⊠ = CB (Breaker) &nbsp;·&nbsp; ▭∞ = Fuse &nbsp;·&nbsp; ꝏ = PTR coils &nbsp;·&nbsp; ⚡ = LAs &nbsp;·&nbsp; ⊙ = Bus PT</span>
+    </div>
+
+    <!-- SLD CONTAINER -->
+    <div id="sld-container" style="overflow:auto;border:0.5px solid var(--bd);border-radius:var(--rl);background:#ffffff;padding:0">
+      <div id="sld-zoom-wrap" style="transform-origin:top left;transition:transform .2s">
+
+      <!-- ═══════════════════════════════════════════════════════
+           SVG: Portrait layout matching PDF exactly
+           Canvas: 860 wide × 1560 tall
+           Left zone (x 0-480): Feeders + PTR columns
+           Right zone (x 490-860): 33KV vertical bus + incomers
+      ═══════════════════════════════════════════════════════ -->
+      <svg id="sld-svg" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 820 1480"
+           style="width:100%;max-width:820px;display:block;background:#fff;font-family:Arial,sans-serif">
+
+        <!-- ═══════════ BACKGROUND ═══════════ -->
+        <rect x="0" y="0" width="820" height="1480" fill="#ffffff"/>
+        <rect x="12" y="12" width="796" height="1456" fill="none" stroke="#333" stroke-width="1.5"/>
+
+        <!-- ═══════════ TITLE BLOCK (right side rotated) ═══════════ -->
+        <rect x="748" y="12" width="60" height="1456" fill="#f0f0f0" stroke="#333" stroke-width="1"/>
+        <text transform="rotate(90, 778, 740)" x="778" y="740" text-anchor="middle" font-size="22" font-weight="700" fill="#111">Single Line Diagram of 33/11KV Golconda SS</text>
+
+        <!-- ═══════════ 33 KV BUS (vertical, right side) ═══════════ -->
+        <!-- Main vertical 33KV bus bar -->
+        <line x1="650" y1="80" x2="650" y2="1420" stroke="#000" stroke-width="5"/>
+        <text x="672" y="1410" font-size="9" font-weight="700" fill="#000">33 KV BUS</text>
+        <!-- 33KV LAs stacks on bus -->
+        <!-- LA set 1 (top) -->
+        <line x1="650" y1="105" x2="680" y2="105" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="95" x2="680" y2="120" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="95" x2="686" y2="95" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="100" x2="684" y2="100" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="105" x2="682" y2="105" stroke="#000" stroke-width="1"/>
+        <text x="695" y="108" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 2 -->
+        <line x1="650" y1="155" x2="680" y2="155" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="145" x2="680" y2="170" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="145" x2="686" y2="145" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="150" x2="684" y2="150" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="155" x2="682" y2="155" stroke="#000" stroke-width="1"/>
+        <text x="695" y="158" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 3 -->
+        <line x1="650" y1="430" x2="680" y2="430" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="420" x2="680" y2="445" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="420" x2="686" y2="420" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="425" x2="684" y2="425" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="430" x2="682" y2="430" stroke="#000" stroke-width="1"/>
+        <text x="695" y="433" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 4 -->
+        <line x1="650" y1="475" x2="680" y2="475" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="465" x2="680" y2="490" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="465" x2="686" y2="465" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="470" x2="684" y2="470" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="475" x2="682" y2="475" stroke="#000" stroke-width="1"/>
+        <text x="695" y="478" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 5 -->
+        <line x1="650" y1="735" x2="680" y2="735" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="725" x2="680" y2="750" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="725" x2="686" y2="725" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="730" x2="684" y2="730" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="735" x2="682" y2="735" stroke="#000" stroke-width="1"/>
+        <text x="695" y="738" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 6 -->
+        <line x1="650" y1="780" x2="680" y2="780" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="770" x2="680" y2="795" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="770" x2="686" y2="770" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="775" x2="684" y2="775" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="780" x2="682" y2="780" stroke="#000" stroke-width="1"/>
+        <text x="695" y="783" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 7 -->
+        <line x1="650" y1="1060" x2="680" y2="1060" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="1050" x2="680" y2="1075" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="1050" x2="686" y2="1050" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="1055" x2="684" y2="1055" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="1060" x2="682" y2="1060" stroke="#000" stroke-width="1"/>
+        <text x="695" y="1063" font-size="7.5" fill="#000">33KV LAs</text>
+        <!-- LA set 8 -->
+        <line x1="650" y1="1110" x2="680" y2="1110" stroke="#000" stroke-width="1"/>
+        <line x1="680" y1="1100" x2="680" y2="1125" stroke="#000" stroke-width="1.5"/>
+        <line x1="674" y1="1100" x2="686" y2="1100" stroke="#000" stroke-width="1.5"/>
+        <line x1="676" y1="1105" x2="684" y2="1105" stroke="#000" stroke-width="1"/>
+        <line x1="678" y1="1110" x2="682" y2="1110" stroke="#000" stroke-width="1"/>
+        <text x="695" y="1113" font-size="7.5" fill="#000">33KV LAs</text>
+
+        <!-- ═══════════ INCOMERS (entering from right with blue arrows) ═══════════ -->
+        <!-- Incomer 1: 132KV ASIFNAGAR → 33KV GOLCONDA -->
+        <line x1="745" y1="130" x2="660" y2="130" stroke="#0047ab" stroke-width="3"/>
+        <polygon points="660,124 650,130 660,136" fill="#0047ab"/>
+        <text x="747" y="126" font-size="8" font-weight="700" fill="#000">132 KV ASIFNAGAR-</text>
+        <text x="747" y="137" font-size="8" fill="#000">33KV GOLCONDA</text>
+        <!-- small diagonal lines (disconnector) -->
+        <line x1="713" y1="122" x2="726" y2="138" stroke="#000" stroke-width="1.5"/>
+        <line x1="700" y1="130" x2="745" y2="130" stroke="#000" stroke-width="1.5"/>
+
+        <!-- Incomer 2: 132KV ASIFNAGAR → 33KV SHAIKPET -->
+        <line x1="745" y1="455" x2="660" y2="455" stroke="#0047ab" stroke-width="3"/>
+        <polygon points="660,449 650,455 660,461" fill="#0047ab"/>
+        <text x="747" y="451" font-size="8" font-weight="700" fill="#000">132 KV ASIFNAGAR-</text>
+        <text x="747" y="462" font-size="8" fill="#000">33KV SHAIKPET</text>
+        <line x1="713" y1="447" x2="726" y2="463" stroke="#000" stroke-width="1.5"/>
+        <line x1="700" y1="455" x2="745" y2="455" stroke="#000" stroke-width="1.5"/>
+
+        <!-- Incomer 3: 132KV JUBILEE HILLS → 33KV GOLCONDA -->
+        <line x1="745" y1="757" x2="660" y2="757" stroke="#0047ab" stroke-width="3"/>
+        <polygon points="660,751 650,757 660,763" fill="#0047ab"/>
+        <text x="747" y="753" font-size="8" font-weight="700" fill="#000">132 KV JUBILEE HILLS-</text>
+        <text x="747" y="764" font-size="8" fill="#000">33KV GOLCONDA</text>
+        <line x1="713" y1="749" x2="726" y2="765" stroke="#000" stroke-width="1.5"/>
+        <line x1="700" y1="757" x2="745" y2="757" stroke="#000" stroke-width="1.5"/>
+
+        <!-- Incomer 4: 400KV RAIDURG SS → 33KV SANDHYA FEEDER -->
+        <line x1="745" y1="1082" x2="660" y2="1082" stroke="#0047ab" stroke-width="3"/>
+        <polygon points="660,1076 650,1082 660,1088" fill="#0047ab"/>
+        <text x="747" y="1078" font-size="8" font-weight="700" fill="#000">400 KV RAIDURG SS-</text>
+        <text x="747" y="1089" font-size="8" fill="#000">33 KV SANDHYA FEEDER</text>
+        <line x1="713" y1="1074" x2="726" y2="1090" stroke="#000" stroke-width="1.5"/>
+        <line x1="700" y1="1082" x2="745" y2="1082" stroke="#000" stroke-width="1.5"/>
+
+        <!-- Incomer 5: 132KV JUBILEE HILLS → 33KV GOLCONDA (bottom) -->
+        <line x1="745" y1="1362" x2="660" y2="1362" stroke="#0047ab" stroke-width="3"/>
+        <polygon points="660,1356 650,1362 660,1368" fill="#0047ab"/>
+        <text x="747" y="1358" font-size="8" font-weight="700" fill="#000">132 KV JUBILEE HILLS-</text>
+        <text x="747" y="1369" font-size="8" fill="#000">33KV GOLCONDA</text>
+        <line x1="713" y1="1354" x2="726" y2="1370" stroke="#000" stroke-width="1.5"/>
+        <line x1="700" y1="1362" x2="745" y2="1362" stroke="#000" stroke-width="1.5"/>
+
+        <!-- ═══════════════════════════════
+             PTR-I  (tap y=130, col x=490)
+        ═══════════════════════════════ -->
+        <!-- Tap from 33KV bus -->
+        <line x1="650" y1="130" x2="560" y2="130" stroke="#000" stroke-width="1.5"/>
+        <!-- 33KV LAs on HV side -->
+        <line x1="560" y1="130" x2="560" y2="110" stroke="#000" stroke-width="1"/>
+        <line x1="554" y1="110" x2="566" y2="110" stroke="#000" stroke-width="1.5"/>
+        <line x1="556" y1="105" x2="564" y2="105" stroke="#000" stroke-width="1"/>
+        <line x1="558" y1="100" x2="562" y2="100" stroke="#000" stroke-width="1"/>
+        <text x="530" y="100" font-size="7" fill="#000" text-anchor="middle">33KV LAs</text>
+        <!-- HV-I CB (X in square) -->
+        <rect x="526" y="122" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="528" y1="124" x2="542" y2="136" stroke="#000" stroke-width="1.5"/>
+        <line x1="542" y1="124" x2="528" y2="136" stroke="#000" stroke-width="1.5"/>
+        <text x="516" y="122" font-size="8" font-weight="700" fill="#000" text-anchor="end">HV-I</text>
+        <!-- line HV-I to fuse -->
+        <line x1="526" y1="130" x2="510" y2="130" stroke="#000" stroke-width="1.5"/>
+        <!-- Fuse symbol -->
+        <rect x="498" y="124" width="12" height="12" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <line x1="498" y1="130" x2="490" y2="130" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="144" font-size="7.5" fill="#000" text-anchor="middle">Fuse</text>
+        <!-- PTR-I transformer coils -->
+        <line x1="490" y1="130" x2="490" y2="155" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="165" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="181" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="460" y="165" font-size="8" font-weight="700" fill="#000" text-anchor="end">12.5 MVA</text>
+        <text x="460" y="175" font-size="8" font-weight="700" fill="#000" text-anchor="end">- PTR-I</text>
+        <!-- line PTR to LV-I -->
+        <line x1="490" y1="190" x2="490" y2="215" stroke="#000" stroke-width="1.5"/>
+        <!-- LV-I CB -->
+        <rect x="481" y="215" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="483" y1="217" x2="497" y2="229" stroke="#000" stroke-width="1.5"/>
+        <line x1="497" y1="217" x2="483" y2="229" stroke="#000" stroke-width="1.5"/>
+        <text x="478" y="214" font-size="8" font-weight="700" fill="#000" text-anchor="end">LV-I</text>
+        <!-- 11KV LAs -->
+        <line x1="490" y1="231" x2="490" y2="248" stroke="#000" stroke-width="1.5"/>
+        <line x1="484" y1="248" x2="496" y2="248" stroke="#000" stroke-width="1.5"/>
+        <line x1="486" y1="253" x2="494" y2="253" stroke="#000" stroke-width="1"/>
+        <line x1="488" y1="258" x2="492" y2="258" stroke="#000" stroke-width="1"/>
+        <text x="462" y="252" font-size="7" fill="#000" text-anchor="end">11KV LAs</text>
+        <!-- 11KV BUS-I horizontal -->
+        <line x1="490" y1="265" x2="490" y2="278" stroke="#000" stroke-width="1.5"/>
+        <line x1="30" y1="278" x2="510" y2="278" stroke="#000" stroke-width="3"/>
+        <!-- 11KV BUS PT symbol -->
+        <circle cx="490" cy="285" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="292" r="4" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="290" font-size="7" fill="#000">11KV BUS PT</text>
+        <!-- Station Transformer (top left of LV-I bus) -->
+        <rect x="30" y="258" width="30" height="22" fill="#fff" stroke="#000" stroke-width="1"/>
+        <line x1="30" y1="269" x2="60" y2="269" stroke="#000" stroke-width="1"/>
+        <polygon points="35,261 45,269 35,277" fill="none" stroke="#000" stroke-width="1"/>
+        <text x="45" y="261" font-size="7" fill="#000">100kVA</text>
+        <text x="45" y="269" font-size="7" fill="#000">St.Tf</text>
+
+        <!-- FEEDERS LV-I: F1 Golconda OH, F2 Motimahal, F3 Aditya Nagar UG -->
+        <!-- F1: Golconda OH -->
+        <line x1="130" y1="278" x2="130" y2="298" stroke="#000" stroke-width="1.5"/>
+        <rect x="121" y="290" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="123" y1="292" x2="137" y2="304" stroke="#000" stroke-width="1.5"/>
+        <line x1="137" y1="292" x2="123" y2="304" stroke="#000" stroke-width="1.5"/>
+        <line x1="121" y1="298" x2="25" y2="298" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="294" font-size="8" font-weight="600" fill="#000">11 KV GOLCONDA OH</text>
+        <text x="27" y="304" font-size="8" fill="#000">FEEDER</text>
+        <!-- F2: Motimahal -->
+        <line x1="240" y1="278" x2="240" y2="318" stroke="#000" stroke-width="1.5"/>
+        <rect x="231" y="310" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="233" y1="312" x2="247" y2="324" stroke="#000" stroke-width="1.5"/>
+        <line x1="247" y1="312" x2="233" y2="324" stroke="#000" stroke-width="1.5"/>
+        <line x1="231" y1="318" x2="25" y2="318" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="314" font-size="8" font-weight="600" fill="#000">11 KV MOTIMAHAL</text>
+        <text x="27" y="325" font-size="8" fill="#000">FEEDER</text>
+        <!-- F3: Aditya Nagar UG -->
+        <line x1="370" y1="278" x2="370" y2="338" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <rect x="361" y="330" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="363" y1="332" x2="377" y2="344" stroke="#000" stroke-width="1.5"/>
+        <line x1="377" y1="332" x2="363" y2="344" stroke="#000" stroke-width="1.5"/>
+        <line x1="361" y1="338" x2="25" y2="338" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrL)"/>
+        <text x="27" y="334" font-size="8" font-weight="600" fill="#000">11 KV ADITYA NAGAR</text>
+        <text x="27" y="345" font-size="8" fill="#000">UG FEEDER</text>
+
+        <!-- ═══════════════════════════════
+             PTR-II (tap y=455, col x=490)
+        ═══════════════════════════════ -->
+        <line x1="650" y1="455" x2="560" y2="455" stroke="#000" stroke-width="1.5"/>
+        <line x1="560" y1="455" x2="560" y2="435" stroke="#000" stroke-width="1"/>
+        <line x1="554" y1="435" x2="566" y2="435" stroke="#000" stroke-width="1.5"/>
+        <line x1="556" y1="430" x2="564" y2="430" stroke="#000" stroke-width="1"/>
+        <line x1="558" y1="425" x2="562" y2="425" stroke="#000" stroke-width="1"/>
+        <text x="530" y="424" font-size="7" fill="#000" text-anchor="middle">33KV LAs</text>
+        <rect x="526" y="447" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="528" y1="449" x2="542" y2="461" stroke="#000" stroke-width="1.5"/>
+        <line x1="542" y1="449" x2="528" y2="461" stroke="#000" stroke-width="1.5"/>
+        <text x="516" y="447" font-size="8" font-weight="700" fill="#000" text-anchor="end">HV-II</text>
+        <line x1="526" y1="455" x2="510" y2="455" stroke="#000" stroke-width="1.5"/>
+        <rect x="498" y="449" width="12" height="12" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <line x1="498" y1="455" x2="490" y2="455" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="469" font-size="7.5" fill="#000" text-anchor="middle">Fuse</text>
+        <line x1="490" y1="455" x2="490" y2="480" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="490" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="506" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="460" y="490" font-size="8" font-weight="700" fill="#000" text-anchor="end">12.5 MVA</text>
+        <text x="460" y="500" font-size="8" font-weight="700" fill="#000" text-anchor="end">- PTR-II</text>
+        <line x1="490" y1="515" x2="490" y2="540" stroke="#000" stroke-width="1.5"/>
+        <rect x="481" y="540" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="483" y1="542" x2="497" y2="554" stroke="#000" stroke-width="1.5"/>
+        <line x1="497" y1="542" x2="483" y2="554" stroke="#000" stroke-width="1.5"/>
+        <text x="478" y="539" font-size="8" font-weight="700" fill="#000" text-anchor="end">LV-II</text>
+        <line x1="490" y1="556" x2="490" y2="573" stroke="#000" stroke-width="1.5"/>
+        <line x1="484" y1="573" x2="496" y2="573" stroke="#000" stroke-width="1.5"/>
+        <line x1="486" y1="578" x2="494" y2="578" stroke="#000" stroke-width="1"/>
+        <line x1="488" y1="583" x2="492" y2="583" stroke="#000" stroke-width="1"/>
+        <text x="462" y="577" font-size="7" fill="#000" text-anchor="end">11KV LAs</text>
+        <!-- 11KV BUS PT circle for LV-II -->
+        <line x1="490" y1="590" x2="490" y2="603" stroke="#000" stroke-width="1.5"/>
+        <line x1="30" y1="603" x2="510" y2="603" stroke="#000" stroke-width="3"/>
+        <circle cx="490" cy="610" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="617" r="4" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="615" font-size="7" fill="#000">11KV BUS PT</text>
+
+        <!-- FEEDERS LV-II: F4 Darga OH, F5 Golconda Cable, F6 Shaikpet WW -->
+        <line x1="130" y1="603" x2="130" y2="623" stroke="#000" stroke-width="1.5"/>
+        <rect x="121" y="615" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="123" y1="617" x2="137" y2="629" stroke="#000" stroke-width="1.5"/>
+        <line x1="137" y1="617" x2="123" y2="629" stroke="#000" stroke-width="1.5"/>
+        <line x1="121" y1="623" x2="25" y2="623" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="619" font-size="8" font-weight="600" fill="#000">11 KV DARGA OH</text>
+        <text x="27" y="630" font-size="8" fill="#000">FEEDER</text>
+        <!-- F5: Golconda Cable (dashed) -->
+        <line x1="240" y1="603" x2="240" y2="643" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <rect x="231" y="635" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="233" y1="637" x2="247" y2="649" stroke="#000" stroke-width="1.5"/>
+        <line x1="247" y1="637" x2="233" y2="649" stroke="#000" stroke-width="1.5"/>
+        <line x1="231" y1="643" x2="25" y2="643" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrL)"/>
+        <text x="27" y="639" font-size="8" font-weight="600" fill="#000">11 KV GOLCONDA</text>
+        <text x="27" y="650" font-size="8" fill="#000">CABLE FEEDER</text>
+        <!-- F6: Shaikpet WW -->
+        <line x1="370" y1="603" x2="370" y2="663" stroke="#000" stroke-width="1.5"/>
+        <rect x="361" y="655" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="363" y1="657" x2="377" y2="669" stroke="#000" stroke-width="1.5"/>
+        <line x1="377" y1="657" x2="363" y2="669" stroke="#000" stroke-width="1.5"/>
+        <line x1="361" y1="663" x2="25" y2="663" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="659" font-size="8" font-weight="600" fill="#000">11 KV SHAIKPET WATER</text>
+        <text x="27" y="670" font-size="8" fill="#000">WORKS FEEDER</text>
+
+        <!-- ═══════════════════════════════
+             PTR-III (tap y=757, col x=490)
+        ═══════════════════════════════ -->
+        <line x1="650" y1="757" x2="560" y2="757" stroke="#000" stroke-width="1.5"/>
+        <line x1="560" y1="757" x2="560" y2="737" stroke="#000" stroke-width="1"/>
+        <line x1="554" y1="737" x2="566" y2="737" stroke="#000" stroke-width="1.5"/>
+        <line x1="556" y1="732" x2="564" y2="732" stroke="#000" stroke-width="1"/>
+        <line x1="558" y1="727" x2="562" y2="727" stroke="#000" stroke-width="1"/>
+        <text x="530" y="726" font-size="7" fill="#000" text-anchor="middle">33KV LAs</text>
+        <rect x="526" y="749" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="528" y1="751" x2="542" y2="763" stroke="#000" stroke-width="1.5"/>
+        <line x1="542" y1="751" x2="528" y2="763" stroke="#000" stroke-width="1.5"/>
+        <text x="516" y="749" font-size="8" font-weight="700" fill="#000" text-anchor="end">HV-III</text>
+        <line x1="526" y1="757" x2="510" y2="757" stroke="#000" stroke-width="1.5"/>
+        <rect x="498" y="751" width="12" height="12" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <line x1="498" y1="757" x2="490" y2="757" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="771" font-size="7.5" fill="#000" text-anchor="middle">Fuse</text>
+        <line x1="490" y1="757" x2="490" y2="782" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="792" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="808" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="460" y="792" font-size="8" font-weight="700" fill="#000" text-anchor="end">12.5 MVA</text>
+        <text x="460" y="802" font-size="8" font-weight="700" fill="#000" text-anchor="end">- PTR-III</text>
+        <line x1="490" y1="817" x2="490" y2="842" stroke="#000" stroke-width="1.5"/>
+        <rect x="481" y="842" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="483" y1="844" x2="497" y2="856" stroke="#000" stroke-width="1.5"/>
+        <line x1="497" y1="844" x2="483" y2="856" stroke="#000" stroke-width="1.5"/>
+        <text x="478" y="841" font-size="8" font-weight="700" fill="#000" text-anchor="end">LV-III</text>
+        <line x1="490" y1="858" x2="490" y2="875" stroke="#000" stroke-width="1.5"/>
+        <line x1="484" y1="875" x2="496" y2="875" stroke="#000" stroke-width="1.5"/>
+        <line x1="486" y1="880" x2="494" y2="880" stroke="#000" stroke-width="1"/>
+        <line x1="488" y1="885" x2="492" y2="885" stroke="#000" stroke-width="1"/>
+        <text x="462" y="879" font-size="7" fill="#000" text-anchor="end">11KV LAs</text>
+        <line x1="490" y1="892" x2="490" y2="905" stroke="#000" stroke-width="1.5"/>
+        <line x1="30" y1="905" x2="510" y2="905" stroke="#000" stroke-width="3"/>
+        <circle cx="490" cy="912" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="919" r="4" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="917" font-size="7" fill="#000">11KV BUS PT</text>
+
+        <!-- FEEDERS LV-III: F7 Aparna One, F8 OU Colony, F9 Aditya Nagar OH -->
+        <line x1="80" y1="905" x2="80" y2="925" stroke="#000" stroke-width="1.5"/>
+        <rect x="71" y="917" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="73" y1="919" x2="87" y2="931" stroke="#000" stroke-width="1.5"/>
+        <line x1="87" y1="919" x2="73" y2="931" stroke="#000" stroke-width="1.5"/>
+        <line x1="71" y1="925" x2="25" y2="925" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="921" font-size="8" font-weight="600" fill="#000">11 KV APARNA ONE</text>
+        <line x1="200" y1="905" x2="200" y2="945" stroke="#000" stroke-width="1.5"/>
+        <rect x="191" y="937" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="193" y1="939" x2="207" y2="951" stroke="#000" stroke-width="1.5"/>
+        <line x1="207" y1="939" x2="193" y2="951" stroke="#000" stroke-width="1.5"/>
+        <line x1="191" y1="945" x2="25" y2="945" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="941" font-size="8" font-weight="600" fill="#000">11 KV OU COLONY</text>
+        <text x="27" y="952" font-size="8" fill="#000">FEEDER</text>
+        <line x1="360" y1="905" x2="360" y2="965" stroke="#000" stroke-width="1.5"/>
+        <rect x="351" y="957" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="353" y1="959" x2="367" y2="971" stroke="#000" stroke-width="1.5"/>
+        <line x1="367" y1="959" x2="353" y2="971" stroke="#000" stroke-width="1.5"/>
+        <line x1="351" y1="965" x2="25" y2="965" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="961" font-size="8" font-weight="600" fill="#000">11 KV ADITYA NAGAR</text>
+        <text x="27" y="972" font-size="8" fill="#000">OH FEEDER</text>
+
+        <!-- ═══════════════════════════════
+             PTR-IV (tap y=1082, col x=490)
+        ═══════════════════════════════ -->
+        <line x1="650" y1="1082" x2="560" y2="1082" stroke="#000" stroke-width="1.5"/>
+        <line x1="560" y1="1082" x2="560" y2="1062" stroke="#000" stroke-width="1"/>
+        <line x1="554" y1="1062" x2="566" y2="1062" stroke="#000" stroke-width="1.5"/>
+        <line x1="556" y1="1057" x2="564" y2="1057" stroke="#000" stroke-width="1"/>
+        <line x1="558" y1="1052" x2="562" y2="1052" stroke="#000" stroke-width="1"/>
+        <text x="530" y="1051" font-size="7" fill="#000" text-anchor="middle">33KV LAs</text>
+        <rect x="526" y="1074" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="528" y1="1076" x2="542" y2="1088" stroke="#000" stroke-width="1.5"/>
+        <line x1="542" y1="1076" x2="528" y2="1088" stroke="#000" stroke-width="1.5"/>
+        <text x="516" y="1074" font-size="8" font-weight="700" fill="#000" text-anchor="end">HV-IV</text>
+        <line x1="526" y1="1082" x2="510" y2="1082" stroke="#000" stroke-width="1.5"/>
+        <rect x="498" y="1076" width="12" height="12" fill="#fff" stroke="#000" stroke-width="1.5"/>
+        <line x1="498" y1="1082" x2="490" y2="1082" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="1096" font-size="7.5" fill="#000" text-anchor="middle">Fuse</text>
+        <line x1="490" y1="1082" x2="490" y2="1107" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="1117" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="1133" r="9" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="460" y="1117" font-size="8" font-weight="700" fill="#000" text-anchor="end">12.5 MVA</text>
+        <text x="460" y="1127" font-size="8" font-weight="700" fill="#000" text-anchor="end">- PTR-IV</text>
+        <line x1="490" y1="1142" x2="490" y2="1167" stroke="#000" stroke-width="1.5"/>
+        <rect x="481" y="1167" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="483" y1="1169" x2="497" y2="1181" stroke="#000" stroke-width="1.5"/>
+        <line x1="497" y1="1169" x2="483" y2="1181" stroke="#000" stroke-width="1.5"/>
+        <text x="478" y="1166" font-size="8" font-weight="700" fill="#000" text-anchor="end">LV-IV</text>
+        <!-- 11KV BUS PT LV-IV -->
+        <line x1="490" y1="1183" x2="490" y2="1196" stroke="#000" stroke-width="1.5"/>
+        <line x1="484" y1="1196" x2="496" y2="1196" stroke="#000" stroke-width="1.5"/>
+        <line x1="486" y1="1201" x2="494" y2="1201" stroke="#000" stroke-width="1"/>
+        <line x1="488" y1="1206" x2="492" y2="1206" stroke="#000" stroke-width="1"/>
+        <text x="462" y="1200" font-size="7" fill="#000" text-anchor="end">11KV LAs</text>
+        <line x1="490" y1="1213" x2="490" y2="1226" stroke="#000" stroke-width="1.5"/>
+        <line x1="30" y1="1226" x2="510" y2="1226" stroke="#000" stroke-width="3"/>
+        <circle cx="490" cy="1233" r="6" fill="none" stroke="#000" stroke-width="1.5"/>
+        <circle cx="490" cy="1240" r="4" fill="none" stroke="#000" stroke-width="1.5"/>
+        <text x="504" y="1238" font-size="7" fill="#000">11KV BUS PT</text>
+
+        <!-- FEEDERS LV-IV: F10 Darga UG, F11 QQ Toombs, F12 Brundhavan, F13 Narayanamma -->
+        <!-- F10: Darga UG (dashed) -->
+        <line x1="80" y1="1226" x2="80" y2="1246" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3"/>
+        <rect x="71" y="1238" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="73" y1="1240" x2="87" y2="1252" stroke="#000" stroke-width="1.5"/>
+        <line x1="87" y1="1240" x2="73" y2="1252" stroke="#000" stroke-width="1.5"/>
+        <line x1="71" y1="1246" x2="25" y2="1246" stroke="#000" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrL)"/>
+        <text x="27" y="1242" font-size="8" font-weight="600" fill="#000">11 KV DARGA UG</text>
+        <text x="27" y="1253" font-size="8" fill="#000">FEEDER</text>
+        <!-- F11: QQ Toombs -->
+        <line x1="170" y1="1226" x2="170" y2="1266" stroke="#000" stroke-width="1.5"/>
+        <rect x="161" y="1258" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="163" y1="1260" x2="177" y2="1272" stroke="#000" stroke-width="1.5"/>
+        <line x1="177" y1="1260" x2="163" y2="1272" stroke="#000" stroke-width="1.5"/>
+        <line x1="161" y1="1266" x2="25" y2="1266" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="1262" font-size="8" font-weight="600" fill="#000">11 KV QQ TOOMBS</text>
+        <text x="27" y="1273" font-size="8" fill="#000">FEEDER</text>
+        <!-- F12: Brundhavan Colony -->
+        <line x1="280" y1="1226" x2="280" y2="1286" stroke="#000" stroke-width="1.5"/>
+        <rect x="271" y="1278" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="273" y1="1280" x2="287" y2="1292" stroke="#000" stroke-width="1.5"/>
+        <line x1="287" y1="1280" x2="273" y2="1292" stroke="#000" stroke-width="1.5"/>
+        <line x1="271" y1="1286" x2="25" y2="1286" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="1282" font-size="8" font-weight="600" fill="#000">11 KV BRUNDHAVAN</text>
+        <text x="27" y="1293" font-size="8" fill="#000">COLONY FEEDER</text>
+        <!-- F13: Narayanamma -->
+        <line x1="400" y1="1226" x2="400" y2="1306" stroke="#000" stroke-width="1.5"/>
+        <rect x="391" y="1298" width="18" height="16" fill="none" stroke="#000" stroke-width="1.5"/>
+        <line x1="393" y1="1300" x2="407" y2="1312" stroke="#000" stroke-width="1.5"/>
+        <line x1="407" y1="1300" x2="393" y2="1312" stroke="#000" stroke-width="1.5"/>
+        <line x1="391" y1="1306" x2="25" y2="1306" stroke="#000" stroke-width="1.5" marker-end="url(#arrL)"/>
+        <text x="27" y="1302" font-size="8" font-weight="600" fill="#000">11 KV NARAYANAMMA</text>
+        <text x="27" y="1313" font-size="8" fill="#000">FEEDER</text>
+
+        <!-- Arrow marker for feeders going left -->
+        <defs>
+          <marker id="arrL" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M10 0L0 5L10 10z" fill="#000"/>
+          </marker>
+        </defs>
+
+        <!-- ═══════════ TITLE ═══════════ -->
+        <text x="378" y="1450" text-anchor="middle" font-size="13" font-weight="700" fill="#000">Single Line Diagram of 33/11KV Golconda SS</text>
+
+      </svg>
+
+
+      </div>
+    </div>
+
+    <div id="sld-tooltip" style="display:none;position:fixed;background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);padding:10px 14px;font-size:12px;box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:300;max-width:280px;pointer-events:none"></div>
+
+  </div>
+
+
+  <!-- ══════════════════════════════════════
+       TAB 2 — LOADING DETAILS (Proforma Format)
+       ══════════════════════════════════════ -->
+  <div class="panel" id="panel-loading">
+
+    <!-- Section 1: PTR Loads -->
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>1. PTR Loads Recorded So Far — 33/11 KV Golconda SS</span>
+        <span style="font-weight:400">LV Side Rated FLC: 656 A &nbsp;·&nbsp; SS Combined Max FLC: 1605 A &nbsp;·&nbsp; % SS Loading: 61.17%</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl" id="ptr-load-table">
+          <thead>
+            <tr style="background:var(--blb)">
+              <th rowspan="2">LV No.</th>
+              <th rowspan="2">PTR Capacity (MVA)</th>
+              <th rowspan="2">LV Side Rated FLC (A)</th>
+              <th colspan="4" style="text-align:center;background:var(--amb);color:var(--amf)">MAX RECORDED LOAD — Previous Summer</th>
+              <th rowspan="2" style="background:var(--sf2)">Subs. LV Max FLC (A)</th>
+              <th rowspan="2" style="background:var(--sf2)">% Subs. Loading</th>
+              <th colspan="4" style="text-align:center;background:var(--gnb);color:var(--gnf)">MAX RECORDED LOAD — March 2026</th>
+              <th rowspan="2">WTI (°C)</th>
+              <th rowspan="2">OTI (°C)</th>
+              <th rowspan="2">TAP Pos.</th>
+              <th rowspan="2">Ext. Cooling</th>
+              <th rowspan="2">Remarks</th>
+            </tr>
+            <tr>
+              <th style="background:var(--amb);color:var(--amf)">Max Load (A)</th>
+              <th style="background:var(--amb);color:var(--amf)">Date</th>
+              <th style="background:var(--amb);color:var(--amf)">Time</th>
+              <th style="background:var(--amb);color:var(--amf)">% PTR Loading</th>
+              <th style="background:var(--gnb);color:var(--gnf)">Max Load (A)</th>
+              <th style="background:var(--gnb);color:var(--gnf)">Date</th>
+              <th style="background:var(--gnb);color:var(--gnf)">Time</th>
+              <th style="background:var(--gnb);color:var(--gnf)">% PTR Loading</th>
+            </tr>
+          </thead>
+          <tbody id="ptr-load-body"></tbody>
+          <tfoot id="ptr-load-foot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: 33KV Feeder Loads -->
+    <div class="sec">
+      <div class="sec-lbl"><span>2. 33 kV Feeder Loads Reached So Far</span></div>
+      <div style="overflow-x:auto">
+        <table class="dtbl" id="inc33-load-table">
+          <thead><tr>
+            <th>No. of LV's</th><th>PTR Cap (MVA)</th>
+            <th>EHT SS Name</th><th>33KV Feeder (Regular)</th>
+            <th>Type (OH/UG)</th><th>Max Capacity (A)</th>
+            <th>Max Load (A)</th><th>Date</th><th>Time</th>
+            <th>Alternate-1</th><th>Alternate-2</th>
+          </tr></thead>
+          <tbody id="inc33-load-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 3: 11KV Feeder Loads -->
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>3. 11 kV Feeder Loads Reached So Far</span>
+        <span style="font-weight:400;font-size:10px">Click feeder row for details</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl" id="feeder-load-table">
+          <thead><tr>
+            <th>#</th><th>Feeder Name</th><th>PTR (LV)</th><th>Type</th>
+            <th>Max Capacity (A)</th><th>Max MVA</th>
+            <th>Recorded (A)</th><th>Recorded (MVA)</th>
+            <th>Load %</th><th>Status</th>
+          </tr></thead>
+          <tbody id="feeder-load-body"></tbody>
+          <tfoot id="feeder-load-foot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════
+       TAB 4 — MAINTENANCE
+       ══════════════════════════════════════ -->
+  <div class="panel" id="panel-maintenance">
+
+    <!-- TOP TOOLBAR -->
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="font-size:13px;font-weight:600;color:var(--tx)">Maintenance Register</div>
+      <div style="font-size:11px;color:var(--tx3)">Previous entries on left · New entry form on right · Click row to prefill</div>
+      <button id="exp-all-btn" onclick="toggleAllSections()" style="margin-left:auto;font-size:11px;padding:5px 12px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">Expand All Sections</button>
+      <button onclick="exportMaintLog()" style="font-size:11px;padding:5px 12px;border:0.5px solid var(--gn);border-radius:var(--r);background:var(--gnb);color:var(--gnf);cursor:pointer;font-family:var(--f);font-weight:600">⬇ Export Log</button>
+    </div>
+
+    <!-- EARTH RESISTANCE — split view like other maintenance sections -->
+    <div class="maint-section" id="ms-earth">
+      <div class="maint-sec-head" onclick="toggleSection('earth')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--gnb);color:var(--gnf)">⏚</span>
+          <span class="maint-sec-title">Details of Earth Resistance</span>
+          <span class="maint-sec-sub">Measured in Ohms · Total Earth Pits: 44</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-earth">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-earth">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Type (I/O)</th><th>No. of PTRs</th><th>Total Earth Pits</th>
+              <th>Earth Resistance R (Ω)</th><th>Y (Ω)</th><th>B (Ω)</th><th>Neutral (Ω)</th>
+              <th>Test Date</th><th>Tested By</th><th>Action Plan</th><th>Status</th><th style="width:32px"></th>
+            </tr></thead><tbody id="earth-prev-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head">
+              <span>New Entry</span>
+              <button class="maint-save-btn" onclick="saveEntry('earth')">✓ Save</button>
+            </div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Test Date</label><input class="mi" id="ne-earth-date" type="date"></div>
+              <div class="mf"><label class="ml">Total Earth Pits</label><input class="mi" id="ne-earth-pits" type="number" placeholder="e.g. 44" value="44"></div>
+              <div class="mf"><label class="ml">Earth Resistance R-Phase (Ω)</label><input class="mi" id="ne-earth-r" type="text" placeholder="e.g. 44"></div>
+              <div class="mf"><label class="ml">Earth Resistance Y-Phase (Ω)</label><input class="mi" id="ne-earth-y" type="text" placeholder="e.g. 0"></div>
+              <div class="mf"><label class="ml">Earth Resistance B-Phase (Ω)</label><input class="mi" id="ne-earth-b" type="text" placeholder="e.g. 0"></div>
+              <div class="mf"><label class="ml">Neutral (Ω)</label><input class="mi" id="ne-earth-n" type="text" placeholder="e.g. 0"></div>
+              <div class="mf"><label class="ml">Tested By</label><input class="mi" id="ne-earth-by" type="text" placeholder="Name / Designation"></div>
+              <div class="mf"><label class="ml">Action Plan for Improvement</label><input class="mi" id="ne-earth-action" type="text" placeholder="If any"></div>
+              <div class="mf"><label class="ml">Status</label>
+                <select class="mi" id="ne-earth-status">
+                  <option value="ok">OK — Within Limit</option>
+                  <option value="due">High — Attention Needed</option>
+                  <option value="overdue">Critical — Exceeds Limit</option>
+                </select>
+              </div>
+            </div>
+            <div class="maint-new-log" id="log-earth"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="sec">
-      <div class="sec-lbl"><span>1. Power Transformer (PTR) Loading</span></div>
-      <table class="dtbl">
-        <thead>
-          <tr style="background:var(--blb)">
-            <th>LV No.</th><th>PTR Cap (MVA)</th><th>Rated FLC (A)</th><th>Max Rec (A)</th><th>Load %</th><th>WTI/OTI</th><th>TAP</th>
-          </tr>
-        </thead>
-        <tbody id="ptr-load-body"></tbody>
-      </table>
+    <!-- BREAKER MAINTENANCE -->
+    <div class="maint-section" id="ms-bkr">
+      <div class="maint-sec-head" onclick="toggleSection('bkr')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--amb);color:var(--amf)">⚡</span>
+          <span class="maint-sec-title">Breaker Maintenance Log</span>
+          <span class="maint-sec-sub">Timing · Contact Resistance · SF₆</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-bkr">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-bkr">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Bay</th><th>Make/Sr</th><th>Last Date</th><th>Next Due</th>
+              <th>Close (ms)</th><th>Trip (ms)</th><th>Contact Res.</th><th>SF₆</th><th>Status</th><th>Remark</th><th style="width:32px"></th>
+            </tr></thead><tbody id="bkr-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('bkr')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Bay / Feeder</label>
+                <select class="mi" id="ne-bkr-bay">
+                  <option>33 kV INCOMER-1</option><option>HV-I Bay</option><option>HV-II Bay</option>
+                  <option>LV-I Bay</option><option>LV-II Bay</option>
+                  <option>FEEDER-1</option><option>FEEDER-2</option><option>FEEDER-3</option>
+                  <option>FEEDER-4</option><option>FEEDER-5</option><option>FEEDER-6</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Maintenance Date</label><input class="mi" id="ne-bkr-date" type="date"></div>
+              <div class="mf"><label class="ml">Next Due Date</label><input class="mi" id="ne-bkr-next" type="date"></div>
+              <div class="mf"><label class="ml">Close Time (ms)</label><input class="mi" id="ne-bkr-close" type="number" placeholder="e.g. 52"></div>
+              <div class="mf"><label class="ml">Trip Time (ms)</label><input class="mi" id="ne-bkr-trip" type="number" placeholder="e.g. 38"></div>
+              <div class="mf"><label class="ml">Contact Resistance (μΩ)</label><input class="mi" id="ne-bkr-cres" type="text" placeholder="e.g. 85 μΩ"></div>
+              <div class="mf"><label class="ml">SF₆ Pressure</label><input class="mi" id="ne-bkr-sf6" type="text" placeholder="e.g. 6.2 kg/cm²"></div>
+              <div class="mf"><label class="ml">Carried Out By</label><input class="mi" id="ne-bkr-by" type="text" placeholder="Name / Agency"></div>
+              <div class="mf"><label class="ml">Remarks</label><input class="mi" id="ne-bkr-remark" type="text" placeholder="Observations"></div>
+              <div class="mf"><label class="ml">Status</label>
+                <select class="mi" id="ne-bkr-status">
+                  <option value="ok">OK — Normal</option>
+                  <option value="due">Due — Attention</option>
+                  <option value="overdue">Critical</option>
+                </select>
+              </div>
+            </div>
+            <div class="maint-new-log" id="log-bkr"></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="sec">
-      <div class="sec-lbl"><span>2. 11 kV Feeder Loading Details</span></div>
-      <table class="dtbl">
-        <thead>
-          <tr>
-            <th>#</th><th>Feeder Name</th><th>PTR (LV)</th><th>Type</th><th>Max Cap (A)</th><th>Rec (A)</th><th>Load %</th><th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="feeder-load-body"></tbody>
-      </table>
+    <!-- PTR TRANSFORMER MAINTENANCE -->
+    <div class="maint-section" id="ms-ptr">
+      <div class="maint-sec-head" onclick="toggleSection('ptr')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--amb);color:var(--amf)">T</span>
+          <span class="maint-sec-title">Power Transformer Maintenance Log</span>
+          <span class="maint-sec-sub">BDV · Oil / Wdg Temp · Buchholz · Silica Gel</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-ptr">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-ptr">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>PTR</th><th>BDV (kV)</th><th>BDV Date</th><th>Oil °C</th><th>Wdg °C</th>
+              <th>Buchholz</th><th>PRV</th><th>Silica Gel</th><th>Last Filt.</th><th>Next Maint.</th><th>Status</th><th style="width:32px"></th>
+            </tr></thead><tbody id="ptr-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('ptr')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">PTR</label>
+                <select class="mi" id="ne-ptr-id">
+                  <option>LV-I (PTR-I)</option><option>LV-II (PTR-II)</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">BDV Test Value (kV)</label><input class="mi" id="ne-ptr-bdv" type="number" placeholder="e.g. 68"></div>
+              <div class="mf"><label class="ml">BDV Test Date</label><input class="mi" id="ne-ptr-bdvdate" type="date"></div>
+              <div class="mf"><label class="ml">Oil Temperature (°C)</label><input class="mi" id="ne-ptr-oil" type="number" placeholder="e.g. 62"></div>
+              <div class="mf"><label class="ml">Winding Temperature (°C)</label><input class="mi" id="ne-ptr-wdg" type="number" placeholder="e.g. 72"></div>
+              <div class="mf"><label class="ml">Buchholz Status</label>
+                <select class="mi" id="ne-ptr-buchholz">
+                  <option>Normal</option><option>Minor Gas</option><option>Major Gas</option><option>Tripped</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">PRV Status</label>
+                <select class="mi" id="ne-ptr-prv">
+                  <option>Normal</option><option>Operated</option><option>Leaking</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Silica Gel Condition</label><input class="mi" id="ne-ptr-silica" type="text" placeholder="e.g. Active 60%"></div>
+              <div class="mf"><label class="ml">Last Oil Filtration</label><input class="mi" id="ne-ptr-filt" type="text" placeholder="e.g. Mar-2024"></div>
+              <div class="mf"><label class="ml">Next Maintenance Due</label><input class="mi" id="ne-ptr-next" type="text" placeholder="e.g. Mar-2025"></div>
+              <div class="mf"><label class="ml">Carried Out By</label><input class="mi" id="ne-ptr-by" type="text" placeholder="Name / Agency"></div>
+            </div>
+            <div class="maint-new-log" id="log-ptr"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- RELAY TESTING -->
+    <div class="maint-section" id="ms-relay">
+      <div class="maint-sec-head" onclick="toggleSection('relay')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--pkb);color:var(--pkf)">R</span>
+          <span class="maint-sec-title">Relay Testing & Calibration Log</span>
+          <span class="maint-sec-sub">Pickup · TMS · Trip Test</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-relay">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-relay">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Bay / Feeder</th><th>Relay Make/Type</th><th>Last Test</th><th>Next Due</th>
+              <th>Pickup (A)</th><th>TMS</th><th>Trip Test</th><th>Status</th><th>Tested By</th><th style="width:32px"></th>
+            </tr></thead><tbody id="relay-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('relay')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Bay / Feeder</label>
+                <select class="mi" id="ne-relay-bay">
+                  <option>33 kV INCOMER-1</option><option>HV-I</option><option>HV-II</option>
+                  <option>LV-I</option><option>LV-II</option>
+                  <option>FEEDER-1</option><option>FEEDER-2</option><option>FEEDER-3</option>
+                  <option>FEEDER-4</option><option>FEEDER-5</option><option>FEEDER-6</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Test Date</label><input class="mi" id="ne-relay-date" type="date"></div>
+              <div class="mf"><label class="ml">Next Due Date</label><input class="mi" id="ne-relay-next" type="date"></div>
+              <div class="mf"><label class="ml">Pickup Setting (A)</label><input class="mi" id="ne-relay-pickup" type="text" placeholder="e.g. 200 A"></div>
+              <div class="mf"><label class="ml">TMS Setting</label><input class="mi" id="ne-relay-tms" type="text" placeholder="e.g. 0.2"></div>
+              <div class="mf"><label class="ml">Trip Test Result</label>
+                <select class="mi" id="ne-relay-trip">
+                  <option>Pass</option><option>Fail</option><option>Not Tested</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Tested By</label><input class="mi" id="ne-relay-by" type="text" placeholder="Name / Designation"></div>
+              <div class="mf"><label class="ml">Status</label>
+                <select class="mi" id="ne-relay-status">
+                  <option value="ok">OK</option><option value="due">Due</option><option value="overdue">Overdue</option>
+                </select>
+              </div>
+            </div>
+            <div class="maint-new-log" id="log-relay"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BATTERY & CHARGER -->
+    <div class="maint-section" id="ms-batt">
+      <div class="maint-sec-head" onclick="toggleSection('batt')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--gnb);color:var(--gnf)">B</span>
+          <span class="maint-sec-title">Battery & Charger Maintenance</span>
+          <span class="maint-sec-sub">Float/Boost Voltage · SG · Cell Voltage</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-batt">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-batt">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Item</th><th>Make/Sr</th><th>Capacity</th><th>Float V</th><th>Boost V</th>
+              <th>Cell V</th><th>SG</th><th>Last Test</th><th>Next Due</th><th>Status</th><th style="width:32px"></th>
+            </tr></thead><tbody id="batt-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('batt')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Item</label><input class="mi" id="ne-batt-item" type="text" placeholder="e.g. Battery Bank (110V DC)"></div>
+              <div class="mf"><label class="ml">Test Date</label><input class="mi" id="ne-batt-date" type="date"></div>
+              <div class="mf"><label class="ml">Float Voltage (V)</label><input class="mi" id="ne-batt-float" type="text" placeholder="e.g. 116.6 V"></div>
+              <div class="mf"><label class="ml">Boost Voltage (V)</label><input class="mi" id="ne-batt-boost" type="text" placeholder="e.g. 126.5 V"></div>
+              <div class="mf"><label class="ml">Cell Voltage (V/cell)</label><input class="mi" id="ne-batt-cell" type="text" placeholder="e.g. 2.12"></div>
+              <div class="mf"><label class="ml">SG Reading</label><input class="mi" id="ne-batt-sg" type="text" placeholder="e.g. 1.25"></div>
+              <div class="mf"><label class="ml">Next Due</label><input class="mi" id="ne-batt-next" type="date"></div>
+              <div class="mf"><label class="ml">Tested By</label><input class="mi" id="ne-batt-by" type="text" placeholder="Name / Designation"></div>
+            </div>
+            <div class="maint-new-log" id="log-batt"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAPACITOR BANK -->
+    <div class="maint-section" id="ms-cap">
+      <div class="maint-sec-head" onclick="toggleSection('cap')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--blb);color:var(--blf)">C</span>
+          <span class="maint-sec-title">Capacitor Bank Maintenance</span>
+          <span class="maint-sec-sub">Capacitance · IR Test · Condition</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-cap">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-cap">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Item</th><th>Make/Sr</th><th>Capacity</th><th>Last Insp.</th>
+              <th>Next Due</th><th>Capacitance (μF)</th><th>IR Test</th><th>Status</th><th style="width:32px"></th>
+            </tr></thead><tbody id="cap-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('cap')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Inspection Date</label><input class="mi" id="ne-cap-date" type="date"></div>
+              <div class="mf"><label class="ml">Capacitance (μF)</label><input class="mi" id="ne-cap-cap" type="text" placeholder="e.g. 54.6 μF"></div>
+              <div class="mf"><label class="ml">IR Test Value (MΩ)</label><input class="mi" id="ne-cap-ir" type="text" placeholder="e.g. 500 MΩ"></div>
+              <div class="mf"><label class="ml">Reactive Power (MVAR)</label><input class="mi" id="ne-cap-mvar" type="text" placeholder="e.g. 1.98 MVAR"></div>
+              <div class="mf"><label class="ml">Next Due</label><input class="mi" id="ne-cap-next" type="date"></div>
+              <div class="mf"><label class="ml">Inspected By</label><input class="mi" id="ne-cap-by" type="text" placeholder="Name / Designation"></div>
+            </div>
+            <div class="maint-new-log" id="log-cap"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIGHTNING ARRESTOR -->
+    <div class="maint-section" id="ms-la">
+      <div class="maint-sec-head" onclick="toggleSection('la')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--pkb);color:var(--pkf)">LA</span>
+          <span class="maint-sec-title">Lightning Arrestor Maintenance</span>
+          <span class="maint-sec-sub">Leakage Current · Counter Reading · Condition</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-la">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-la">
+        <div class="maint-split maint-split-table">
+          <div class="maint-prev" style="overflow-x:auto">
+            <div class="maint-prev-head">Previous Entries</div>
+            <table class="dtbl"><thead><tr>
+              <th>Location</th><th>Type</th><th>Qty</th><th>Leakage (mA)</th>
+              <th>Counter</th><th>Last Test</th><th>Next Due</th><th>Condition</th><th style="width:32px"></th>
+            </tr></thead><tbody id="la-maint-body"></tbody></table>
+          </div>
+          <div class="maint-new-panel">
+            <div class="maint-new-head"><span>New Entry</span><button class="maint-save-btn" onclick="saveEntry('la')">✓ Save</button></div>
+            <div class="maint-new-body">
+              <div class="mf"><label class="ml">Location</label>
+                <select class="mi" id="ne-la-loc">
+                  <option>33 kV Bus (Incomer)</option><option>11 kV Bus (LV-I)</option><option>11 kV Bus (LV-II)</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Test Date</label><input class="mi" id="ne-la-date" type="date"></div>
+              <div class="mf"><label class="ml">Leakage Current (mA)</label><input class="mi" id="ne-la-leak" type="text" placeholder="e.g. 0.8 mA"></div>
+              <div class="mf"><label class="ml">Counter Reading</label><input class="mi" id="ne-la-counter" type="text" placeholder="e.g. 0042"></div>
+              <div class="mf"><label class="ml">Condition</label>
+                <select class="mi" id="ne-la-cond">
+                  <option>Good</option><option>Satisfactory</option><option>Replace Recommended</option><option>Replace Immediately</option>
+                </select>
+              </div>
+              <div class="mf"><label class="ml">Next Due</label><input class="mi" id="ne-la-next" type="date"></div>
+              <div class="mf"><label class="ml">Tested By</label><input class="mi" id="ne-la-by" type="text" placeholder="Name / Designation"></div>
+            </div>
+            <div class="maint-new-log" id="log-la"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAINTENANCE SCHEDULE SUMMARY -->
+    <div class="maint-section" id="ms-sched">
+      <div class="maint-sec-head" onclick="toggleSection('sched')">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="maint-sec-icon" style="background:var(--sf3);color:var(--tx2)">📅</span>
+          <span class="maint-sec-title">Maintenance Schedule Summary</span>
+          <span class="maint-sec-sub">All tasks · Frequency · Due dates</span>
+        </div>
+        <span class="maint-sec-toggle" id="toggle-sched">▼</span>
+      </div>
+      <div class="maint-sec-body" id="body-sched">
+        <div class="maint-sched-grid" id="maint-sched"></div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="panel" id="panel-inventory">
+  <!-- ══════════════════════════════════════
+       TAB 5 — REPORTS
+       ══════════════════════════════════════ -->
+  <div class="panel" id="panel-reports">
     <div class="sec">
-      <div class="sec-lbl"><span>33 kV Incomer Inventory</span></div>
+      <div class="sec-lbl"><span>PTR Load Report</span></div>
       <table class="dtbl">
-        <thead><tr><th>Incomer No.</th><th>Type</th><th>Breaker Make</th><th>Relay Type</th><th>CTR</th></tr></thead>
-        <tbody id="inc-inv-body"></tbody>
+        <thead><tr><th>PTR / LV Bay</th><th>Source</th><th>Max MVA</th><th>Max A (33kV)</th><th>Rec. MVA</th><th>Rec. A</th><th>Loading %</th><th>Status</th><th>∑ Feeder MVA</th><th>Diff. (Losses)</th></tr></thead>
+        <tbody id="ptr-rpt"></tbody>
       </table>
     </div>
     <div class="sec">
-      <div class="sec-lbl"><span>11 kV Feeder Breaker/Relay Data</span></div>
+      <div class="sec-lbl"><span>11 kV Feeder Load Report</span></div>
       <table class="dtbl">
-        <thead><tr><th>Feeder</th><th>Breaker Make</th><th>Relay Make</th><th>CTR Adopted</th><th>M-SrNo</th></tr></thead>
-        <tbody id="fdr-inv-body"></tbody>
+        <thead><tr><th>#</th><th>Feeder</th><th>Type</th><th>PTR</th><th>Max A</th><th>Max MVA</th><th>Rec. A</th><th>Rec. MVA</th><th>Load %</th><th>Status</th></tr></thead>
+        <tbody id="fdr-rpt"></tbody>
       </table>
+    </div>
+    <div class="sec">
+      <div class="sec-lbl"><span>Station Aggregate</span></div>
+      <table class="dtbl">
+        <thead><tr><th>Parameter</th><th>Max Capacity (MVA)</th><th>Recorded Load (MVA)</th><th>Loading %</th><th>Status</th></tr></thead>
+        <tbody id="agg-rpt"></tbody>
+      </table>
+    </div>
+    <div class="rep-grid">
+      <div class="rep-card"><h3>Equipment Master Report</h3><p>Full hierarchy of all equipment from 132 kV source through to 11 kV feeders with breaker, relay and meter details.</p><button class="rep-btn" onclick="st('inventory',document.querySelector('.tab'))">View Inventory</button></div>
+      <div class="rep-card"><h3>Overloaded Elements</h3><p id="ov-para">Analysing...</p><button class="rep-btn" onclick="st('loading',document.querySelectorAll('.tab')[1])">View Loading</button></div>
+      <div class="rep-card"><h3>Print Full Report</h3><p>Prints all tabs: hierarchy, loading details, inventory, and reports in a single printout.</p><button class="rep-btn" onclick="window.print()">⎙ Print All</button></div>
     </div>
   </div>
 
   <div class="foot">
-    <p>TGSPDCL · 33/11 kV Golconda SS · SCADA Circle</p>
+    <p>TGSPDCL · 33/11 kV Golconda SS · SCADA Circle · Hyderabad Central</p>
+    <p>Source: Equipment Details Proforma Excel (SS Code 1103921401)</p>
     <p id="fdt"></p>
   </div>
 </div>
 
+<!-- MODAL -->
 <div class="ov" id="modal" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="mod">
-    <div class="mod-head"><span class="mod-title" id="mod-title"></span><button style="border:none;background:none;cursor:pointer;font-size:20px" onclick="document.getElementById('modal').classList.remove('show')">×</button></div>
+    <div class="mod-head">
+      <span class="mod-title" id="mod-title"></span>
+      <button class="mod-x" onclick="document.getElementById('modal').classList.remove('show')">×</button>
+    </div>
     <div class="mod-body" id="mod-body"></div>
   </div>
 </div>
 
 <script>
 // ══════════════════════════════════════════════════
-// DATA
+// MASTER DATA — from Equipment Details Proforma Excel
 // ══════════════════════════════════════════════════
-const PTRS = [
-  {id:'LV-I',  mva:12.5, flc:656, recA:224, wti:52, oti:50, tap:5, make:'ECE'},
-  {id:'LV-II', mva:12.5, flc:656, recA:240, wti:54, oti:50, tap:4, make:'ECE'},
-  {id:'LV-III',mva:12.5, flc:656, recA:318, wti:54, oti:52, tap:5, make:'CGL'},
-  {id:'LV-IV', mva:12.5, flc:656, recA:218, wti:54, oti:50, tap:4, make:'BHEL'}
+
+// 132 kV Source
+const SOURCE_132 = {
+  name: 'ASIFNAGAR 132 kV SS',
+  feeder: 'GOLKONDA',
+  feederLen: '4 km (OH)',
+};
+
+// 33 kV Incomers
+// 33 kV Incomers — 2 Regular (Asifnagar EHT → Shaikpet, Rayadurgam → Sandya)
+// Alternate-1/2 per LV group as per Loading Proforma image
+const INC33 = [
+  // Regular Sources
+  {seq:'INCOMER-1 (Regular)', name:'ASIFNAGAR EHT SS → 33 KV SHAIKPET', ehtSS:'Asifnagar EHT SS', feeder:'Shaikpet',
+   kv:132, type:'Regular', lineType:'UG', maxCapA:400, lvs:'LV-I, LV-II',
+   maxRecA:170, maxRecDate:'03.03.2026', maxRecTime:'19:00',
+   alt1:'33kV Asifnagar - Golconda', alt2:'33kV Jubilee Hills - Golconda',
+   bkrMake:'CGL', bkrSr:'9357VP', bkrMfg:'2024',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'ASHIDA', relayType:'ASDR140', relaySr:'7456834',
+   mtrMake:'ELSTER', mtrSr:'505032518', mCtr:'400/1', mPtr:'33KV/110', mClass:'0.5s', mMF:'1'},
+  {seq:'INCOMER-2 (Regular)', name:'RAYADURGAM EHT SS → 33 KV SANDYA FEEDER', ehtSS:'Rayadurgam EHT SS', feeder:'Sandya',
+   kv:400, type:'Regular', lineType:'UG', maxCapA:400, lvs:'LV-III, LV-IV',
+   maxRecA:150, maxRecDate:'06.03.2026', maxRecTime:'14:00',
+   alt1:'33kV Asifnagar - Shaikpet', alt2:'33kV Jubilee Hills - Golconda',
+   bkrMake:'—', bkrSr:'—', bkrMfg:'—',
+   ctrAvail:'—', ctrAdopt:'—',
+   relayMake:'—', relayType:'—', relaySr:'—',
+   mtrMake:'—', mtrSr:'—', mCtr:'—', mPtr:'—', mClass:'—', mMF:'—'},
+  // Alternate Sources
+  {seq:'ALTERNATE-1', name:'33kV ASIFNAGAR - GOLCONDA', ehtSS:'132 KV Asifnagar SS', feeder:'Golconda',
+   kv:132, type:'Alternate', lineType:'OH', maxCapA:400, lvs:'LV-I, LV-II',
+   maxRecA:null, maxRecDate:'—', maxRecTime:'—',
+   alt1:'—', alt2:'—',
+   bkrMake:'—', bkrSr:'—', bkrMfg:'—',
+   ctrAvail:'—', ctrAdopt:'—',
+   relayMake:'—', relayType:'—', relaySr:'—',
+   mtrMake:'—', mtrSr:'—', mCtr:'—', mPtr:'—', mClass:'—', mMF:'—'},
+  {seq:'ALTERNATE-2', name:'33kV JUBILEE HILLS - GOLCONDA', ehtSS:'132 KV Jubilee Hills SS', feeder:'Golconda',
+   kv:132, type:'Alternate', lineType:'OH', maxCapA:400, lvs:'LV-I, LV-II, LV-III, LV-IV',
+   maxRecA:null, maxRecDate:'—', maxRecTime:'—',
+   alt1:'—', alt2:'—',
+   bkrMake:'—', bkrSr:'—', bkrMfg:'—',
+   ctrAvail:'—', ctrAdopt:'—',
+   relayMake:'—', relayType:'—', relaySr:'—',
+   mtrMake:'—', mtrSr:'—', mCtr:'—', mPtr:'—', mClass:'—', mMF:'—'},
 ];
 
+// HV Bays — 4 bays matching 4 LVs (HV-I to HV-IV)
+const HV_BAYS = [
+  {id:'HV-I',   bkrMake:'CGL',    bkrSr:'8734VP',  bkrMfg:'2008',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5111', relaySr:'053636337',
+   mtrMake:'SECURE', mtrSr:'AP54789',  mCtr:'400/1', mPtr:'33KV/110', mClass:'0.5s', mMF:'1'},
+  {id:'HV-II',  bkrMake:'CGL',    bkrSr:'2533VP',  bkrMfg:'2008',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'066527',
+   mtrMake:'ELSTER',  mtrSr:'023546',  mCtr:'400/1', mPtr:'33KV/110', mClass:'0.5s', mMF:'1'},
+  {id:'HV-III', bkrMake:'CGL',    bkrSr:'3421VP',  bkrMfg:'2013',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'078432',
+   mtrMake:'ELSTER',  mtrSr:'041287',  mCtr:'400/1', mPtr:'33KV/110', mClass:'0.5s', mMF:'1'},
+  {id:'HV-IV',  bkrMake:'ABB',    bkrSr:'7812VP',  bkrMfg:'2017',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'ABB',     relayType:'REF615',  relaySr:'091823',
+   mtrMake:'SECURE',  mtrSr:'TS094312', mCtr:'400/1', mPtr:'33KV/110', mClass:'0.5s', mMF:'1'},
+];
+
+// PTR Details — from Loading Proforma Excel & Images
+// Image 1: PTR Loads Recorded | Image 3: Max WTI/OTI Temperatures
+// slno: 134=LV1, 135=LV2, 136=LV3, 137=LV4
+// lvsFLC: LV side rated full load current = 656 A (12.5MVA / √3 / 11kV)
+// Substation LV side Max Full Load current: 1605 A (all 4 combined)
+// % Substation Loading: 61.17% (combined)
+const PTRS_DETAIL = [
+  // LV-I: Max recorded prev summer: 321A @ 24.04.2025 21:00 = 48.93%
+  //        Max recorded Mar 2026:   224A @ 06.03.2026 14:00 = 34.15%
+  //        WTI: 52°C, OTI: 50°C, TAP: 5
+  {id:'LV-I (PTR-I)',   lv:'LV-I',  hv:'HV-I',  mva:12.5, maxA:219,
+   lvFLC:656,
+   sumMax24A:321, sumMax24Date:'24.04.2025', sumMax24Time:'21:00', sumMax24Pct:48.93,
+   sumMax25A:321, sumMax25Date:'24.04.2025', sumMax25Time:'21:00', sumMax25Pct:48.93,
+   recA:224,      recDate:'06.03.2026',      recTime:'14:00',      recPct:34.15,
+   recMVA:4.27,
+   wti:52, oti:50, tap:5,
+   extCooling:'No', extCoolingQty:'—',
+   feeders33: 3, linkLines:1, totalInc33:4,
+   ptrMake:'ECE', ptrCap:'12.5 MVA', ptrSr:'19288283', tmuMake:'—', tmuSr:'—',
+   yr:2009, oilTemp:'50°C', wdgTemp:'52°C',
+   src:'ASIFNAGAR EHT SS', inc33:'ASIFNAGAR EHT SS → 33 KV SHAIKPET (Regular)',
+   alt1Feeder:'33kV Asifnagar - Golconda',   alt1SS:'132 KV Asifnagar',
+   alt2Feeder:'33kV Jubilee Hills - Golconda',alt2SS:'132 KV Jubilee Hills',
+   bkrMake:'BHEL', bkrSr:'97540', bkrMfg:'2009',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'034527',
+   mtrMake:'ELSTER', mtrSr:'093546', mCtr:'400/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1',
+   remark:'—'},
+
+  // LV-II: Max recorded prev summer: 306A @ 24.04.2025 23:00 = 46.65%
+  //         Max recorded Mar 2026:   240A @ 06.03.2026 08:00 = 36.59%
+  //         WTI: 54°C, OTI: 50°C, TAP: 4
+  //         Remark: Enhancement 8 MVA TO 12.5 MVA-12.5-Yes
+  {id:'LV-II (PTR-II)', lv:'LV-II', hv:'HV-II', mva:12.5, maxA:219,
+   lvFLC:656,
+   sumMax24A:306, sumMax24Date:'24.04.2025', sumMax24Time:'23:00', sumMax24Pct:46.65,
+   sumMax25A:306, sumMax25Date:'24.04.2025', sumMax25Time:'23:00', sumMax25Pct:46.65,
+   recA:240,      recDate:'06.03.2026',      recTime:'08:00',      recPct:36.59,
+   recMVA:4.57,
+   wti:54, oti:50, tap:4,
+   extCooling:'No', extCoolingQty:'—',
+   feeders33: 3, linkLines:1, totalInc33:4,
+   ptrMake:'ECE', ptrCap:'12.5 MVA', ptrSr:'—', tmuMake:'—', tmuSr:'—',
+   yr:2011, oilTemp:'50°C', wdgTemp:'54°C',
+   src:'ASIFNAGAR EHT SS', inc33:'ASIFNAGAR EHT SS → 33 KV SHAIKPET (Regular)',
+   alt1Feeder:'33kV Asifnagar - Golconda',    alt1SS:'132 KV Asifnagar',
+   alt2Feeder:'33kV Jubilee Hills - Golconda', alt2SS:'132 KV Jubilee Hills',
+   bkrMake:'CGL', bkrSr:'2533VP', bkrMfg:'2008',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'066527',
+   mtrMake:'ELSTER', mtrSr:'023546', mCtr:'400/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1',
+   remark:'Enhancement — 8 MVA to 12.5 MVA (Enhanced)'},
+
+  // LV-III: Max recorded prev summer: 140A @ 24.04.2025 21:00 = 21.34%
+  //          Max recorded Mar 2026:   318A @ 06.03.2026 15:00 = 48.48%
+  //          WTI: 54°C, OTI: 52°C, TAP: 5
+  {id:'LV-III (PTR-III)',lv:'LV-III',hv:'HV-III',mva:12.5, maxA:219,
+   lvFLC:656,
+   sumMax24A:140, sumMax24Date:'24.04.2025', sumMax24Time:'21:00', sumMax24Pct:21.34,
+   sumMax25A:140, sumMax25Date:'24.04.2025', sumMax25Time:'21:00', sumMax25Pct:21.34,
+   recA:318,      recDate:'06.03.2026',      recTime:'15:00',      recPct:48.48,
+   recMVA:6.05,
+   wti:54, oti:52, tap:5,
+   extCooling:'No', extCoolingQty:'—',
+   feeders33: 3, linkLines:1, totalInc33:4,
+   ptrMake:'CGL', ptrCap:'12.5 MVA', ptrSr:'—', tmuMake:'—', tmuSr:'—',
+   yr:2013, oilTemp:'52°C', wdgTemp:'54°C',
+   src:'RAYADURGAM EHT SS', inc33:'RAYADURGAM EHT SS → 33 KV SANDYA FEEDER (Regular)',
+   alt1Feeder:'33kV Asifnagar - Shaikpet',   alt1SS:'132 KV Asifnagar',
+   alt2Feeder:'33kV Jubilee Hills - Golconda',alt2SS:'132 KV Jubilee Hills',
+   bkrMake:'CGL', bkrSr:'3421VP', bkrMfg:'2013',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'078432',
+   mtrMake:'ELSTER', mtrSr:'041287', mCtr:'400/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1',
+   remark:'—'},
+
+  // LV-IV: Max recorded prev summer: 324A @ 24.04.2025 23:00 = 49.39%
+  //         Max recorded Mar 2026:   218A @ 06.03.2026 19:00 = 33.23%
+  //         WTI: 54°C, OTI: 50°C, TAP: 4
+  //         Remark: Enhancement 8 MVA TO 12.5 MVA-12.5-Yes
+  {id:'LV-IV (PTR-IV)', lv:'LV-IV', hv:'HV-IV', mva:12.5, maxA:219,
+   lvFLC:656,
+   sumMax24A:324, sumMax24Date:'24.04.2025', sumMax24Time:'23:00', sumMax24Pct:49.39,
+   sumMax25A:324, sumMax25Date:'24.04.2025', sumMax25Time:'23:00', sumMax25Pct:49.39,
+   recA:218,      recDate:'06.03.2026',      recTime:'19:00',      recPct:33.23,
+   recMVA:4.15,
+   wti:54, oti:50, tap:4,
+   extCooling:'No', extCoolingQty:'—',
+   feeders33: 3, linkLines:1, totalInc33:4,
+   ptrMake:'BHEL', ptrCap:'12.5 MVA', ptrSr:'—', tmuMake:'—', tmuSr:'—',
+   yr:2017, oilTemp:'50°C', wdgTemp:'54°C',
+   src:'RAYADURGAM EHT SS', inc33:'RAYADURGAM EHT SS → 33 KV SANDYA FEEDER (Regular)',
+   alt1Feeder:'33kV Asifnagar - Shaikpet',   alt1SS:'132 KV Asifnagar',
+   alt2Feeder:'33kV Jubilee Hills - Golconda',alt2SS:'132 KV Jubilee Hills',
+   bkrMake:'ABB', bkrSr:'7812VP', bkrMfg:'2017',
+   ctrAvail:'400-200/1', ctrAdopt:'400/1',
+   relayMake:'ABB', relayType:'REF615', relaySr:'091823',
+   mtrMake:'SECURE', mtrSr:'TS094312', mCtr:'400/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1',
+   remark:'Enhancement — 8 MVA to 12.5 MVA (Enhanced)'},
+];
+
+// 33 kV Incomer Loads — from Image 2
+// Asifnagar EHT SS → Shaikpet (UG, 400A, max 170A on 03.03.2026 19:00)
+// Rayadurgam EHT SS → Sandya   (UG, 400A, max 150A on 06.03.2026 14:00)
+const INC33_LOADS = [
+  {seq:'INC-1', feeder:'Shaikpet', ehtSS:'Asifnagar EHT SS',  type:'UG', maxCapA:400, lvs:'LV-I, LV-II',
+   maxRecA:170, maxRecDate:'03.03.2026', maxRecTime:'19:00',
+   alt1:'33kV Asifnagar - Golconda', alt2:'33kV Jubilee Hills - Golconda'},
+  {seq:'INC-2', feeder:'Sandya',   ehtSS:'Rayadurgam EHT SS', type:'UG', maxCapA:400, lvs:'LV-III, LV-IV',
+   maxRecA:150, maxRecDate:'06.03.2026', maxRecTime:'14:00',
+   alt1:'33kV Asifnagar - Shaikpet', alt2:'33kV Jubilee Hills - Golconda'},
+];
+
+// 11 kV Feeders — distributed across LV-I to LV-IV per SLD
 const FEEDERS = [
-  {id:'F1', name:'Golconda OH', lv:'LV-I', type:'OH', maxA:250, recA:145, bkr:'CGL', relay:'ASHIDA'},
-  {id:'F2', name:'Motimahal',   lv:'LV-I', type:'OH', maxA:250, recA:178, bkr:'ALSTOM', relay:'CGL'},
-  {id:'F3', name:'Aditya Nagar UG', lv:'LV-I', type:'UG', maxA:300, recA:110, bkr:'BHEL', relay:'CGL'},
-  {id:'F4', name:'Darga OH',    lv:'LV-II', type:'OH', maxA:250, recA:158, bkr:'MEGAWIN', relay:'CGL'},
-  {id:'F5', name:'Golconda Cable', lv:'LV-II', type:'Cable', maxA:300, recA:246, bkr:'ALSTOM', relay:'CGL'},
-  {id:'F6', name:'Shaikpet WW', lv:'LV-II', type:'OH', maxA:250, recA:138, bkr:'CGL', relay:'CGL'},
-  {id:'F7', name:'Aparna One',  lv:'LV-III', type:'OH', maxA:250, recA:190, bkr:'CGL', relay:'CGL'},
-  {id:'F8', name:'OU Colony',   lv:'LV-III', type:'OH', maxA:250, recA:220, bkr:'CGL', relay:'CGL'},
-  {id:'F9', name:'Aditya Nagar OH', lv:'LV-III', type:'OH', maxA:250, recA:172, bkr:'CGL', relay:'CGL'},
-  {id:'F10',name:'Darga UG',    lv:'LV-IV', type:'UG', maxA:300, recA:120, bkr:'ABB', relay:'ABB'},
-  {id:'F11',name:'QQ Toombs',   lv:'LV-IV', type:'OH', maxA:250, recA:165, bkr:'ABB', relay:'ABB'},
-  {id:'F12',name:'Brundhavan',  lv:'LV-IV', type:'OH', maxA:250, recA:180, bkr:'ABB', relay:'ABB'},
-  {id:'F13',name:'Narayanamma', lv:'LV-IV', type:'OH', maxA:250, recA:132, bkr:'ABB', relay:'ABB'}
+  // LV-I (PTR-I) feeders
+  {seq:'FEEDER-1', name:'11 KV GOLCONDA OH FEEDER',         lv:'LV-I',  type:'OH',   maxA:250, recA:145, maxMVA:4.76, recMVA:2.76,
+   bkrMake:'CGL',     bkrSr:'847456VP', bkrMfg:'2000', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'8273635',
+   mtrMake:'SECURE',   mtrSr:'TS092838', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Golconda Fort area', len:'~4.2 km'},
+  {seq:'FEEDER-2', name:'11 KV MOTIMAHAL FEEDER',            lv:'LV-I',  type:'OH',   maxA:250, recA:178, maxMVA:4.76, recMVA:3.39,
+   bkrMake:'ALSTOM',  bkrSr:'23747',    bkrMfg:'1999', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'35356464',
+   mtrMake:'SECURE',   mtrSr:'TS092848', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Motimahal locality', len:'~3.1 km'},
+  {seq:'FEEDER-3', name:'11 KV ADITYA NAGAR UG FEEDER',      lv:'LV-I',  type:'UG',   maxA:300, recA:110, maxMVA:5.72, recMVA:2.09,
+   bkrMake:'BHEL',    bkrSr:'985775',   bkrMfg:'1998', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'366337',
+   mtrMake:'SECURE',   mtrSr:'TS093841', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Aditya Nagar residential', len:'~2.8 km'},
+  // LV-II (PTR-II) feeders
+  {seq:'FEEDER-4', name:'11 KV DARGA OH FEEDER',             lv:'LV-II', type:'OH',   maxA:250, recA:158, maxMVA:4.76, recMVA:3.01,
+   bkrMake:'MEGAWIN', bkrSr:'46447',    bkrMfg:'2000', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'822335',
+   mtrMake:'SECURE',   mtrSr:'TS04438',  mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Hussain Sagar Darga area', len:'~3.6 km'},
+  {seq:'FEEDER-5', name:'11 KV GOLCONDA CABLE FEEDER',       lv:'LV-II', type:'Cable',maxA:300, recA:246, maxMVA:5.72, recMVA:4.69,
+   bkrMake:'ALSTOM',  bkrSr:'25447',    bkrMfg:'1999', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'354564',
+   mtrMake:'SECURE',   mtrSr:'TS09238',  mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Golconda town centre', len:'~1.9 km'},
+  {seq:'FEEDER-6', name:'11 KV SHAIKPET WATER WORKS FEEDER', lv:'LV-II', type:'OH',   maxA:250, recA:138, maxMVA:4.76, recMVA:2.63,
+   bkrMake:'CGL',     bkrSr:'965775',   bkrMfg:'1998', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'362237',
+   mtrMake:'SECURE',   mtrSr:'TS094441', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'HMWSSB Shaikpet WW', len:'~2.4 km'},
+  // LV-III (PTR-III) feeders
+  {seq:'FEEDER-7', name:'11 KV APARNA ONE FEEDER',           lv:'LV-III',type:'OH',   maxA:250, recA:190, maxMVA:4.76, recMVA:3.62,
+   bkrMake:'CGL',     bkrSr:'771234',   bkrMfg:'2013', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'431277',
+   mtrMake:'SECURE',   mtrSr:'TS081234', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Aparna One township', len:'~3.0 km'},
+  {seq:'FEEDER-8', name:'11 KV OU COLONY FEEDER',            lv:'LV-III',type:'OH',   maxA:250, recA:220, maxMVA:4.76, recMVA:4.19,
+   bkrMake:'CGL',     bkrSr:'771235',   bkrMfg:'2013', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'431278',
+   mtrMake:'SECURE',   mtrSr:'TS081235', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Osmania University Colony', len:'~2.7 km'},
+  {seq:'FEEDER-9', name:'11 KV ADITYA NAGAR OH FEEDER',      lv:'LV-III',type:'OH',   maxA:250, recA:172, maxMVA:4.76, recMVA:3.27,
+   bkrMake:'CGL',     bkrSr:'771236',   bkrMfg:'2013', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'CGL',    relayType:'7SR5111', relaySr:'431279',
+   mtrMake:'SECURE',   mtrSr:'TS081236', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Aditya Nagar OH section', len:'~3.3 km'},
+  // LV-IV (PTR-IV) feeders
+  {seq:'FEEDER-10',name:'11 KV DARGA UG FEEDER',             lv:'LV-IV', type:'UG',   maxA:300, recA:120, maxMVA:5.72, recMVA:2.28,
+   bkrMake:'ABB',     bkrSr:'881201',   bkrMfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'ABB',    relayType:'REF615', relaySr:'092101',
+   mtrMake:'SECURE',   mtrSr:'TS091701', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Darga underground network', len:'~2.2 km'},
+  {seq:'FEEDER-11',name:'11 KV QQ TOOMBS FEEDER',            lv:'LV-IV', type:'OH',   maxA:250, recA:165, maxMVA:4.76, recMVA:3.14,
+   bkrMake:'ABB',     bkrSr:'881202',   bkrMfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'ABB',    relayType:'REF615', relaySr:'092102',
+   mtrMake:'SECURE',   mtrSr:'TS091702', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Qutb Shahi Toombs area', len:'~4.8 km'},
+  {seq:'FEEDER-12',name:'11 KV BRUNDHAVAN COLONY FEEDER',    lv:'LV-IV', type:'OH',   maxA:250, recA:180, maxMVA:4.76, recMVA:3.43,
+   bkrMake:'ABB',     bkrSr:'881203',   bkrMfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'ABB',    relayType:'REF615', relaySr:'092103',
+   mtrMake:'SECURE',   mtrSr:'TS091703', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Brundhavan Colony', len:'~3.5 km'},
+  {seq:'FEEDER-13',name:'11 KV NARAYANAMMA FEEDER',          lv:'LV-IV', type:'OH',   maxA:250, recA:132, maxMVA:4.76, recMVA:2.51,
+   bkrMake:'ABB',     bkrSr:'881204',   bkrMfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'200/1',
+   relayMake:'ABB',    relayType:'REF615', relaySr:'092104',
+   mtrMake:'SECURE',   mtrSr:'TS091704', mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Narayanamma locality', len:'~2.9 km'},
 ];
 
 // ══════════════════════════════════════════════════
-// ENGINE
+// HELPERS
 // ══════════════════════════════════════════════════
+const r2=v=>Math.round(v*100)/100;
+const pct=(r,m)=>Math.min(Math.round(r/m*100),100);
+const lc=v=>v>=80?'var(--dg)':v>=70?'var(--wn)':'var(--ok)';
+const ll=v=>v>=80?'Overload':v>=70?'High':'Normal';
+const lbg=v=>v>=80?'var(--rb)':v>=70?'var(--amb)':'var(--gnb)';
+const lfg=v=>v>=80?'var(--rf)':v>=70?'var(--amf)':'var(--gnf)';
+const ts=t=>t==='OH'?{bg:'#eaf3de',fg:'#3b6d11'}:t==='UG'?{bg:'#e6f1fb',fg:'#0c447c'}:{bg:'#fbeaf0',fg:'#72243e'};
+const lvColors={'LV-I':'#e1f5ee|#085041','LV-II':'#e6f1fb|#0c447c','LV-III':'#faeeda|#633806','LV-IV':'#fbeaf0|#72243e'};
+const lvc=lv=>(lvColors[lv]||'#eeece7|#5a5a55').split('|');
+
 function st(id,el){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -279,88 +1652,990 @@ function st(id,el){
   document.getElementById('panel-'+id).classList.add('active');
 }
 
-function getCol(p){ return p>=80?'#a32d2d':p>=70?'#ba7517':'#1d9e75'; }
-
-function render() {
-  // KPI
-  const totMVA = PTRS.reduce((s,p)=>s + (p.recA * 11 * 1.732 / 1000), 0);
-  document.getElementById('kpi-peak').textContent = totMVA.toFixed(2);
-  document.getElementById('kpi-pct').textContent = Math.round(totMVA/50*100) + '%';
-
-  // PTR Table
-  document.getElementById('ptr-load-body').innerHTML = PTRS.map(p=>{
-    const pct = Math.round(p.recA/p.flc*100);
-    return `<tr><td>${p.id}</td><td>${p.mva}</td><td>${p.flc}</td><td style="color:${getCol(pct)};font-weight:700">${p.recA}</td><td>${pct}%</td><td>${p.wti}/${p.oti}°C</td><td>${p.tap}</td></tr>`;
-  }).join('');
-
-  // Feeder Table
-  document.getElementById('feeder-load-body').innerHTML = FEEDERS.map(f=>{
-    const pct = Math.round(f.recA/f.maxA*100);
-    return `<tr><td>${f.id}</td><td>${f.name}</td><td>${f.lv}</td><td>${f.type}</td><td>${f.maxA}</td><td>${f.recA}</td><td style="font-weight:700;color:${getCol(pct)}">${pct}%</td><td><span style="background:${getCol(pct)}1a;color:${getCol(pct)};padding:2px 6px;border-radius:3px;font-size:10px">${pct>=80?'Overload':pct>=70?'High':'Normal'}</span></td></tr>`;
-  }).join('');
-
-  // Inventory
-  document.getElementById('fdr-inv-body').innerHTML = FEEDERS.map(f=>`<tr><td>${f.name}</td><td>${f.bkr}</td><td>${f.relay}</td><td>200/1</td><td>TS09${Math.floor(Math.random()*9000)+1000}</td></tr>`).join('');
-
-  initCharts();
+function dg(items){
+  return `<div class="detail-grid">${items.map(([l,v])=>`<div class="dg-item"><div class="dg-l">${l}</div><div class="dg-v${v==='—'||v===null?' na':''}">${v??'—'}</div></div>`).join('')}</div>`;
 }
 
-function initCharts() {
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const txtColor = isDark ? '#989890' : '#585853';
+// ══════════════════════════════════════════════════
+// RENDER HIERARCHY TAB
+// Sequential: 132kV → 33kV incomer → HV → PTR → LV → feeders
+// ══════════════════════════════════════════════════
+function renderHierarchy(){
+  const root = document.getElementById('hier-root');
 
-  // 1. PTR Load Dist (Identity Tab)
-  new Chart(document.getElementById('chart-ptr-dist'), {
-    type: 'bar',
-    data: {
-      labels: PTRS.map(p=>p.id),
-      datasets: [{
-        label: 'Recorded MVA',
-        data: PTRS.map(p=>(p.recA*11*1.732/1000).toFixed(2)),
-        backgroundColor: ['#0f6e56', '#185fa5', '#854f0b', '#993556']
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+  // ── LEVEL 1: 132 kV SOURCE ──
+  let html = `
+  <div class="lcard" style="border-left:4px solid var(--bl)">
+    <div class="lcard-head" style="background:var(--blb)">
+      <span class="lbadge" style="background:var(--bl);color:#fff">132 kV</span>
+      <span class="lcard-title" style="color:var(--blf)">132 kV ASIFNAGAR Substation — Source SS</span>
+      <span class="lcard-meta">Feeding 33 kV Golconda SS</span>
+    </div>
+    <div class="lcard-body">
+      ${dg([['33 kV Feeder Name','GOLKONDA'],['Feeder Type','Overhead (OH)'],['Feeder Length','4 km (OH)'],['Destination','33/11 kV Golconda SS']])}
+    </div>
+  </div>`;
+
+  // Connector
+  html += `<div style="height:16px;border-left:2px dashed var(--bd2);margin-left:24px"></div>`;
+
+  // ── LEVEL 2: 33 kV INCOMER ──
+  html += `
+  <div class="lcard" style="border-left:4px solid var(--gn)">
+    <div class="lcard-head" style="background:var(--gnb)">
+      <span class="lbadge" style="background:var(--gn);color:#fff">33 kV</span>
+      <span class="lcard-title" style="color:var(--gnf)">33 kV Incomer — 33 KV INCOMER-1</span>
+      <span class="lcard-meta">Regular · On 33 kV Bus</span>
+    </div>
+    <div class="lcard-body">
+      ${dg([
+        ['Breaker Make','CGL'],['Breaker Sr.No','9357VP'],['MFG Year','2024'],
+        ['CTR Available','400-200/1'],['CTR Adopted','400/1'],
+        ['Relay Make','ASHIDA'],['Relay Type','ASDR140'],['Relay Sr.No','7456834'],
+        ['Meter Make','ELSTER'],['Meter Sr.No','505032518'],
+        ['M-CTR','400/1'],['M-PTR','33KV/110'],['Class','0.5s'],['MF','1'],
+      ])}
+    </div>
+  </div>`;
+
+  // Loop PTRs: each PTR = HV → PTR → LV → feeders
+  PTRS_DETAIL.forEach(ptr => {
+    const lp = pct(ptr.recMVA, ptr.mva);
+    const pF = FEEDERS.filter(f=>f.lv===ptr.lv);
+    const fSum = r2(pF.reduce((s,f)=>s+f.recMVA,0));
+    const diff = r2(ptr.recMVA - fSum);
+    const dC = Math.abs(diff)<=0.2?'var(--ok)':Math.abs(diff)<=0.5?'var(--wn)':'var(--dg)';
+    const fMaxSum = r2(pF.reduce((s,f)=>s+f.maxMVA,0));
+    const fSumA = pF.reduce((s,f)=>s+f.recA,0);
+    const fMaxA = pF.reduce((s,f)=>s+f.maxA,0);
+
+    // Connector
+    html += `<div style="height:16px;border-left:2px dashed var(--bd2);margin-left:24px"></div>`;
+
+    // ── LEVEL 3: HV BAY ──
+    const hv = HV_BAYS.find(h=>h.id===ptr.hv)||{};
+    html += `
+    <div class="lcard" style="border-left:4px solid var(--bl);margin-left:24px">
+      <div class="lcard-head" style="background:var(--blb)">
+        <span class="lbadge" style="background:var(--bl);color:#fff">HV Bay</span>
+        <span class="lcard-title" style="color:var(--blf)">${ptr.hv} — 33 kV HV Bay</span>
+        <span class="lcard-meta">33 kV side of ${ptr.id}</span>
+      </div>
+      <div class="lcard-body">
+        ${dg([
+          ['Breaker Make',hv.bkrMake||'—'],['Breaker Sr.No',hv.bkrSr||'—'],['MFG Year',hv.bkrMfg||'—'],
+          ['CTR Available',hv.ctrAvail||'—'],['CTR Adopted',hv.ctrAdopt||'—'],
+          ['Relay Make',hv.relayMake||'—'],['Relay Type',hv.relayType||'—'],['Relay Sr.No',hv.relaySr||'—'],
+          ['Meter Make',hv.mtrMake||'—'],['Meter Sr.No',hv.mtrSr||'—'],
+          ['M-CTR',hv.mCtr||'—'],['M-PTR',hv.mPtr||'—'],['Class',hv.mClass||'—'],['MF',hv.mMF||'—'],
+        ])}
+      </div>
+    </div>`;
+
+    // Connector
+    html += `<div style="height:16px;border-left:2px dashed var(--bd2);margin-left:48px"></div>`;
+
+    // ── LEVEL 4: PTR ──
+    html += `
+    <div class="lcard" style="border-left:4px solid var(--am);margin-left:48px">
+      <div class="lcard-head" style="background:var(--amb)">
+        <span class="lbadge" style="background:var(--am);color:#fff">PTR</span>
+        <span class="lcard-title" style="color:var(--amf)">${ptr.id} — Power Transformer</span>
+        <span class="lcard-meta">${ptr.ptrMake} · ${ptr.ptrCap} · Sr: ${ptr.ptrSr}</span>
+      </div>
+      <div class="lcard-body">
+        ${dg([
+          ['PTR Make',ptr.ptrMake],['Rated Capacity',ptr.ptrCap],['Sr. No.',ptr.ptrSr],
+          ['Ratio','33/11 kV'],['Vector Group','Dyn11'],
+          ['Year',ptr.yr],['Oil Temp.',ptr.oilTemp],['Wdg. Temp.',ptr.wdgTemp],['Tap Pos.',ptr.tap],
+          ['TMU Make',ptr.tmuMake],['TMU Sr.No',ptr.tmuSr],['OTI',ptr.oti],['WTI',ptr.wti],
+        ])}
+      </div>
+    </div>`;
+
+    // Connector
+    html += `<div style="height:16px;border-left:2px dashed var(--bd2);margin-left:72px"></div>`;
+
+    // ── LEVEL 5: LV BAY + LOAD ──
+    html += `
+    <div class="lcard" style="border-left:4px solid var(--gn);margin-left:72px">
+      <div class="lcard-head" style="background:var(--gnb)">
+        <span class="lbadge" style="background:var(--gn);color:#fff">LV Bay</span>
+        <span class="lcard-title" style="color:var(--gnf)">${ptr.lv} — 11 kV LV Bay</span>
+        <span class="lcard-meta">${ptr.bkrMake} Breaker · ${ptr.ptrCap} PTR</span>
+      </div>
+      <div class="lcard-body">
+        ${dg([
+          ['Breaker Make',ptr.bkrMake],['Breaker Sr.No',ptr.bkrSr],['MFG Year',ptr.bkrMfg],
+          ['CTR Available',ptr.ctrAvail],['CTR Adopted',ptr.ctrAdopt],
+          ['Relay Make',ptr.relayMake],['Relay Type',ptr.relayType],['Relay Sr.No',ptr.relaySr],
+          ['Meter Make',ptr.mtrMake],['Meter Sr.No',ptr.mtrSr],
+          ['M-CTR',ptr.mCtr],['M-PTR',ptr.mPtr],['Class',ptr.mClass],['MF',ptr.mMF],
+        ])}
+        <!-- Loading -->
+        <div class="load-inline">
+          <span class="load-label">PTR Loading</span>
+          <span style="font-size:11px;color:var(--tx3);margin-right:8px">Max: ${ptr.mva} MVA / ${ptr.maxA} A</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${lp}%;background:${lc(lp)}"></div></div>
+          <span class="bar-pct" style="color:${lc(lp)}">${lp}%</span>
+          <span class="bar-tag" style="background:${lbg(lp)};color:${lfg(lp)}">${ptr.recMVA.toFixed(2)} MVA · ${ll(lp)}</span>
+        </div>
+        <!-- Tally -->
+        <div class="tally-strip">
+          <div class="tc"><div class="tc-l">PTR Recorded</div><div class="tc-v">${ptr.recMVA.toFixed(2)} MVA</div></div>
+          <div class="tc"><div class="tc-l">∑ Feeder Sum</div><div class="tc-v">${fSum.toFixed(2)} MVA</div></div>
+          <div class="tc"><div class="tc-l">Difference</div><div class="tc-v" style="color:${dC}">${diff>=0?'+':''}${diff.toFixed(2)} MVA</div></div>
+        </div>
+      </div>
+
+      <!-- ── LEVEL 6: 11 kV FEEDERS ── -->
+      <div style="border-top:0.5px solid var(--bd)">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 14px;background:var(--sf2)">
+          <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)">11 kV Feeders on ${ptr.lv} — ${pF.length} feeders</span>
+          <span style="font-size:9px;color:var(--tx3)">Rec/Max (A) · Rec/Max (MVA) · Load%</span>
+        </div>
+        <table class="fdr-table">
+          <tbody>
+            ${pF.map(f=>{
+              const fp=pct(f.recA,f.maxA);
+              const fts=ts(f.type);
+              return `<tr onclick="showFeeder('${f.seq}')">
+                <td><span class="ftbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span><span class="fname">${f.name.replace(/^11 KV /,'')}</span></td>
+                <td class="fnum" style="text-align:right"><span style="color:${lc(fp)};font-weight:600">${f.recA}</span><span class="fmx"> / ${f.maxA} A</span></td>
+                <td class="fnum" style="text-align:right"><span style="color:${lc(fp)};font-weight:600">${f.recMVA.toFixed(2)}</span><span class="fmx"> / ${f.maxMVA.toFixed(2)}</span></td>
+                <td class="fbar-cell"><div class="fbar-w"><div class="fbar-bg"><div class="fbar-f" style="width:${fp}%;background:${lc(fp)}"></div></div><span class="fpct" style="color:${lc(fp)}">${fp}%</span></div></td>
+                <td><span style="font-size:11px;color:var(--tx2)">${f.bkrMake} / ${f.relayMake}</span></td>
+              </tr>`;
+            }).join('')}
+            <tr class="tally-tr">
+              <td><strong>∑ Total (${pF.length} feeders)</strong></td>
+              <td class="fnum" style="text-align:right"><strong>${fSumA}</strong><span class="fmx"> / ${fMaxA} A</span></td>
+              <td class="fnum" style="text-align:right"><strong>${fSum.toFixed(2)}</strong><span class="fmx"> / ${fMaxSum.toFixed(2)}</span></td>
+              <td></td><td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>`;
   });
 
-  // 2. Feeder Types (Identity Tab)
-  const types = FEEDERS.reduce((acc,f)=>{ acc[f.type]=(acc[f.type]||0)+1; return acc; }, {});
-  new Chart(document.getElementById('chart-fdr-types'), {
-    type: 'doughnut',
-    data: {
-      labels: Object.keys(types),
-      datasets: [{
-        data: Object.values(types),
-        backgroundColor: ['#1d9e75', '#185fa5', '#993556'],
-        borderWidth: 0
-      }]
-    },
-    options: { responsive: true, maintainAspectRatio: false }
-  });
+  root.innerHTML = html;
+}
 
-  // 3. Feeder Load vs Capacity (Loading Tab)
-  new Chart(document.getElementById('chart-fdr-load'), {
-    type: 'line',
-    data: {
-      labels: FEEDERS.map(f=>f.id),
-      datasets: [
-        { label: 'Recorded Load (A)', data: FEEDERS.map(f=>f.recA), borderColor: '#185fa5', backgroundColor: '#185fa522', fill: true, tension: 0.3 },
-        { label: 'Max Capacity (A)', data: FEEDERS.map(f=>f.maxA), borderColor: '#a32d2d', borderDash: [5, 5], fill: false }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: { beginAtZero: true, grid: { color: isDark ? '#2c2c29' : '#dddbd2' }, ticks: { color: txtColor } },
-        x: { grid: { display: false }, ticks: { color: txtColor } }
-      }
+// ══════════════════════════════════════════════════
+// RENDER LOADING TAB
+// ══════════════════════════════════════════════════
+function renderLoading(){
+  // ── TABLE 1: PTR LOADS ──
+  const totFLC = 1605; const totSubs = 61.17;
+  document.getElementById('ptr-load-body').innerHTML = PTRS_DETAIL.map((ptr,i)=>{
+    const pct24 = ptr.sumMax24Pct;
+    const pct26 = ptr.recPct;
+    const c24 = pct24>=80?'var(--dg)':pct24>=50?'var(--wn)':'var(--ok)';
+    const c26 = pct26>=80?'var(--dg)':pct26>=50?'var(--wn)':'var(--ok)';
+    const pF = FEEDERS.filter(f=>f.lv===ptr.lv);
+    return `<tr>
+      <td style="font-weight:700">${ptr.lv}</td>
+      <td class="fnum">${ptr.mva}</td>
+      <td class="fnum">${ptr.lvFLC}</td>
+      <td class="fnum" style="color:${c24};font-weight:600">${ptr.sumMax24A}</td>
+      <td class="fnum">${ptr.sumMax24Date}</td>
+      <td class="fnum">${ptr.sumMax24Time}</td>
+      <td class="fnum" style="color:${c24};font-weight:700">${ptr.sumMax24Pct.toFixed(2)}%</td>
+      <td class="fnum" style="background:var(--sf2)">${i===0?totFLC:'—'}</td>
+      <td class="fnum" style="background:var(--sf2);font-weight:700;color:var(--wn)">${i===0?totSubs+'%':'—'}</td>
+      <td class="fnum" style="color:${c26};font-weight:600">${ptr.recA}</td>
+      <td class="fnum">${ptr.recDate}</td>
+      <td class="fnum">${ptr.recTime}</td>
+      <td class="fnum" style="color:${c26};font-weight:700">${ptr.recPct.toFixed(2)}%</td>
+      <td class="fnum">${ptr.wti}</td>
+      <td class="fnum">${ptr.oti}</td>
+      <td class="fnum">${ptr.tap}</td>
+      <td style="font-size:11px">${ptr.extCooling}</td>
+      <td style="font-size:11px;color:var(--tx2)">${ptr.remark}</td>
+    </tr>`;
+  }).join('');
+
+  // Footer totals row
+  const totRecA = PTRS_DETAIL.reduce((s,p)=>s+p.recA,0);
+  const totSum24A = PTRS_DETAIL.reduce((s,p)=>s+p.sumMax24A,0);
+  const avgPct24 = (PTRS_DETAIL.reduce((s,p)=>s+p.sumMax24Pct,0)/PTRS_DETAIL.length).toFixed(2);
+  const avgPct26 = (PTRS_DETAIL.reduce((s,p)=>s+p.recPct,0)/PTRS_DETAIL.length).toFixed(2);
+  document.getElementById('ptr-load-foot').innerHTML = `<tr style="background:var(--sf3);font-weight:600">
+    <td colspan="2" style="text-align:right;font-size:11px;color:var(--tx2)">Station Total / Average</td>
+    <td class="fnum" style="color:var(--tx)">${PTRS_DETAIL.reduce((s,p)=>s+p.lvFLC,0)} A</td>
+    <td class="fnum" style="color:var(--wn)">${totSum24A} A</td>
+    <td colspan="2"></td>
+    <td class="fnum" style="color:var(--wn)">${avgPct24}%</td>
+    <td class="fnum">${totFLC}</td>
+    <td class="fnum" style="color:var(--wn)">${totSubs}%</td>
+    <td class="fnum" style="color:var(--ok)">${totRecA} A</td>
+    <td colspan="2"></td>
+    <td class="fnum" style="color:var(--ok)">${avgPct26}%</td>
+    <td colspan="5"></td>
+  </tr>`;
+
+  // ── TABLE 2: 33KV FEEDER LOADS — one row per regular incomer with LVs + alternates ──
+  document.getElementById('inc33-load-body').innerHTML = INC33_LOADS.map(inc=>{
+    const lc = inc.maxRecA ? `<span style="color:var(--ok);font-weight:600">${inc.maxRecA}</span>` : '—';
+    return `<tr>
+      <td style="font-weight:600">${inc.lvs}</td>
+      <td class="fnum">${PTRS_DETAIL[0].mva}</td>
+      <td style="font-weight:600">${inc.ehtSS}</td>
+      <td style="font-weight:600">${inc.feeder}</td>
+      <td><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;background:var(--gnb);color:var(--gnf)">${inc.type}</span></td>
+      <td class="fnum">${inc.maxCapA}</td>
+      <td class="fnum">${lc}</td>
+      <td class="fnum">${inc.maxRecDate}</td>
+      <td class="fnum">${inc.maxRecTime}</td>
+      <td style="font-size:11px"><span style="font-weight:600;color:var(--amf)">Alt-1:</span> ${inc.alt1}</td>
+      <td style="font-size:11px"><span style="font-weight:600;color:var(--blf)">Alt-2:</span> ${inc.alt2}</td>
+    </tr>`;
+  }).join('');
+
+  // ── TABLE 3: 11KV FEEDER LOADS ──
+  document.getElementById('feeder-load-body').innerHTML = FEEDERS.map((f,i)=>{
+    const fp  = Math.min(Math.round(f.recA/f.maxA*100),100);
+    const fc  = fp>=80?'var(--dg)':fp>=70?'var(--wn)':'var(--ok)';
+    const fts = ts(f.type);
+    const lvc2 = {'LV-I':'#e1f5ee|#085041','LV-II':'#e6f1fb|#0c447c','LV-III':'#faeeda|#633806','LV-IV':'#fbeaf0|#72243e'};
+    const lvcol = (lvc2[f.lv]||'#eeece7|#5a5a55').split('|');
+    return `<tr onclick="showFeeder('${f.seq}')" style="cursor:pointer">
+      <td style="color:var(--tx3);font-family:var(--m)">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-weight:600">${f.seq}: ${f.name.replace(/^11 KV /,'')}</td>
+      <td><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;background:${lvcol[0]};color:${lvcol[1]}">${f.lv}</span></td>
+      <td><span class="ftbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span></td>
+      <td class="fnum">${f.maxA}</td>
+      <td class="fnum">${f.maxMVA.toFixed(2)}</td>
+      <td class="fnum" style="color:${fc};font-weight:600">${f.recA}</td>
+      <td class="fnum" style="color:${fc};font-weight:600">${f.recMVA.toFixed(2)}</td>
+      <td><div style="display:flex;align-items:center;gap:5px">
+        <div style="width:50px;height:5px;background:var(--sf3);border-radius:3px;overflow:hidden">
+          <div style="height:5px;width:${fp}%;background:${fc};border-radius:3px"></div>
+        </div>
+        <span style="font-weight:700;font-family:var(--m);color:${fc}">${fp}%</span>
+      </div></td>
+      <td><span style="background:${fp>=80?'var(--rb)':fp>=70?'var(--amb)':'var(--gnb)'};color:${fp>=80?'var(--rf)':fp>=70?'var(--amf)':'var(--gnf)'};padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${fp>=80?'Overload':fp>=70?'High':'Normal'}</span></td>
+    </tr>`;
+  }).join('');
+
+  // Feeder footer totals
+  const totRecA2  = FEEDERS.reduce((s,f)=>s+f.recA,0);
+  const totMaxA2  = FEEDERS.reduce((s,f)=>s+f.maxA,0);
+  const totRecMVA2= r2(FEEDERS.reduce((s,f)=>s+f.recMVA,0));
+  const totMaxMVA2= r2(FEEDERS.reduce((s,f)=>s+f.maxMVA,0));
+  const totPct2   = Math.min(Math.round(totRecMVA2/totMaxMVA2*100),100);
+  document.getElementById('feeder-load-foot').innerHTML = `<tr style="background:var(--sf3);font-weight:600">
+    <td colspan="3" style="text-align:right;font-size:11px;color:var(--tx2)">\u03a3 Total (${FEEDERS.length} feeders)</td>
+    <td class="fnum">${totMaxA2}</td>
+    <td class="fnum">${totMaxMVA2.toFixed(2)}</td>
+    <td class="fnum" style="color:var(--ok)">${totRecA2}</td>
+    <td class="fnum" style="color:var(--ok)">${totRecMVA2.toFixed(2)}</td>
+    <td><div style="display:flex;align-items:center;gap:5px">
+      <div style="width:50px;height:5px;background:var(--sf3);border-radius:3px;overflow:hidden">
+        <div style="height:5px;width:${totPct2}%;background:var(--ok);border-radius:3px"></div>
+      </div>
+      <span style="font-weight:700;font-family:var(--m);color:var(--ok)">${totPct2}%</span>
+    </div></td>
+    <td colspan="1"></td>
+  </tr>`;
+}
+
+// ══════════════════════════════════════════════════
+// RENDER INVENTORY TAB
+// ══════════════════════════════════════════════════
+function renderInventory(){
+  // 33 kV Incomers — all 4 from INC33 data with name column
+  const incNos = ['INCOMER-1','INCOMER-2','INCOMER-3','INCOMER-4'];
+  document.getElementById('inc33-inv-body').innerHTML = INC33.map((inc,i)=>{
+    const typeBg = inc.type==='Regular'?'var(--gnb)':'var(--amb)';
+    const typeFg = inc.type==='Regular'?'var(--gnf)':'var(--amf)';
+    return `<tr>
+      <td style="font-weight:700;white-space:nowrap">33 KV ${incNos[i]}</td>
+      <td style="font-size:11px;color:var(--tx)">${inc.name}</td>
+      <td><span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:${typeBg};color:${typeFg}">${inc.type}</span></td>
+      <td>${inc.bkrMake}</td><td class="fnum">${inc.bkrSr}</td><td>${inc.bkrMfg}</td>
+      <td class="fnum">${inc.ctrAvail}</td><td class="fnum">${inc.ctrAdopt}</td>
+      <td>${inc.relayMake}</td><td class="fnum">${inc.relayType}</td><td class="fnum">${inc.relaySr}</td>
+      <td>${inc.mtrMake}</td><td class="fnum">${inc.mtrSr}</td>
+      <td class="fnum">${inc.mCtr}</td><td class="fnum">${inc.mPtr}</td>
+      <td>${inc.mClass}</td><td>${inc.mMF}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('hv-inv').innerHTML = HV_BAYS.map(h=>`
+    <tr><td style="font-weight:600">${h.id}</td><td>${h.bkrMake}</td><td class="fnum">${h.bkrSr}</td><td>${h.bkrMfg}</td><td class="fnum">${h.ctrAvail}</td><td class="fnum">${h.ctrAdopt}</td><td>${h.relayMake}</td><td class="fnum">${h.relayType}</td><td class="fnum">${h.relaySr}</td><td>${h.mtrMake}</td><td class="fnum">${h.mtrSr}</td><td class="fnum">${h.mCtr}</td><td class="fnum">${h.mPtr}</td><td>${h.mClass}</td><td>${h.mMF}</td></tr>`).join('');
+
+  document.getElementById('ptr-inv').innerHTML = PTRS_DETAIL.map(p=>`
+    <tr><td style="font-weight:600">${p.id}</td><td>${p.ptrMake}</td><td class="fnum">${p.ptrCap}</td><td class="fnum">${p.ptrSr}</td><td>${p.tmuMake}</td><td class="fnum">${p.tmuSr}</td><td class="fnum">${p.oti}°C</td><td class="fnum">${p.wti}°C</td></tr>`).join('');
+
+  document.getElementById('lv-inv').innerHTML = PTRS_DETAIL.map(p=>`
+    <tr><td style="font-weight:600">${p.lv}</td><td>${p.bkrMake}</td><td class="fnum">${p.bkrSr}</td><td>${p.bkrMfg}</td><td class="fnum">${p.ctrAvail}</td><td class="fnum">${p.ctrAdopt}</td><td>${p.relayMake}</td><td class="fnum">${p.relayType}</td><td class="fnum">${p.relaySr}</td><td>${p.mtrMake}</td><td class="fnum">${p.mtrSr}</td><td class="fnum">${p.mCtr}</td><td class="fnum">${p.mPtr}</td><td>${p.mClass}</td><td>${p.mMF}</td></tr>`).join('');
+
+  document.getElementById('fdr-inv').innerHTML = FEEDERS.map(f=>{
+    const fts=ts(f.type);
+    return `<tr onclick="showFeeder('${f.seq}')" style="cursor:pointer">
+      <td style="font-weight:600"><span class="ftbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span>${f.seq}: ${f.name.replace(/^11 KV /,'')}</td>
+      <td>${f.bkrMake}</td><td class="fnum">${f.bkrSr}</td><td>${f.bkrMfg}</td>
+      <td class="fnum">${f.ctrAvail}</td><td class="fnum">${f.ctrAdopt}</td>
+      <td>${f.relayMake}</td><td class="fnum">${f.relayType}</td><td class="fnum">${f.relaySr}</td>
+      <td>${f.mtrMake}</td><td class="fnum">${f.mtrSr}</td>
+      <td class="fnum">${f.mCtr}</td><td class="fnum">${f.mPtr}</td><td>${f.mClass}</td><td>${f.mMF}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// RENDER REPORTS TAB
+// ══════════════════════════════════════════════════
+function renderReports(){
+  document.getElementById('ptr-rpt').innerHTML = PTRS_DETAIL.map(p=>{
+    const lp=pct(p.recMVA,p.mva);
+    const fs=r2(FEEDERS.filter(f=>f.lv===p.lv).reduce((s,f)=>s+f.recMVA,0));
+    const d=r2(p.recMVA-fs);
+    const dC=Math.abs(d)<=0.2?'var(--ok)':Math.abs(d)<=0.5?'var(--wn)':'var(--dg)';
+    return `<tr>
+      <td style="font-weight:600">${p.id}</td>
+      <td style="font-size:11px;color:var(--tx2)">${p.src}</td>
+      <td class="fnum">${p.mva} MVA</td><td class="fnum">${p.maxA} A</td>
+      <td class="fnum" style="color:${lc(lp)};font-weight:600">${p.recMVA.toFixed(2)}</td>
+      <td class="fnum" style="color:${lc(lp)};font-weight:600">${p.recA}</td>
+      <td style="font-weight:700;color:${lc(lp)};font-family:var(--m)">${lp}%</td>
+      <td><span style="background:${lbg(lp)};color:${lfg(lp)};padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${ll(lp)}</span></td>
+      <td class="fnum">${fs.toFixed(2)}</td>
+      <td class="fnum" style="font-weight:700;color:${dC}">${d>=0?'+':''}${d.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('fdr-rpt').innerHTML = FEEDERS.map((f,i)=>{
+    const fp=pct(f.recA,f.maxA);
+    const fts=ts(f.type);
+    const c=lvc(f.lv);
+    return `<tr onclick="showFeeder('${f.seq}')" style="cursor:pointer">
+      <td style="color:var(--tx3);font-family:var(--m)">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-weight:500;font-size:12px">${f.seq}: ${f.name.replace(/^11 KV /,'')}</td>
+      <td><span class="ftbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span></td>
+      <td><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:3px;background:${c[0]};color:${c[1]}">${f.lv}</span></td>
+      <td class="fnum">${f.maxA}</td><td class="fnum">${f.maxMVA.toFixed(2)}</td>
+      <td class="fnum" style="color:${lc(fp)};font-weight:600">${f.recA}</td>
+      <td class="fnum" style="color:${lc(fp)};font-weight:600">${f.recMVA.toFixed(2)}</td>
+      <td style="font-weight:700;color:${lc(fp)};font-family:var(--m)">${fp}%</td>
+      <td><span style="background:${lbg(fp)};color:${lfg(fp)};padding:2px 6px;border-radius:3px;font-size:10px;font-weight:600">${ll(fp)}</span></td>
+    </tr>`;
+  }).join('');
+
+  const totPrec=r2(PTRS_DETAIL.reduce((s,p)=>s+p.recMVA,0));
+  const totPmax=r2(PTRS_DETAIL.reduce((s,p)=>s+p.mva,0));
+  const totFrec=r2(FEEDERS.reduce((s,f)=>s+f.recMVA,0));
+  const totFmax=r2(FEEDERS.reduce((s,f)=>s+f.maxMVA,0));
+  const diff=r2(totPrec-totFrec);
+  document.getElementById('agg-rpt').innerHTML=`
+    <tr><td><strong>All PTRs (Station)</strong></td><td class="fnum">${totPmax.toFixed(1)}</td><td class="fnum" style="color:${lc(pct(totPrec,totPmax))};font-weight:600">${totPrec.toFixed(2)}</td><td style="font-weight:700;color:${lc(pct(totPrec,totPmax))};font-family:var(--m)">${pct(totPrec,totPmax)}%</td><td><span style="background:${lbg(pct(totPrec,totPmax))};color:${lfg(pct(totPrec,totPmax))};padding:2px 8px;border-radius:3px;font-size:10px;font-weight:600">${ll(pct(totPrec,totPmax))}</span></td></tr>
+    <tr><td><strong>All 11 kV Feeders (${FEEDERS.length})</strong></td><td class="fnum">${totFmax.toFixed(2)}</td><td class="fnum" style="font-weight:600">${totFrec.toFixed(2)}</td><td style="font-weight:700;font-family:var(--m)">${pct(totFrec,totFmax)}%</td><td style="font-size:12px;color:var(--tx2)">Sum of all feeders</td></tr>
+    <tr><td><strong>Technical Losses</strong></td><td>—</td><td colspan="3" style="font-weight:700;font-family:var(--m);font-size:14px;color:${Math.abs(diff)<=0.5?'var(--ok)':'var(--wn)'}">${diff>=0?'+':''}${diff.toFixed(2)} MVA</td></tr>`;
+
+  const ovP=PTRS_DETAIL.filter(p=>pct(p.recMVA,p.mva)>=70).map(p=>`<strong>${p.id}</strong> (${pct(p.recMVA,p.mva)}%)`);
+  const ovF=FEEDERS.filter(f=>pct(f.recA,f.maxA)>=80).map(f=>`<strong>${f.seq}</strong> (${pct(f.recA,f.maxA)}%)`);
+  let msg='';
+  if(ovP.length) msg+=`PTRs at High/Overload: ${ovP.join(', ')}. `;
+  if(ovF.length) msg+=`Feeders overloaded: ${ovF.join(', ')}.`;
+  if(!msg) msg='All PTRs and feeders within normal loading limits.';
+  document.getElementById('ov-para').innerHTML=msg;
+}
+
+// ══════════════════════════════════════════════════
+// FEEDER MODAL
+// ══════════════════════════════════════════════════
+function showFeeder(seq){
+  const f=FEEDERS.find(x=>x.seq===seq); if(!f)return;
+  const fp=pct(f.recA,f.maxA);
+  document.getElementById('mod-title').textContent=f.name;
+  document.getElementById('mod-body').innerHTML=[
+    ['Sequence',         f.seq],
+    ['Voltage',          '11 kV'],
+    ['Type',             f.type==='OH'?'Overhead (OH)':f.type==='UG'?'Underground (UG)':'Cable'],
+    ['Source PTR (LV)',  f.lv],
+    ['Area Served',      f.area],
+    ['Approx. Length',   f.len],
+    ['Breaker Make',     f.bkrMake],
+    ['Breaker Sr. No.',  f.bkrSr],
+    ['MFG Year',         f.bkrMfg],
+    ['CTR Available',    f.ctrAvail],
+    ['CTR Adopted',      f.ctrAdopt],
+    ['Relay Make',       f.relayMake],
+    ['Relay Type',       f.relayType],
+    ['Relay Sr. No.',    f.relaySr],
+    ['Meter Make',       f.mtrMake],
+    ['Meter Sr. No.',    f.mtrSr],
+    ['M-CTR',            f.mCtr],
+    ['M-PTR',            f.mPtr],
+    ['Max Current',      `${f.maxA} A`],
+    ['Max MVA',          `${f.maxMVA.toFixed(2)} MVA`],
+    ['Recorded Current', `${f.recA} A`],
+    ['Recorded Load',    `${f.recMVA.toFixed(2)} MVA — ${fp}% (${ll(fp)})`],
+  ].map(([l,v])=>`<div class="dl-r"><span class="dl-l">${l}</span><span class="dl-v">${v}</span></div>`).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+// ══════════════════════════════════════════════════
+// MAINTENANCE DATA
+// ══════════════════════════════════════════════════
+
+const EARTH_DATA = [
+  {loc:'Main Earth Grid (SS)',       value:'0.42 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'PTR-I (LV-I) Neutral',       value:'0.38 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'PTR-II (LV-II) Neutral',     value:'0.45 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'33 kV Bus Structure',         value:'0.51 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'HV-I Bay Earth',             value:'0.39 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'HV-II Bay Earth',            value:'0.47 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'11 kV Bus Earth (LV-I)',     value:'0.61 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'11 kV Bus Earth (LV-II)',    value:'0.58 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'Control Room Earth',         value:'1.20 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'due'},
+  {loc:'LA Surge Counter Earth',     value:'0.72 Ω', date:'12-Jan-2025', limit:'< 5 Ω',   status:'ok'},
+  {loc:'Capacitor Bank Earth',       value:'0.55 Ω', date:'12-Jan-2025', limit:'< 1 Ω',   status:'ok'},
+  {loc:'Battery Room Earth',         value:'0.48 Ω', date:'12-Jan-2025', limit:'< 5 Ω',   status:'ok'},
+];
+
+const IR_DATA = [
+  {equip:'PTR-I HV Winding',         value:'2800 MΩ', date:'15-Dec-2024', limit:'> 100 MΩ', status:'ok'},
+  {equip:'PTR-I LV Winding',         value:'1950 MΩ', date:'15-Dec-2024', limit:'> 100 MΩ', status:'ok'},
+  {equip:'PTR-I HV-LV (PI Index)',   value:'2.1',     date:'15-Dec-2024', limit:'> 1.5',    status:'ok'},
+  {equip:'PTR-II HV Winding',        value:'3200 MΩ', date:'15-Dec-2024', limit:'> 100 MΩ', status:'ok'},
+  {equip:'PTR-II LV Winding',        value:'2200 MΩ', date:'15-Dec-2024', limit:'> 100 MΩ', status:'ok'},
+  {equip:'PTR-II HV-LV (PI Index)',  value:'2.4',     date:'15-Dec-2024', limit:'> 1.5',    status:'ok'},
+  {equip:'11 kV Cable (FEEDER-3 UG)',value:'420 MΩ',  date:'10-Jan-2025', limit:'> 50 MΩ',  status:'ok'},
+  {equip:'11 kV Cable (FEEDER-5 CB)',value:'85 MΩ',   date:'10-Jan-2025', limit:'> 50 MΩ',  status:'due'},
+  {equip:'33 kV INCOMER-1 CT',       value:'680 MΩ',  date:'12-Jan-2025', limit:'> 100 MΩ', status:'ok'},
+  {equip:'33 kV Bus PT',             value:'540 MΩ',  date:'12-Jan-2025', limit:'> 100 MΩ', status:'ok'},
+  {equip:'Station Transformer',      value:'310 MΩ',  date:'15-Jan-2025', limit:'> 50 MΩ',  status:'ok'},
+  {equip:'Battery Charger DC Bus',   value:'—',       date:'—',           limit:'> 1 MΩ',   status:'na'},
+];
+
+const BKR_MAINT = [
+  {bay:'33 kV INCOMER-1', make:'CGL', sr:'9357VP', lastDate:'05-Nov-2024', nextDate:'05-Nov-2025', closeMs:'52', tripMs:'38', contactRes:'85 μΩ', sf6:'6.2 kg/cm²', status:'ok',  remark:'Normal'},
+  {bay:'HV-I Bay',        make:'CGL', sr:'8734VP', lastDate:'10-Oct-2024', nextDate:'10-Oct-2025', closeMs:'55', tripMs:'42', contactRes:'92 μΩ', sf6:'6.0 kg/cm²', status:'ok',  remark:'Normal'},
+  {bay:'HV-II Bay',       make:'CGL', sr:'2533VP', lastDate:'10-Oct-2024', nextDate:'10-Oct-2025', closeMs:'58', tripMs:'44', contactRes:'110 μΩ',sf6:'5.9 kg/cm²', status:'due', remark:'Contact res. high — check'},
+  {bay:'LV-I Bay',        make:'BHEL',sr:'97540',  lastDate:'12-Oct-2024', nextDate:'12-Oct-2025', closeMs:'50', tripMs:'36', contactRes:'78 μΩ', sf6:'N/A (ACB)',   status:'ok',  remark:'Normal'},
+  {bay:'LV-II Bay',       make:'CGL', sr:'2533VP', lastDate:'12-Oct-2024', nextDate:'12-Oct-2025', closeMs:'54', tripMs:'40', contactRes:'88 μΩ', sf6:'N/A (ACB)',   status:'ok',  remark:'Normal'},
+  {bay:'FEEDER-1',        make:'CGL', sr:'847456VP',lastDate:'20-Sep-2024',nextDate:'20-Sep-2025', closeMs:'48', tripMs:'35', contactRes:'70 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+  {bay:'FEEDER-2',        make:'ALSTOM',sr:'23747',lastDate:'20-Sep-2024', nextDate:'20-Sep-2025', closeMs:'51', tripMs:'38', contactRes:'75 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+  {bay:'FEEDER-3',        make:'BHEL', sr:'985775',lastDate:'22-Sep-2024', nextDate:'22-Sep-2025', closeMs:'49', tripMs:'36', contactRes:'72 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+  {bay:'FEEDER-4',        make:'MEGAWIN',sr:'46447',lastDate:'22-Sep-2024',nextDate:'22-Sep-2025', closeMs:'53', tripMs:'39', contactRes:'80 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+  {bay:'FEEDER-5',        make:'ALSTOM',sr:'25447',lastDate:'22-Sep-2024', nextDate:'22-Sep-2025', closeMs:'52', tripMs:'37', contactRes:'77 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+  {bay:'FEEDER-6',        make:'CGL',  sr:'965775',lastDate:'24-Sep-2024', nextDate:'24-Sep-2025', closeMs:'50', tripMs:'36', contactRes:'73 μΩ', sf6:'N/A',         status:'due', remark:'Annual maint. due'},
+];
+
+const PTR_MAINT = [
+  {ptr:'LV-I (PTR-I)', bdvKV:'68', bdvDate:'15-Dec-2024', oilTemp:'62°C', wdgTemp:'72°C',
+   buchholz:'Normal', prv:'Normal', silicaGel:'Replaced Jan-2025', lastFilt:'Mar-2024', nextMaint:'Mar-2025', status:'ok'},
+  {ptr:'LV-II (PTR-II)', bdvKV:'72', bdvDate:'15-Dec-2024', oilTemp:'65°C', wdgTemp:'78°C',
+   buchholz:'Normal', prv:'Normal', silicaGel:'Active — 60%', lastFilt:'Jun-2024', nextMaint:'Jun-2025', status:'ok'},
+];
+
+const RELAY_MAINT = [
+  {bay:'33 kV INCOMER-1', make:'ASHIDA', type:'ASDR140', lastTest:'08-Nov-2024', nextDue:'08-Nov-2025', pickup:'400 A', tms:'0.1', tripTest:'Pass', status:'ok', tested:'AE Golconda'},
+  {bay:'HV-I',            make:'SIEMENS',type:'7SR5111', lastTest:'12-Oct-2024', nextDue:'12-Oct-2025', pickup:'400 A', tms:'0.15',tripTest:'Pass', status:'ok', tested:'AE Golconda'},
+  {bay:'HV-II',           make:'SIEMENS',type:'7SR5421', lastTest:'12-Oct-2024', nextDue:'12-Oct-2025', pickup:'400 A', tms:'0.15',tripTest:'Pass', status:'ok', tested:'AE Golconda'},
+  {bay:'LV-I',            make:'SIEMENS',type:'7SR5421', lastTest:'14-Oct-2024', nextDue:'14-Oct-2025', pickup:'600 A', tms:'0.1', tripTest:'Pass', status:'ok', tested:'AE Golconda'},
+  {bay:'LV-II',           make:'SIEMENS',type:'7SR5421', lastTest:'14-Oct-2024', nextDue:'14-Oct-2025', pickup:'600 A', tms:'0.1', tripTest:'Pass', status:'ok', tested:'AE Golconda'},
+  {bay:'FEEDER-1',        make:'CGL',    type:'7SR5111', lastTest:'25-Sep-2024', nextDue:'25-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+  {bay:'FEEDER-2',        make:'CGL',    type:'7SR5111', lastTest:'25-Sep-2024', nextDue:'25-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+  {bay:'FEEDER-3',        make:'CGL',    type:'7SR5111', lastTest:'25-Sep-2024', nextDue:'25-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+  {bay:'FEEDER-4',        make:'CGL',    type:'7SR5111', lastTest:'27-Sep-2024', nextDue:'27-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+  {bay:'FEEDER-5',        make:'CGL',    type:'7SR5111', lastTest:'27-Sep-2024', nextDue:'27-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+  {bay:'FEEDER-6',        make:'CGL',    type:'7SR5111', lastTest:'27-Sep-2024', nextDue:'27-Sep-2025', pickup:'200 A', tms:'0.2', tripTest:'Pass', status:'due',tested:'AE Golconda'},
+];
+
+const BATT_MAINT = [
+  {item:'Battery Bank (110V DC)', make:'AMARRAJA / 32572', cap:'200 Ah',
+   floatV:'116.6 V', boostV:'126.5 V', cellV:'2.12 V/cell', sg:'1.25',
+   lastTest:'20-Dec-2024', nextDue:'20-Jun-2025', status:'ok'},
+  {item:'Battery Charger', make:'AMARRAJA / 32572', cap:'30 A @ 110V DC',
+   floatV:'116.6 V', boostV:'126.5 V', cellV:'—', sg:'—',
+   lastTest:'20-Dec-2024', nextDue:'20-Jun-2025', status:'ok'},
+];
+
+const CAP_MAINT = [
+  {item:'Capacitor Bank', make:'SHREEM / 557777', cap:'2 MVAR',
+   lastInsp:'10-Jan-2025', nextDue:'10-Jul-2025',
+   capacitance:'54.6 μF', irTest:'> 500 MΩ', status:'ok'},
+];
+
+const LA_MAINT = [
+  {loc:'33 kV Bus (Incomer)', type:'Gapless / 33 kV', qty:'3',
+   leakage:'0.8 mA', counter:'0042', lastTest:'12-Jan-2025', nextDue:'12-Jan-2026', condition:'Good'},
+  {loc:'11 kV Bus (LV-I)',    type:'Gapless / 11 kV', qty:'3',
+   leakage:'0.6 mA', counter:'0018', lastTest:'12-Jan-2025', nextDue:'12-Jan-2026', condition:'Good'},
+  {loc:'11 kV Bus (LV-II)',   type:'Gapless / 11 kV', qty:'3',
+   leakage:'0.7 mA', counter:'0021', lastTest:'12-Jan-2025', nextDue:'12-Jan-2026', condition:'Good'},
+];
+
+const SCHED = [
+  {task:'Earth Resistance Test',       freq:'Annual',     last:'12-Jan-2025', next:'12-Jan-2026', status:'ok'},
+  {task:'IR Test (Transformers)',      freq:'Annual',     last:'15-Dec-2024', next:'15-Dec-2025', status:'ok'},
+  {task:'Breaker Maintenance',         freq:'Annual',     last:'Oct-2024',    next:'Oct-2025',    status:'due'},
+  {task:'PTR Oil BDV Test',           freq:'Annual',     last:'15-Dec-2024', next:'15-Dec-2025', status:'ok'},
+  {task:'Relay Testing & Calibration',freq:'Annual',     last:'Oct-2024',    next:'Oct-2025',    status:'due'},
+  {task:'Battery SG & Voltage Check', freq:'Half-Yearly',last:'20-Dec-2024', next:'20-Jun-2025', status:'ok'},
+  {task:'Capacitor Bank Inspection',   freq:'Half-Yearly',last:'10-Jan-2025', next:'10-Jul-2025', status:'ok'},
+  {task:'LA Leakage Current Test',    freq:'Annual',     last:'12-Jan-2025', next:'12-Jan-2026', status:'ok'},
+  {task:'PTR Oil Filtration',         freq:'3 Years',    last:'Mar-2024',    next:'Mar-2027',    status:'ok'},
+  {task:'Thermal Imaging (IR Scan)',  freq:'Annual',     last:'Nov-2024',    next:'Nov-2025',    status:'ok'},
+  {task:'SCADA/RTU Health Check',     freq:'Quarterly',  last:'Jan-2025',    next:'Apr-2025',    status:'due'},
+  {task:'Control Cable IR Test',      freq:'Annual',     last:'Jan-2025',    next:'Jan-2026',    status:'ok'},
+];
+
+// ══════════════════════════════════════════════════
+// MAINTENANCE — SPLIT VIEW ENGINE
+// ══════════════════════════════════════════════════
+
+// In-memory new entries log per section
+const maintLog = {earth:[],bkr:[],ptr:[],relay:[],batt:[],cap:[],la:[]};
+
+function toggleSection(id){
+  const body = document.getElementById('body-'+id);
+  const tog  = document.getElementById('toggle-'+id);
+  if(!body) return;
+  body.classList.toggle('open');
+  tog.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function toggleAllSections(){
+  const sections = ['earth','bkr','ptr','relay','batt','cap','la','sched'];
+  const anyOpen = sections.some(s=>document.getElementById('body-'+s)?.classList.contains('open'));
+  sections.forEach(s=>{
+    const b=document.getElementById('body-'+s);
+    const t=document.getElementById('toggle-'+s);
+    if(b){ b.classList[anyOpen?'remove':'add']('open'); if(t) t.textContent=anyOpen?'▼':'▲'; }
+  });
+  document.getElementById('exp-all-btn').textContent = anyOpen?'Expand All Sections':'Collapse All';
+}
+
+// Re-render a section's new-entry log
+function renderLog(section){
+  const el = document.getElementById('log-'+section);
+  if(!el) return;
+  const entries = maintLog[section];
+  if(!entries.length){ el.innerHTML=`<div class="maint-log-empty">No new entries yet — fill the form and click Save</div>`; return; }
+  el.innerHTML = entries.slice().reverse().map((e,ri)=>{
+    const i = entries.length-1-ri;
+    const vals = Object.entries(e).filter(([k])=>k!=='_ts').map(([k,v])=>`<span class="mle-val">${k}: ${v}</span>`).join('');
+    return `<div class="maint-log-entry">
+      <div class="mle-head">
+        <span class="mle-title">${e._ts||'Entry'}</span>
+        <button class="mle-del" onclick="deleteEntry('${section}',${i})">✕ Remove</button>
+      </div>
+      <div class="mle-vals">${vals}</div>
+    </div>`;
+  }).join('');
+}
+
+function deleteEntry(section,idx){
+  maintLog[section].splice(idx,1);
+  renderLog(section);
+}
+
+function gv(id){ return document.getElementById(id)?.value?.trim()||''; }
+
+function saveEntry(section){
+  const ts = new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+' '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  let entry = {_ts:ts};
+  if(section==='earth'){
+    entry = {_ts:ts, Date:gv('ne-earth-date')||'—', Pits:gv('ne-earth-pits'), R:gv('ne-earth-r')+' Ω', Y:gv('ne-earth-y')+' Ω', B:gv('ne-earth-b')+' Ω', N:gv('ne-earth-n')+' Ω', By:gv('ne-earth-by'), Action:gv('ne-earth-action')||'—', Status:gv('ne-earth-status')};
+    ['ne-earth-r','ne-earth-y','ne-earth-b','ne-earth-n','ne-earth-by','ne-earth-action'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    // Also append a row to the previous entries table
+    const tbody = document.getElementById('earth-prev-body');
+    if(tbody){
+      const sc = entry.Status==='ok'?'var(--ok)':entry.Status==='due'?'var(--wn)':'var(--dg)';
+      const existing = tbody.querySelector('td[colspan]');
+      if(existing) tbody.innerHTML='';
+      tbody.insertAdjacentHTML('beforeend',`<tr>
+        <td>O</td><td class="fnum">4</td><td class="fnum">${entry.Pits}</td>
+        <td class="fnum" style="color:${sc};font-weight:600">${entry.R}</td>
+        <td class="fnum" style="color:${sc}">${entry.Y}</td>
+        <td class="fnum" style="color:${sc}">${entry.B}</td>
+        <td class="fnum" style="color:${sc}">${entry.N}</td>
+        <td class="fnum">${entry.Date}</td>
+        <td style="font-size:11px">${entry.By||'—'}</td>
+        <td style="font-size:11px;color:var(--tx2)">${entry.Action}</td>
+        <td><span class="maint-status ${entry.Status==='ok'?'ms-ok':entry.Status==='due'?'ms-due':'ms-overdue'}">${entry.Status==='ok'?'OK':entry.Status==='due'?'Due':'Overdue'}</span></td>
+        <td></td>
+      </tr>`);
     }
-  });
+  } else if(section==='ir'){
+    entry = {_ts:ts, Equipment:gv('ne-ir-equip'), Value:gv('ne-ir-val'), Date:gv('ne-ir-date')||'—', Limit:gv('ne-ir-limit'), Voltage:gv('ne-ir-volt'), By:gv('ne-ir-by'), Status:gv('ne-ir-status')};
+    ['ne-ir-equip','ne-ir-val','ne-ir-volt','ne-ir-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='bkr'){
+    entry = {_ts:ts, Bay:gv('ne-bkr-bay'), Date:gv('ne-bkr-date')||'—', NextDue:gv('ne-bkr-next')||'—', Close:gv('ne-bkr-close')+' ms', Trip:gv('ne-bkr-trip')+' ms', ContactRes:gv('ne-bkr-cres'), SF6:gv('ne-bkr-sf6'), By:gv('ne-bkr-by'), Status:gv('ne-bkr-status'), Remarks:gv('ne-bkr-remark')};
+    ['ne-bkr-close','ne-bkr-trip','ne-bkr-cres','ne-bkr-sf6','ne-bkr-by','ne-bkr-remark'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='ptr'){
+    entry = {_ts:ts, PTR:gv('ne-ptr-id'), BDV:gv('ne-ptr-bdv')+' kV', BDVDate:gv('ne-ptr-bdvdate')||'—', OilTemp:gv('ne-ptr-oil')+'°C', WdgTemp:gv('ne-ptr-wdg')+'°C', Buchholz:gv('ne-ptr-buchholz'), PRV:gv('ne-ptr-prv'), SilicaGel:gv('ne-ptr-silica'), LastFilt:gv('ne-ptr-filt'), NextMaint:gv('ne-ptr-next'), By:gv('ne-ptr-by')};
+    ['ne-ptr-bdv','ne-ptr-oil','ne-ptr-wdg','ne-ptr-silica','ne-ptr-filt','ne-ptr-next','ne-ptr-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='relay'){
+    entry = {_ts:ts, Bay:gv('ne-relay-bay'), Date:gv('ne-relay-date')||'—', NextDue:gv('ne-relay-next')||'—', Pickup:gv('ne-relay-pickup'), TMS:gv('ne-relay-tms'), TripTest:gv('ne-relay-trip'), By:gv('ne-relay-by'), Status:gv('ne-relay-status')};
+    ['ne-relay-pickup','ne-relay-tms','ne-relay-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='batt'){
+    entry = {_ts:ts, Item:gv('ne-batt-item'), Date:gv('ne-batt-date')||'—', FloatV:gv('ne-batt-float'), BoostV:gv('ne-batt-boost'), CellV:gv('ne-batt-cell'), SG:gv('ne-batt-sg'), NextDue:gv('ne-batt-next')||'—', By:gv('ne-batt-by')};
+    ['ne-batt-item','ne-batt-float','ne-batt-boost','ne-batt-cell','ne-batt-sg','ne-batt-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='cap'){
+    entry = {_ts:ts, Date:gv('ne-cap-date')||'—', Capacitance:gv('ne-cap-cap'), IR:gv('ne-cap-ir'), MVAR:gv('ne-cap-mvar'), NextDue:gv('ne-cap-next')||'—', By:gv('ne-cap-by')};
+    ['ne-cap-cap','ne-cap-ir','ne-cap-mvar','ne-cap-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else if(section==='la'){
+    entry = {_ts:ts, Location:gv('ne-la-loc'), Date:gv('ne-la-date')||'—', Leakage:gv('ne-la-leak')+' mA', Counter:gv('ne-la-counter'), Condition:gv('ne-la-cond'), NextDue:gv('ne-la-next')||'—', By:gv('ne-la-by')};
+    ['ne-la-leak','ne-la-counter','ne-la-by'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }
+  maintLog[section].push(entry);
+  renderLog(section);
+  // Flash save
+  const btn = document.querySelector(`#body-${section} .maint-save-btn`);
+  if(btn){ const o=btn.textContent; btn.textContent='✓ Saved!'; setTimeout(()=>btn.textContent=o,1500); }
 }
 
-document.getElementById('fdt').textContent = 'System Update: ' + new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'long', year:'numeric'});
-render();
+function prefillBkr(bay,date,next,close,trip,cres,sf6,remark){
+  ['ne-bkr-bay','ne-bkr-close','ne-bkr-trip','ne-bkr-cres','ne-bkr-sf6','ne-bkr-remark'].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.value=[bay,close,trip,cres,sf6,remark][i]||'';
+  });
+  const body=document.getElementById('body-bkr');
+  if(body&&!body.classList.contains('open')) toggleSection('bkr');
+}
+
+function prefillRelay(bay,pickup,tms){
+  ['ne-relay-bay','ne-relay-pickup','ne-relay-tms'].forEach((id,i)=>{
+    const el=document.getElementById(id); if(el) el.value=[bay,pickup,tms][i]||'';
+  });
+  const body=document.getElementById('body-relay');
+  if(body&&!body.classList.contains('open')) toggleSection('relay');
+}
+
+function exportMaintLog(){
+  let txt='GOLCONDA SS — MAINTENANCE LOG EXPORT\n'+'='.repeat(50)+'\n';
+  txt+=`Generated: ${new Date().toLocaleString('en-IN')}\n\n`;
+  Object.entries(maintLog).forEach(([sec,entries])=>{
+    if(!entries.length) return;
+    txt+=`\n${sec.toUpperCase()} ENTRIES (${entries.length}):\n${'-'.repeat(40)}\n`;
+    entries.forEach(e=>{
+      txt+=Object.entries(e).map(([k,v])=>`  ${k}: ${v}`).join('\n')+'\n\n';
+    });
+  });
+  const a=document.createElement('a');
+  a.href='data:text/plain;charset=utf-8,'+encodeURIComponent(txt);
+  a.download='Golconda_SS_Maintenance_Log.txt'; a.click();
+}
+
+function renderMaintenance(){
+  const stCls = s=>s==='ok'?'ms-ok':s==='due'?'ms-due':s==='overdue'?'ms-overdue':'ms-na';
+  const stLbl = s=>s==='ok'?'OK':s==='due'?'Due':s==='overdue'?'Overdue':'N/A';
+
+  // Earth Resistance — empty table, entries added via new entry form
+  const earthBody = document.getElementById('earth-prev-body');
+  if(earthBody && !earthBody.dataset.init){
+    earthBody.dataset.init='1';
+    earthBody.innerHTML=`<tr><td colspan="12" style="text-align:center;color:var(--tx3);font-style:italic;padding:12px">No entries yet — use the form to add readings</td></tr>`;
+  }
+
+  // Breaker table with prefill buttons
+  document.getElementById('bkr-maint-body').innerHTML = BKR_MAINT.map(b=>`
+    <tr>
+      <td style="font-weight:600">${b.bay}</td>
+      <td style="font-size:11px;color:var(--tx2)">${b.make}/${b.sr}</td>
+      <td class="fnum">${b.lastDate}</td>
+      <td class="fnum" style="color:${b.status==='ok'?'var(--tx2)':'var(--wn)'}">${b.nextDate}</td>
+      <td class="fnum">${b.closeMs} ms</td><td class="fnum">${b.tripMs} ms</td>
+      <td class="fnum" style="color:${parseInt(b.contactRes)>100?'var(--wn)':'var(--tx)'}">${b.contactRes}</td>
+      <td class="fnum">${b.sf6}</td>
+      <td><span class="maint-status ${stCls(b.status)}">${stLbl(b.status)}</span></td>
+      <td style="font-size:11px;color:var(--tx2)">${b.remark}</td>
+      <td><button class="edit-prefill-btn" onclick="prefillBkr('${b.bay}','${b.lastDate}','${b.nextDate}','${b.closeMs}','${b.tripMs}','${b.contactRes}','${b.sf6}','${b.remark}')">➕</button></td>
+    </tr>`).join('');
+
+  // PTR table
+  document.getElementById('ptr-maint-body').innerHTML = PTR_MAINT.map(p=>`
+    <tr>
+      <td style="font-weight:600">${p.ptr}</td>
+      <td class="fnum" style="color:${parseInt(p.bdvKV)>=60?'var(--ok)':'var(--wn)'}">${p.bdvKV} kV</td>
+      <td class="fnum">${p.bdvDate}</td>
+      <td class="fnum" style="color:${parseInt(p.oilTemp)>70?'var(--wn)':'var(--tx)'}">${p.oilTemp}</td>
+      <td class="fnum" style="color:${parseInt(p.wdgTemp)>85?'var(--wn)':'var(--tx)'}">${p.wdgTemp}</td>
+      <td style="color:var(--ok)">${p.buchholz}</td><td style="color:var(--ok)">${p.prv}</td>
+      <td style="font-size:11px">${p.silicaGel}</td>
+      <td class="fnum">${p.lastFilt}</td><td class="fnum">${p.nextMaint}</td>
+      <td><span class="maint-status ${stCls(p.status)}">${stLbl(p.status)}</span></td>
+      <td><button class="edit-prefill-btn" onclick="document.getElementById('ne-ptr-id').value='${p.ptr}';toggleSection('ptr')">➕</button></td>
+    </tr>`).join('');
+
+  // Relay table with prefill buttons
+  document.getElementById('relay-maint-body').innerHTML = RELAY_MAINT.map(r=>`
+    <tr>
+      <td style="font-weight:600">${r.bay}</td>
+      <td style="font-size:11px;color:var(--tx2)">${r.make}/${r.type}</td>
+      <td class="fnum">${r.lastTest}</td>
+      <td class="fnum" style="color:${r.status==='ok'?'var(--tx2)':'var(--wn)'}">${r.nextDue}</td>
+      <td class="fnum">${r.pickup}</td><td class="fnum">${r.tms}</td>
+      <td style="color:${r.tripTest==='Pass'?'var(--ok)':'var(--dg)'};font-weight:600">${r.tripTest}</td>
+      <td><span class="maint-status ${stCls(r.status)}">${stLbl(r.status)}</span></td>
+      <td style="font-size:11px;color:var(--tx2)">${r.tested}</td>
+      <td><button class="edit-prefill-btn" onclick="prefillRelay('${r.bay}','${r.pickup}','${r.tms}')">➕</button></td>
+    </tr>`).join('');
+
+  // Battery table
+  document.getElementById('batt-maint-body').innerHTML = BATT_MAINT.map(b=>`
+    <tr>
+      <td style="font-weight:600">${b.item}</td>
+      <td style="font-size:11px;color:var(--tx2)">${b.make}</td>
+      <td class="fnum">${b.cap}</td>
+      <td class="fnum">${b.floatV}</td><td class="fnum">${b.boostV}</td>
+      <td class="fnum">${b.cellV}</td><td class="fnum">${b.sg}</td>
+      <td class="fnum">${b.lastTest}</td><td class="fnum">${b.nextDue}</td>
+      <td><span class="maint-status ${stCls(b.status)}">${stLbl(b.status)}</span></td>
+      <td><button class="edit-prefill-btn" onclick="document.getElementById('ne-batt-item').value='${b.item}';toggleSection('batt')">➕</button></td>
+    </tr>`).join('');
+
+  // Capacitor bank table
+  document.getElementById('cap-maint-body').innerHTML = CAP_MAINT.map(c=>`
+    <tr>
+      <td style="font-weight:600">${c.item}</td>
+      <td style="font-size:11px;color:var(--tx2)">${c.make}</td>
+      <td class="fnum">${c.cap}</td>
+      <td class="fnum">${c.lastInsp}</td><td class="fnum">${c.nextDue}</td>
+      <td class="fnum">${c.capacitance}</td><td class="fnum">${c.irTest}</td>
+      <td><span class="maint-status ${stCls(c.status)}">${stLbl(c.status)}</span></td>
+      <td><button class="edit-prefill-btn" onclick="toggleSection('cap')">➕</button></td>
+    </tr>`).join('');
+
+  // LA table
+  document.getElementById('la-maint-body').innerHTML = LA_MAINT.map(l=>`
+    <tr>
+      <td style="font-weight:600">${l.loc}</td>
+      <td style="font-size:11px;color:var(--tx2)">${l.type}</td>
+      <td class="fnum" style="text-align:center">${l.qty}</td>
+      <td class="fnum" style="color:${parseFloat(l.leakage)>1?'var(--wn)':'var(--ok)'}">${l.leakage}</td>
+      <td class="fnum">${l.counter}</td>
+      <td class="fnum">${l.lastTest}</td><td class="fnum">${l.nextDue}</td>
+      <td style="color:var(--ok);font-weight:500">${l.condition}</td>
+      <td><button class="edit-prefill-btn" onclick="document.getElementById('ne-la-loc').value='${l.loc}';toggleSection('la')">➕</button></td>
+    </tr>`).join('');
+
+  // Schedule cards
+  document.getElementById('maint-sched').innerHTML = SCHED.map(s=>`
+    <div class="maint-sched-card" style="border-left:3px solid ${s.status==='ok'?'var(--ok)':s.status==='due'?'var(--wn)':'var(--dg)'}">
+      <div class="msc-title">${s.task}</div>
+      <div class="msc-date">Last: ${s.last} → Next: <strong>${s.next}</strong></div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span class="msc-freq">${s.freq}</span>
+        <span class="maint-status ${s.status==='ok'?'ms-ok':s.status==='due'?'ms-due':'ms-overdue'}">${s.status==='ok'?'OK':s.status==='due'?'Due':'Overdue'}</span>
+      </div>
+    </div>`).join('');
+
+  // Init all logs as empty
+  Object.keys(maintLog).forEach(s=>renderLog(s));
+
+  // Open first section by default
+  toggleSection('earth');
+}
+
+// ══════════════════════════════════════════════════
+// SS IDENTITY — editable form with live sync
+// ══════════════════════════════════════════════════
+
+// Build per-PTR editable rows in identity form (auto from PTRS_DETAIL)
+function syncIdentity(){ /* no-op — basic info only */ }
+
+function saveIdentity(){
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  btn.style.background = 'var(--ok)';
+  btn.style.color = '#fff';
+  btn.style.borderColor = 'var(--ok)';
+  setTimeout(()=>{
+    btn.textContent = orig;
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }, 2000);
+}
+
+function renderPTRLoadingSummary(){
+
+  // ── PTR LOADING CARDS ──
+  const elPTR = document.getElementById('id-ptr-loading');
+  if(elPTR){
+    const lc2 = v => v>=80?'var(--dg)':v>=70?'var(--wn)':'var(--ok)';
+    const lb2 = v => v>=80?'var(--rb)':v>=70?'var(--amb)':'var(--gnb)';
+    const lf2 = v => v>=80?'var(--rf)':v>=70?'var(--amf)':'var(--gnf)';
+    const ll2 = v => v>=80?'Overload':v>=70?'High':'Normal';
+    const fts2 = t => t==='OH'?{bg:'#eaf3de',fg:'#3b6d11'}:t==='UG'?{bg:'#e6f1fb',fg:'#0c447c'}:{bg:'#fbeaf0',fg:'#72243e'};
+
+    elPTR.innerHTML =
+      // Group 1: LV-I & LV-II — Asifnagar EHT SS → Shaikpet
+      '<div style="margin-bottom:16px">'
+      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--gnf);background:var(--gnb);padding:5px 12px;border-radius:var(--r);margin-bottom:8px;display:inline-block">Regular Source: ASIFNAGAR EHT SS → 33 KV SHAIKPET &nbsp;·&nbsp; LV-I &amp; LV-II</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + buildPTRCards(PTRS_DETAIL.slice(0,2))
+      + '</div></div>'
+      // Group 2: LV-III & LV-IV — Rayadurgam EHT SS → Sandya
+      + '<div>'
+      + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--pkf);background:var(--pkb);padding:5px 12px;border-radius:var(--r);margin-bottom:8px;display:inline-block">Regular Source: RAYADURGAM EHT SS → 33 KV SANDYA FEEDER &nbsp;·&nbsp; LV-III &amp; LV-IV</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+      + buildPTRCards(PTRS_DETAIL.slice(2,4))
+      + '</div></div>';
+    function buildPTRCards(ptrs){
+      return ptrs.map(function(p){
+        var lp    = Math.min(Math.round(p.recMVA/p.mva*100),100);
+        var lcol  = lc2(lp), lbg = lb2(lp), lfg = lf2(lp), lbl = ll2(lp);
+        var pFdrs = FEEDERS.filter(function(f){ return f.lv===p.lv; });
+        var fdrRows = pFdrs.map(function(f){
+          var fp = Math.min(Math.round(f.recA/f.maxA*100),100);
+          var fc = lc2(fp), ft = fts2(f.type);
+          var nm = f.name.replace(/^11 KV /,'').replace(/ FEEDER$/,'');
+          return '<div style="display:flex;align-items:center;gap:5px;padding:2px 0;border-bottom:0.5px solid var(--bd)">'
+            + '<span style="font-size:8px;font-weight:700;padding:1px 4px;border-radius:2px;background:'+ft.bg+';color:'+ft.fg+';flex-shrink:0">'+f.type+'</span>'
+            + '<span style="font-size:10px;color:var(--tx);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nm+'</span>'
+            + '<span style="font-size:9px;font-family:var(--m);color:var(--tx3);flex-shrink:0">'+f.recA+'A</span>'
+            + '<div style="width:36px;height:3px;background:var(--sf3);border-radius:2px;flex-shrink:0;overflow:hidden"><div style="height:3px;width:'+fp+'%;background:'+fc+'"></div></div>'
+            + '<span style="font-size:9px;font-weight:700;font-family:var(--m);color:'+fc+';min-width:24px;text-align:right">'+fp+'%</span>'
+            + '</div>';
+        }).join('');
+        return '<div style="background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid '+lcol+';border-radius:var(--rl);overflow:hidden">'
+          + '<div style="padding:9px 12px;background:var(--sf2);border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;gap:6px">'
+            + '<div>'
+              + '<span style="font-size:13px;font-weight:700;color:var(--tx)">'+p.id+'</span>'
+              + '<span style="font-size:10px;color:var(--tx3);margin-left:6px">'+p.lv+' \xb7 '+p.hv+' \xb7 '+p.ptrMake+'</span>'
+            + '</div>'
+            + '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:'+lbg+';color:'+lfg+';flex-shrink:0">'+lbl+'</span>'
+          + '</div>'
+          + '<div style="padding:10px 12px;border-bottom:0.5px solid var(--bd)">'
+            + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px">'
+              + '<span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)">Present Loading (Mar 2026)</span>'
+              + '<span style="font-size:20px;font-weight:700;font-family:var(--m);color:'+lcol+';line-height:1">'+lp+'%</span>'
+            + '</div>'
+            + '<div style="height:7px;background:var(--sf3);border-radius:4px;overflow:hidden;margin-bottom:7px"><div style="height:7px;border-radius:4px;width:'+lp+'%;background:'+lcol+'"></div></div>'
+            + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
+              + '<div style="font-size:10px;color:var(--tx3)">Rec: <strong style="color:'+lcol+';font-family:var(--m)">'+p.recMVA.toFixed(2)+' MVA / '+p.recA+' A</strong></div>'
+              + '<div style="font-size:10px;color:var(--tx3)">Cap: <strong style="color:var(--tx);font-family:var(--m)">'+p.mva+' MVA / '+p.lvFLC+' A</strong></div>'
+              + '<div style="font-size:10px;color:var(--tx3)">Date: <strong style="font-family:var(--m)">'+p.recDate+' '+p.recTime+'</strong></div>'
+              + '<div style="font-size:10px;color:var(--tx3)">TAP: <strong style="font-family:var(--m)">'+p.tap+' \xb7 WTI: '+p.wti+'\xb0C \xb7 OTI: '+p.oti+'\xb0C</strong></div>'
+            + '</div>'
+          + '</div>'
+          + '<div style="padding:6px 12px;border-bottom:0.5px solid var(--bd);background:rgba(186,117,23,.12)">'
+            + '<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--am);margin-bottom:2px">Prev Summer Max (2025)</div>'
+            + '<div style="font-size:11px;font-weight:600;color:var(--amf)">'+p.sumMax24A+' A \xb7 '+p.sumMax24Pct+'% \xb7 '+p.sumMax24Date+' '+p.sumMax24Time+'</div>'
+          + '</div>'
+          + '<div style="padding:6px 12px;border-bottom:0.5px solid var(--bd);background:var(--blb)">'
+            + '<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--blf);margin-bottom:2px">33 kV Feeding Source</div>'
+            + '<div style="font-size:11px;font-weight:600;color:var(--blf);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+p.inc33+'</div>'
+            + '<div style="font-size:9px;color:var(--blf);opacity:.75;margin-top:1px">Alt-1: '+p.alt1Feeder+' \xb7 Alt-2: '+p.alt2Feeder+'</div>'
+          + '</div>'
+          + '<div style="padding:7px 12px">'
+            + '<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:5px">'+pFdrs.length+' \xd7 11 kV Feeders on '+p.lv+'</div>'
+            + fdrRows
+          + '</div>'
+        + '</div>';
+      }).join('');
+    }
+  }
+
+  // ── INCOMING SOURCES ──
+  var titleEl = document.getElementById('id-inc-title');
+  var kpiEl   = document.getElementById('id-inc-kpi');
+  var cardsEl = document.getElementById('id-inc-cards');
+  if(!kpiEl || !cardsEl) return;
+
+  var regularSrc = INC33.filter(function(i){ return i.type==='Regular'; });
+  var alternateSrc = INC33.filter(function(i){ return i.type==='Alternate'; });
+  var totalInc = INC33.length;
+  if(titleEl) titleEl.textContent = 'Incoming Sources \u2014 2 Regular · 2 Alternate';
+
+  // KPI tiles
+  kpiEl.innerHTML = [
+    {lbl:'Total Sources',   val:totalInc,           sub:'(Regular + Alternate)', col:'var(--bl)'},
+    {lbl:'Regular Feeders', val:regularSrc.length,  sub:'Active Incomers',       col:'var(--gn)'},
+    {lbl:'Alternate Feeders',val:alternateSrc.length,sub:'Standby Sources',      col:'var(--am)'},
+  ].map(function(k){
+    return '<div style="background:var(--sf);border:0.5px solid var(--bd);border-top:3px solid '+k.col+';border-radius:var(--r);padding:10px 12px;text-align:center">'
+      + '<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:4px">'+k.lbl+'</div>'
+      + '<div style="font-size:24px;font-weight:700;line-height:1;color:var(--tx)">'+k.val+'</div>'
+      + '<div style="font-size:9px;color:var(--tx3);margin-top:2px">'+k.sub+'</div>'
+      + '</div>';
+  }).join('');
+
+  // Source cards — Regular first, then Alternate
+  var regularCards = regularSrc.map(function(inc){
+    var ld = INC33_LOADS.filter(function(l){ return inc.feeder && l.feeder===inc.feeder; })[0];
+    var col='var(--gn)', bg='var(--gnb)', fg='var(--gnf)';
+    var maxInfo = ld ? 'Max Rec: '+ld.maxRecA+' A @ '+ld.maxRecDate+' '+ld.maxRecTime : '—';
+    return '<div style="flex:1;min-width:260px;background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid '+col+';border-radius:var(--rl);overflow:hidden">'
+      + '<div style="padding:9px 12px;background:'+bg+';border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:4px">'
+        + '<div>'
+          + '<div style="font-size:11px;font-weight:700;color:'+fg+'">'+inc.ehtSS+'</div>'
+          + '<div style="font-size:10px;color:'+fg+';opacity:.85">→ 33 kV '+inc.feeder+' ('+inc.lineType+')</div>'
+        + '</div>'
+        + '<span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:3px;background:'+col+';color:#fff">Regular</span>'
+      + '</div>'
+      + '<div style="padding:8px 12px;border-bottom:0.5px solid var(--bd)">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">'
+          + '<div style="font-size:10px;color:var(--tx3)">LVs Fed: <strong style="color:var(--tx)">'+inc.lvs+'</strong></div>'
+          + '<div style="font-size:10px;color:var(--tx3)">Capacity: <strong style="font-family:var(--m)">'+inc.maxCapA+' A · '+inc.lineType+'</strong></div>'
+          + '<div style="font-size:10px;color:var(--tx3)">'+maxInfo+'</div>'
+        + '</div>'
+      + '</div>'
+      + '<div style="padding:7px 12px">'
+        + '<div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:5px">Alternate Sources</div>'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">'
+          + '<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--amb);color:var(--amf)">Alt-1</span>'
+          + '<span style="font-size:11px;color:var(--tx)">'+inc.alt1+'</span>'
+        + '</div>'
+        + '<div style="display:flex;align-items:center;gap:6px">'
+          + '<span style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--blb);color:var(--blf)">Alt-2</span>'
+          + '<span style="font-size:11px;color:var(--tx)">'+inc.alt2+'</span>'
+        + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+
+  var altCards = '<div style="width:100%;margin-top:10px">'
+    + '<div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:8px;padding-bottom:4px;border-bottom:0.5px solid var(--bd)">Alternate Sources (Standby)</div>'
+    + '<div style="display:flex;flex-wrap:wrap;gap:10px">'
+    + alternateSrc.map(function(inc){
+      var col='var(--am)', bg='var(--amb)', fg='var(--amf)';
+      var lvLabel = inc.lvs;
+      return '<div style="flex:1;min-width:220px;background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid '+col+';border-radius:var(--rl);overflow:hidden">'
+        + '<div style="padding:8px 12px;background:'+bg+';border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between">'
+          + '<span style="font-size:11px;font-weight:700;color:'+fg+'">'+inc.name+'</span>'
+          + '<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;background:'+col+';color:#fff">'+inc.seq+'</span>'
+        + '</div>'
+        + '<div style="padding:8px 12px">'
+          + '<div style="font-size:10px;color:var(--tx3)">Source: <strong style="color:var(--tx)">'+inc.ehtSS+'</strong></div>'
+          + '<div style="font-size:10px;color:var(--tx3);margin-top:3px">Covers LVs: <strong style="color:var(--tx)">'+lvLabel+'</strong></div>'
+        + '</div>'
+      + '</div>';
+    }).join('')
+    + '</div></div>';
+
+  cardsEl.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:10px">' + regularCards + '</div>' + altCards;
+}
+// ══════════════════════════════════════════════════
+// SLD ZOOM
+// ══════════════════════════════════════════════════
+let sldScale = 1;
+function zoomSLD(factor){
+  sldScale = Math.min(Math.max(sldScale * factor, 0.4), 3);
+  const w = document.getElementById('sld-zoom-wrap');
+  if(w) w.style.transform = `scale(${sldScale})`;
+}
+function resetZoom(){ sldScale=1; const w=document.getElementById('sld-zoom-wrap'); if(w) w.style.transform='scale(1)'; }
+
+// ══════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════
+renderPTRLoadingSummary();
+renderHierarchy();
+renderLoading();
+renderInventory();
+renderMaintenance();
+renderReports();
+document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 </script>
 </body>
 </html>
