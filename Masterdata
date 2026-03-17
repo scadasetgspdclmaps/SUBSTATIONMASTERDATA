@@ -1,0 +1,1740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>33/11 kV Golconda SS — Master Data | TGSPDCL</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f4f3ef;--sf:#fff;--sf2:#eeecea;--sf3:#e4e2dc;
+  --bd:#dddbd3;--bd2:#c5c3bb;
+  --tx:#1a1a17;--tx2:#56564e;--tx3:#96968e;
+  --gn:#0f6e56;--gn-bg:#e1f5ee;--gn-fg:#085041;
+  --bl:#185fa5;--bl-bg:#e6f1fb;--bl-fg:#0c447c;
+  --am:#854f0b;--am-bg:#faeeda;--am-fg:#633806;
+  --pk-bg:#fbeaf0;--pk-fg:#72243e;
+  --rb:#fcebeb;--rf:#501313;
+  --ok:#1d9e75;--wn:#ba7517;--dn:#a32d2d;
+  --r:8px;--rl:12px;
+  --f:system-ui,-apple-system,'Segoe UI',sans-serif;
+  --m:'SF Mono','Consolas','Courier New',monospace;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0d0d0b;--sf:#191917;--sf2:#212120;--sf3:#2a2a27;
+  --bd:#2c2c29;--bd2:#3c3c38;
+  --tx:#e4e3db;--tx2:#98988f;--tx3:#585850;
+  --gn-bg:#04342c;--gn-fg:#9fe1cb;
+  --bl-bg:#042c53;--bl-fg:#b5d4f4;
+  --am-bg:#412402;--am-fg:#fac775;
+  --pk-bg:#4b1528;--pk-fg:#f4c0d1;
+  --rb:#501313;--rf:#f7c1c1;
+}}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);font-size:14px;line-height:1.5;min-height:100vh}
+.topbar{background:var(--sf);border-bottom:0.5px solid var(--bd);padding:0 18px;display:flex;align-items:center;gap:10px;height:50px;position:sticky;top:0;z-index:100}
+.tlogo{width:28px;height:28px;background:var(--gn);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tlogo svg{width:15px;height:15px}
+.tname{font-size:13px;font-weight:600}.tsub{font-size:10px;color:var(--tx3)}
+.tr{margin-left:auto;display:flex;align-items:center;gap:7px}
+.pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px}
+.pill-g{background:var(--gn-bg);color:var(--gn-fg)}
+.pill-live{background:var(--ok);color:#fff;display:flex;align-items:center;gap:3px}
+.pill-live::before{content:'';width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.pbtn{font-size:11px;padding:4px 11px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)}
+.pbtn:hover{background:var(--sf2)}
+.page{max-width:1140px;margin:0 auto;padding:20px 16px 64px}
+.hero{margin-bottom:20px}
+.hero h1{font-size:20px;font-weight:600;margin-bottom:3px}
+.hero p{font-size:12px;color:var(--tx2);margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:10px;padding:2px 9px;border-radius:20px;border:0.5px solid var(--bd);color:var(--tx2);background:var(--sf)}
+.krow{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-bottom:24px}
+.kpi{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:11px 13px}
+.kpi.ac{border-left:3px solid var(--gn)}
+.kl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:2px}
+.kv{font-size:22px;font-weight:600;line-height:1}.ks{font-size:10px;color:var(--tx3);margin-top:2px}
+.tabs{display:flex;border-bottom:0.5px solid var(--bd);margin-bottom:22px;overflow-x:auto}
+.tab{font-size:13px;font-weight:500;padding:9px 18px;cursor:pointer;border-bottom:2px solid transparent;color:var(--tx2);white-space:nowrap;margin-bottom:-0.5px;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--f)}
+.tab.active{color:var(--tx);border-bottom-color:var(--tx)}
+.tab:hover:not(.active){color:var(--tx)}
+.panel{display:none}.panel.active{display:block}
+.section{margin-bottom:28px}
+.slabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tx3);margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+/* Banner */
+.pf-banner{background:var(--bl-bg);border:0.5px solid var(--bl);border-radius:var(--rl);padding:12px 16px;margin-bottom:20px}
+.pf-banner h2{font-size:13px;font-weight:700;color:var(--bl-fg);margin-bottom:2px}
+.pf-banner p{font-size:11px;color:var(--bl-fg);opacity:.85;margin-bottom:6px}
+.pf-meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:11px;color:var(--tx2)}
+/* PTR Cards */
+.ptrs{display:flex;flex-direction:column;gap:20px}
+.pc{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden}
+.pc.warn{border-left:3px solid var(--wn)}.pc.over{border-left:3px solid var(--dn)}
+.pc-top{display:flex;align-items:center;gap:8px;padding:10px 16px;background:var(--sf2);border-bottom:0.5px solid var(--bd);flex-wrap:wrap}
+.pc-id{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dok{background:var(--ok)}.dwn{background:var(--wn)}.ddn{background:var(--dn)}
+.pc-mva{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:var(--bl-bg);color:var(--bl-fg)}
+.pc-src{font-size:10px;color:var(--tx3);margin-left:auto}
+.pc-body{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:0.5px solid var(--bd)}
+@media(max-width:720px){.pc-body{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.pc-body{grid-template-columns:1fr}}
+.pc-col{padding:12px 15px;border-right:0.5px solid var(--bd)}
+.pc-col:last-child{border-right:none}
+.pc-col-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:8px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px}
+.sl{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--tx3);margin-bottom:1px}
+.sv{font-size:11px;font-weight:500;font-family:var(--m)}
+.amp-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px}
+.ag-l{font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:1px}
+.ag-v{font-size:18px;font-weight:700;line-height:1;font-family:var(--m)}
+.ag-u{font-size:11px;font-weight:500}
+.ag-sub{font-size:9px;color:var(--tx3);margin-top:1px}
+.ptr-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.bbar{height:6px;background:var(--sf3);border-radius:3px;overflow:hidden;flex:1}
+.bfill{height:6px;border-radius:3px}
+.bpct{font-size:12px;font-weight:700;font-family:var(--m)}
+.btag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px}
+.tally-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:8px;background:var(--sf2);border-radius:var(--r)}
+.tml{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+.tmv{font-size:11px;font-weight:600;font-family:var(--m)}
+.hist-table{width:100%;border-collapse:collapse;font-size:11px}
+.hist-table th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);padding:3px 5px;border-bottom:0.5px solid var(--bd);text-align:left}
+.hist-table td{padding:4px 5px;border-bottom:0.5px solid var(--bd);font-family:var(--m);font-size:11px}
+.hist-table tr:last-child td{border-bottom:none}
+.hist-note{font-size:10px;color:var(--tx2);line-height:1.5;margin-top:8px;padding:6px 8px;background:var(--am-bg);border-radius:4px}
+/* Feeder table */
+.fdr-section{border-top:0.5px solid var(--bd)}
+.fdr-head{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:var(--sf2);border-bottom:0.5px solid var(--bd)}
+.fdr-hl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
+.fdr-cols{display:flex;gap:16px;font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.ftable{width:100%;border-collapse:collapse;font-size:11px}
+.ftable tbody tr{cursor:pointer}
+.ftable tbody tr:hover td{background:var(--sf2)}
+.ftable td{padding:6px 14px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
+.ftable tr:last-child td{border-bottom:none}
+.fn-cell{display:flex;align-items:center;gap:6px}
+.fbadge{font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.fn{font-weight:500}
+.fa{font-family:var(--m);font-size:11px}
+.fa-rec{font-weight:700}.fa-max{color:var(--tx3)}
+.fb-cell{min-width:120px}
+.fb-wrap{display:flex;align-items:center;gap:6px}
+.fb-bg{flex:1;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden;min-width:50px}
+.fb-fill{height:4px;border-radius:2px}
+.fpct{font-size:10px;font-weight:700;font-family:var(--m);min-width:28px;text-align:right}
+.tr-tally td{background:var(--sf2)!important;border-top:1px solid var(--bd2)}
+.t-name{font-size:10px;font-weight:700}
+/* Data tables */
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);padding:7px 10px;text-align:left;background:var(--sf2);border-bottom:0.5px solid var(--bd)}
+.dt td{padding:8px 10px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
+.dt tr:last-child td{border-bottom:none}
+.dt tbody tr:hover td{background:var(--sf2)}
+.inc-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;display:inline-block}
+.reg-b{background:var(--gn-bg);color:var(--gn-fg)}.alt-b{background:var(--am-bg);color:var(--am-fg)}
+.status-pill{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px}
+/* ── MAINTENANCE ── */
+.ms{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.ms-head{display:flex;align-items:center;justify-content:space-between;padding:10px 15px;background:var(--sf2);border-bottom:0.5px solid var(--bd);cursor:pointer;user-select:none}
+.ms-title{font-size:12px;font-weight:700}
+.ms-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
+.ms-chev{font-size:11px;color:var(--tx3);transition:transform .2s;margin-left:6px}
+.ms-body{display:none;padding:14px 15px}
+.ms-body.open{display:block}
+.mf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:12px}
+.mf-group{display:flex;flex-direction:column;gap:4px}
+.mf-group.full{grid-column:1/-1}
+.mf-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
+.mf-input{font-size:12px;padding:7px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--f);outline:none;width:100%}
+.mf-input:focus{border-color:var(--bl)}
+.mf-select{font-size:12px;padding:7px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--f);outline:none;width:100%;cursor:pointer}
+.mf-select:focus{border-color:var(--bl)}
+.mf-ta{font-size:12px;padding:7px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--f);outline:none;width:100%;resize:vertical;min-height:68px}
+.mf-ta:focus{border-color:var(--bl)}
+.mt-table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px}
+.mt-table th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);padding:6px 9px;background:var(--sf2);border-bottom:0.5px solid var(--bd);text-align:left}
+.mt-table td{padding:6px 9px;border-bottom:0.5px solid var(--bd);vertical-align:middle}
+.mt-table tr:last-child td{border-bottom:none}
+.mt-table .mf-input,.mt-table .mf-select{padding:4px 7px;font-size:11px}
+/* Photo */
+.photo-zone{border:1.5px dashed var(--bd2);border-radius:var(--rl);padding:16px;text-align:center;cursor:pointer;position:relative;background:var(--sf2);transition:border-color .15s;margin-top:6px}
+.photo-zone:hover{border-color:var(--bl)}
+.photo-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.pz-icon{font-size:22px;margin-bottom:4px}
+.pz-text{font-size:12px;font-weight:500;color:var(--tx2)}
+.pz-sub{font-size:10px;color:var(--tx3);margin-top:2px}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:10px}
+.pi{position:relative;border-radius:var(--r);overflow:hidden;border:0.5px solid var(--bd);background:var(--sf2)}
+.pi img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.pi-foot{padding:4px 6px;display:flex;align-items:center;gap:4px}
+.pi-cap{font-size:10px;color:var(--tx2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-del{width:18px;height:18px;border-radius:3px;border:none;background:var(--rb);color:var(--rf);cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pi-del:hover{background:var(--dn);color:#fff}
+/* Save bar */
+.save-bar{display:flex;align-items:center;gap:10px;margin-top:14px;padding-top:12px;border-top:0.5px solid var(--bd);flex-wrap:wrap}
+.btn-save{font-size:12px;font-weight:600;padding:7px 18px;border:0.5px solid var(--gn);border-radius:var(--r);background:var(--gn-bg);color:var(--gn-fg);cursor:pointer;font-family:var(--f)}
+.btn-save:hover{background:var(--gn);color:#fff}
+.btn-reset{font-size:12px;padding:7px 14px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)}
+.btn-print{font-size:12px;padding:7px 14px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f);margin-left:auto}
+.save-msg{font-size:11px;color:var(--ok);font-weight:600}
+.sub-divider{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin:14px 0 8px;padding-bottom:5px;border-bottom:0.5px solid var(--bd)}
+/* Modal */
+.mover{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
+.mover.show{display:flex}
+.modal{background:var(--sf);border-radius:var(--rl);width:100%;max-width:420px;border:0.5px solid var(--bd);max-height:88vh;overflow-y:auto;animation:sup .18s ease}
+@keyframes sup{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mhead{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:0.5px solid var(--bd);background:var(--sf2);position:sticky;top:0}
+.mtitle{font-size:13px;font-weight:600}
+.mx{width:24px;height:24px;border:none;background:none;cursor:pointer;font-size:18px;color:var(--tx2);font-family:var(--f);border-radius:4px}
+.mx:hover{background:var(--bd)}
+.mbody{padding:14px 16px}
+.dr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--bd);gap:14px;align-items:baseline}
+.dr:last-child{border-bottom:none}
+.dl{font-size:11px;color:var(--tx2);flex-shrink:0}.dv{font-size:11px;font-weight:500;text-align:right}
+.footer{margin-top:40px;padding-top:14px;border-top:0.5px solid var(--bd);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.footer p{font-size:10px;color:var(--tx3)}
+/* ── CHARTS ── */
+.ch-row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:700px){.ch-row2{grid-template-columns:1fr}}
+.ch-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px 16px;overflow:hidden}
+.ch-head{margin-bottom:14px}
+.ch-title{font-size:12px;font-weight:700;color:var(--tx);display:block}
+.ch-sub{font-size:10px;color:var(--tx3);margin-top:2px;display:block}
+.ch-wrap{position:relative;height:240px}
+.ch-wrap-sm{position:relative;height:200px}
+/* Gauge dials */
+.gauge-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:500px){.gauge-row{grid-template-columns:repeat(2,1fr)}}
+.gauge-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.gauge-label{font-size:10px;font-weight:600;color:var(--tx2);text-align:center}
+.gauge-val{font-size:13px;font-weight:700;font-family:var(--m)}
+.gauge-sub{font-size:9px;color:var(--tx3);text-align:center}
+/* Status matrix */
+.sm-group{flex:1;min-width:140px}
+.sm-group-title{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:5px}
+.sm-chips{display:flex;flex-wrap:wrap;gap:4px}
+.sm-chip{font-size:10px;font-weight:600;padding:4px 8px;border-radius:5px;cursor:pointer;border:1px solid transparent;transition:opacity .15s}
+.sm-chip:hover{opacity:.8}
+/* ── INVENTORY ── */
+.inv-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);margin-bottom:14px;overflow:hidden}
+.inv-card-head{display:flex;align-items:center;gap:10px;padding:10px 15px;background:var(--sf2);border-bottom:0.5px solid var(--bd);cursor:pointer;user-select:none}
+.inv-title{font-size:12px;font-weight:700;flex:1}
+.inv-badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px}
+.inv-chev{font-size:12px;color:var(--tx3);transition:transform .2s}
+.inv-body{display:none;padding:14px 15px}
+.inv-body.open{display:block}
+.inv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:12px}
+.inv-field{display:flex;flex-direction:column;gap:4px}
+.inv-field.full{grid-column:1/-1}
+.inv-field label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
+.inv-save-bar{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--bd)}
+.ptr-inv-block{background:var(--sf2);border:0.5px solid var(--bd);border-radius:var(--r);padding:12px;margin-bottom:10px}
+.ptr-inv-title{font-size:11px;font-weight:700;color:var(--bl-fg);background:var(--bl-bg);padding:4px 10px;border-radius:4px;display:inline-block;margin-bottom:10px}
+@media print{.topbar{position:static}.pbtn,.tabs,.save-bar,.inv-save-bar{display:none!important}.panel{display:block!important}.ms-body,.inv-body{display:block!important}.pc,.ms,.inv-card{break-inside:avoid}}
+@media(max-width:520px){.krow{grid-template-columns:repeat(2,1fr)}.pc-src,.fdr-cols{display:none}.tally-mini{grid-template-columns:1fr 1fr}.inv-grid{grid-template-columns:1fr}}
+</style>
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="tlogo"><svg viewBox="0 0 15 15" fill="none"><circle cx="7.5" cy="7.5" r="2.5" stroke="#fff" stroke-width="1.4"/><path d="M7.5 1v2M7.5 12v2M1 7.5h2M12 7.5h2M3 3l1.4 1.4M10.6 10.6l1.4 1.4M3 12l1.4-1.4M10.6 4.4l1.4-1.4" stroke="#fff" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div><div class="tname">33/11 kV Golconda SS</div><div class="tsub">TGSPDCL · SCADA Circle · Hyderabad Central</div></div>
+  <div class="tr"><span class="pill pill-live">Live</span><span class="pill pill-g">TGSPDCL</span><button class="pbtn" onclick="window.print()">⎙ Print</button></div>
+</div>
+
+<div class="page">
+  <div class="hero">
+    <h1>33/11 kV Golconda Substation</h1>
+    <p>Praja Palana Proforma · Loading Report · Maintenance Report · SCADA Circle</p>
+    <div class="chips">
+      <span class="chip">📍 Golconda, Hyderabad</span>
+      <span class="chip">Lines Division: Central</span>
+      <span class="chip">Sub-Division: Golconda</span>
+      <span class="chip">Op. Circle: Hyderabad Central</span>
+    </div>
+  </div>
+  <div class="krow">
+    <div class="kpi ac"><div class="kl">Capacity</div><div class="kv">50</div><div class="ks">MVA (4×12.5)</div></div>
+    <div class="kpi"><div class="kl">PTRs</div><div class="kv">4</div><div class="ks">In service</div></div>
+    <div class="kpi"><div class="kl">33 kV Incomers</div><div class="kv">4</div><div class="ks">Sources</div></div>
+    <div class="kpi"><div class="kl">11 kV Feeders</div><div class="kv">15</div><div class="ks">Registered</div></div>
+    <div class="kpi"><div class="kl">Bus Voltage</div><div class="kv">33</div><div class="ks">kV</div></div>
+    <div class="kpi"><div class="kl">Stn. Transformer</div><div class="kv">100</div><div class="ks">kVA</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw('loading',this)">Loading Report</button>
+    <button class="tab" onclick="sw('maint',this)">Maintenance Report</button>
+    <button class="tab" onclick="sw('charts',this)">Charts &amp; Analytics</button>
+    <button class="tab" onclick="sw('inventory',this)">SS Master Data</button>
+    <button class="tab" onclick="sw('sld',this)">Single Line Diagram</button>
+    <button class="tab" onclick="sw('summary',this)">Station Summary</button>
+  </div>
+
+  <!-- TAB 1: LOADING REPORT -->
+  <div class="panel active" id="panel-loading">
+    <div class="pf-banner">
+      <h2>PRAJA PALANA PROFORMA — Loading Details</h2>
+      <p>33/11 kV Golconda SS · Outdoor · Lines Section: Golconda</p>
+      <div class="pf-meta">
+        <span><strong>Lines Division:</strong> Central</span>
+        <span><strong>Sub-Division:</strong> Golconda</span>
+        <span><strong>Op. Circle:</strong> Hyderabad Central</span>
+        <span id="pf-date"></span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="slabel"><span>A — 33 kV Feeder Incoming Sources</span></div>
+      <table class="dt"><thead><tr><th>Sl</th><th>Feeder Name</th><th>Type</th><th>Regular/Alternate</th><th>Summer 2024 Max</th><th>Summer 2025 Max</th><th>Present 2026</th><th>Remarks</th></tr></thead><tbody id="inc-body"></tbody></table>
+      <div style="font-size:11px;color:var(--tx2);padding:8px 11px;background:var(--am-bg);border-radius:0 0 var(--r) var(--r);margin-top:-1px"><strong>New Proposals:</strong> Interlinking cable from 33 kV Kulsumpura SS proposed for alternate supply from 132 kV Seetarambagh EHT SS.</div>
+    </div>
+    <div class="section">
+      <div class="slabel"><span>B &amp; C — PTR Operations + 11 kV Feeder Loading</span><span style="font-size:10px;font-weight:400">Click any feeder row for full details</span></div>
+      <div class="ptrs" id="ptrs"></div>
+    </div>
+    <div class="section">
+      <div class="slabel"><span>Station Load Tally</span></div>
+      <table class="dt"><tbody id="stn-tally"></tbody></table>
+    </div>
+    <div class="section">
+      <div class="slabel"><span>D — LT Supply to SS</span></div>
+      <table class="dt"><thead><tr><th>Sl</th><th>Equipment</th><th>Regular Supply</th><th>Alternate Source</th></tr></thead>
+      <tbody><tr><td>20</td><td>Station Transformer (100 kVA)</td><td>AB Switch control</td><td>11 KV Golconda OH — Feelkhana Feeder / Shaikpet WW SS</td></tr></tbody></table>
+    </div>
+  </div>
+
+  <!-- TAB 2: MAINTENANCE REPORT -->
+  <div class="panel" id="panel-maint">
+    <div class="pf-banner">
+      <h2>PRAJA PALANA PROFORMA — Maintenance Reports</h2>
+      <p>33/11 kV Golconda SS · Photo attachments supported in every section below</p>
+      <div class="pf-meta"><span><strong>Lines Division:</strong> Central</span><span><strong>Op. Circle:</strong> Hyderabad Central</span><span id="maint-date"></span></div>
+    </div>
+
+    <!-- E1 Thermovision -->
+    <div class="ms" id="ms-thermo">
+      <div class="ms-head" onclick="toggleMS('thermo')">
+        <span class="ms-title">E1 — Thermovision Camera Survey</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="ms-badge" style="background:var(--am-bg);color:var(--am-fg)">Sl 24–25</span>
+          <span class="ms-chev" id="chev-thermo">▼</span>
+        </div>
+      </div>
+      <div class="ms-body open" id="body-thermo">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--gn-fg);background:var(--gn-bg);padding:5px 10px;border-radius:5px;margin-bottom:10px">Morning Shift (Sl 24)</div>
+            <div class="mf-grid" style="grid-template-columns:1fr 1fr">
+              <div class="mf-group full"><label class="mf-label">Identified Hotspots</label><textarea class="mf-ta" id="th-am-hot" placeholder="Describe hotspots identified…"></textarea></div>
+              <div class="mf-group"><label class="mf-label">Rectification Done</label><select class="mf-select" id="th-am-rect"><option value="">— Select —</option><option>Yes</option><option>No</option><option>Pending</option></select></div>
+              <div class="mf-group"><label class="mf-label">Survey Date</label><input class="mf-input" type="date" id="th-am-date"></div>
+              <div class="mf-group full"><label class="mf-label">Rectification Details</label><textarea class="mf-ta" id="th-am-det" placeholder="Action taken…"></textarea></div>
+            </div>
+            <label class="mf-label" style="display:block;margin-bottom:4px">Morning Photos</label>
+            <div class="photo-zone"><input type="file" id="up-th-am" accept="image/*" multiple onchange="addPhotos(this,'pg-th-am')"><div class="pz-icon">📷</div><div class="pz-text">Attach thermovision images</div><div class="pz-sub">JPG / PNG · Multiple allowed</div></div>
+            <div class="photo-grid" id="pg-th-am"></div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--am-fg);background:var(--am-bg);padding:5px 10px;border-radius:5px;margin-bottom:10px">Evening Shift (Sl 25)</div>
+            <div class="mf-grid" style="grid-template-columns:1fr 1fr">
+              <div class="mf-group full"><label class="mf-label">Identified Hotspots</label><textarea class="mf-ta" id="th-pm-hot" placeholder="Describe hotspots identified…"></textarea></div>
+              <div class="mf-group"><label class="mf-label">Rectification Done</label><select class="mf-select" id="th-pm-rect"><option value="">— Select —</option><option>Yes</option><option>No</option><option>Pending</option></select></div>
+              <div class="mf-group"><label class="mf-label">Survey Date</label><input class="mf-input" type="date" id="th-pm-date"></div>
+              <div class="mf-group full"><label class="mf-label">Rectification Details</label><textarea class="mf-ta" id="th-pm-det" placeholder="Action taken…"></textarea></div>
+            </div>
+            <label class="mf-label" style="display:block;margin-bottom:4px">Evening Photos</label>
+            <div class="photo-zone"><input type="file" id="up-th-pm" accept="image/*" multiple onchange="addPhotos(this,'pg-th-pm')"><div class="pz-icon">📷</div><div class="pz-text">Attach thermovision images</div><div class="pz-sub">JPG / PNG · Multiple allowed</div></div>
+            <div class="photo-grid" id="pg-th-pm"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- E2 Lightning Arrestors -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('la')">
+        <span class="ms-title">E2 — Lightning Arrestors</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--bl-bg);color:var(--bl-fg)">Sl 26–28</span><span class="ms-chev" id="chev-la">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-la">
+        <table class="mt-table">
+          <thead><tr><th>Bus</th><th>Incomers (Qty)</th><th>LA Line Type (Qty)</th><th>Buses Existing (Qty)</th><th>LA Station Type (Qty)</th><th>Remarks</th></tr></thead>
+          <tbody>
+            <tr><td><strong>33 kV Bus</strong></td><td><input class="mf-input" id="la-33-inc" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-33-line" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-33-bus" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-33-stn" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-33-rem" placeholder="Remarks"></td></tr>
+            <tr><td><strong>11 kV Bus</strong></td><td><input class="mf-input" id="la-11-inc" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-11-line" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-11-bus" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-11-stn" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="la-11-rem" placeholder="Remarks"></td></tr>
+          </tbody>
+        </table>
+        <label class="mf-label" style="display:block;margin-bottom:4px">LA Inspection Photos</label>
+        <div class="photo-zone"><input type="file" id="up-la" accept="image/*" multiple onchange="addPhotos(this,'pg-la')"><div class="pz-icon">📸</div><div class="pz-text">Attach LA inspection photos</div><div class="pz-sub">Before &amp; after rectification · JPG/PNG</div></div>
+        <div class="photo-grid" id="pg-la"></div>
+      </div>
+    </div>
+
+    <!-- E3 Earth Resistance -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('er')">
+        <span class="ms-title">E3 — Earth Resistance</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--gn-bg);color:var(--gn-fg)">Sl 29–31</span><span class="ms-chev" id="chev-er">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-er">
+        <table class="mt-table">
+          <thead><tr><th>Total Pits</th><th>Inside SY &lt;0.7 Ω</th><th>Inside SY &gt;0.7 Ω</th><th>Outside SY &lt;0.7 Ω</th><th>Outside SY &gt;0.7 Ω</th><th>Test Date</th><th>Remarks</th></tr></thead>
+          <tbody><tr>
+            <td><input class="mf-input" id="er-pits" type="number" placeholder="—" style="width:60px"></td>
+            <td><input class="mf-input" id="er-in-lo" type="number" placeholder="—" style="width:60px"></td>
+            <td><input class="mf-input" id="er-in-hi" type="number" placeholder="—" style="width:60px"></td>
+            <td><input class="mf-input" id="er-out-lo" type="number" placeholder="—" style="width:60px"></td>
+            <td><input class="mf-input" id="er-out-hi" type="number" placeholder="—" style="width:60px"></td>
+            <td><input class="mf-input" id="er-date" type="date"></td>
+            <td><input class="mf-input" id="er-rem" placeholder="Remarks"></td>
+          </tr></tbody>
+        </table>
+        <label class="mf-label" style="display:block;margin-bottom:4px">Earth Test Photos / Scanned Report</label>
+        <div class="photo-zone"><input type="file" id="up-er" accept="image/*,.pdf" multiple onchange="addPhotos(this,'pg-er')"><div class="pz-icon">🔌</div><div class="pz-text">Attach test photos or scanned report</div><div class="pz-sub">JPG / PNG / PDF accepted</div></div>
+        <div class="photo-grid" id="pg-er"></div>
+      </div>
+    </div>
+
+    <!-- F Safety Equipment -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('safety')">
+        <span class="ms-title">F — Safety &amp; Protection Equipment</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--rb);color:var(--rf)">Sl 39–46</span><span class="ms-chev" id="chev-safety">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-safety">
+        <div class="sub-divider">F1 · Fire Extinguishers</div>
+        <table class="mt-table">
+          <thead><tr><th>Sl</th><th>Type</th><th>Available (Qty)</th><th>Required (Qty)</th><th>Condition</th><th>Remarks</th></tr></thead>
+          <tbody>
+            <tr><td>39–40</td><td>Composite</td><td><input class="mf-input" id="fe-comp-avail" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="fe-comp-req" type="number" placeholder="—" style="width:60px"></td><td><select class="mf-select" id="fe-comp-cond" style="width:140px"><option value="">—</option><option>Good</option><option>Serviceable</option><option>Needs replacement</option></select></td><td><input class="mf-input" id="fe-comp-rem" placeholder="Remarks"></td></tr>
+            <tr><td>41</td><td>HP Carbon Water Mist</td><td><input class="mf-input" id="fe-hp-avail" type="number" placeholder="—" style="width:60px"></td><td><input class="mf-input" id="fe-hp-req" type="number" placeholder="—" style="width:60px"></td><td><select class="mf-select" id="fe-hp-cond" style="width:140px"><option value="">—</option><option>Good</option><option>Serviceable</option><option>Needs replacement</option></select></td><td><input class="mf-input" id="fe-hp-rem" placeholder="Remarks"></td></tr>
+          </tbody>
+        </table>
+        <div class="sub-divider">F2 · Safety Equipment</div>
+        <table class="mt-table"><thead><tr><th>Sl</th><th>Item</th><th>Available (Qty)</th><th>Required (Qty)</th><th>Condition</th><th>Remarks</th></tr></thead><tbody id="se-body"></tbody></table>
+        <label class="mf-label" style="display:block;margin-bottom:4px;margin-top:8px">Safety Equipment Photos</label>
+        <div class="photo-zone"><input type="file" id="up-safety" accept="image/*" multiple onchange="addPhotos(this,'pg-safety')"><div class="pz-icon">🦺</div><div class="pz-text">Attach photos of safety equipment</div><div class="pz-sub">Helmets, gloves, mats, ladder, torch</div></div>
+        <div class="photo-grid" id="pg-safety"></div>
+      </div>
+    </div>
+
+    <!-- G Infrastructure -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('infra')">
+        <span class="ms-title">G — SS Infrastructure</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--sf2);color:var(--tx2)">Sl 47–51</span><span class="ms-chev" id="chev-infra">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-infra">
+        <div class="sub-divider">G1 · Yard Lights</div>
+        <div class="mf-grid" style="margin-bottom:14px">
+          <div class="mf-group"><label class="mf-label">Required (Nos)</label><input class="mf-input" id="yl-req" type="number" placeholder="—"></div>
+          <div class="mf-group"><label class="mf-label">Working (Nos)</label><input class="mf-input" id="yl-work" type="number" placeholder="—"></div>
+          <div class="mf-group"><label class="mf-label">Available (Nos)</label><input class="mf-input" id="yl-avail" type="number" placeholder="—"></div>
+          <div class="mf-group"><label class="mf-label">Remarks</label><input class="mf-input" id="yl-rem" placeholder="Remarks"></div>
+        </div>
+        <div class="sub-divider">G2 · Furniture</div>
+        <div class="mf-grid" style="margin-bottom:12px">
+          <div class="mf-group"><label class="mf-label">Chairs (Qty)</label><input class="mf-input" id="furn-chair" type="number" placeholder="—"></div>
+          <div class="mf-group"><label class="mf-label">Chair Condition</label><select class="mf-select" id="furn-chair-cond"><option value="">—</option><option>Good</option><option>Fair</option><option>Poor</option></select></div>
+          <div class="mf-group"><label class="mf-label">Tables (Qty)</label><input class="mf-input" id="furn-table" type="number" placeholder="—"></div>
+          <div class="mf-group"><label class="mf-label">Table Condition</label><select class="mf-select" id="furn-table-cond"><option value="">—</option><option>Good</option><option>Fair</option><option>Poor</option></select></div>
+        </div>
+        <label class="mf-label" style="display:block;margin-bottom:4px">Infrastructure Photos</label>
+        <div class="photo-zone"><input type="file" id="up-infra" accept="image/*" multiple onchange="addPhotos(this,'pg-infra')"><div class="pz-icon">🏗️</div><div class="pz-text">Attach infrastructure photos</div><div class="pz-sub">Yard lights, furniture, premises</div></div>
+        <div class="photo-grid" id="pg-infra"></div>
+      </div>
+    </div>
+
+    <!-- H Cleaning -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('clean')">
+        <span class="ms-title">H — SS Cleaning</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--gn-bg);color:var(--gn-fg)">Sl 53–54</span><span class="ms-chev" id="chev-clean">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-clean">
+        <div class="mf-grid">
+          <div class="mf-group"><label class="mf-label">Inside Switch Yard</label><select class="mf-select" id="cl-inside"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Outside Switch Yard</label><select class="mf-select" id="cl-outside"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Surrounding Area</label><select class="mf-select" id="cl-surr"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Washroom Neatness</label><select class="mf-select" id="cl-wash"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Water Facility (Avail)</label><select class="mf-select" id="cl-water-avail"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Water Facility (Req)</label><select class="mf-select" id="cl-water-req"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Sump Facility (Avail)</label><select class="mf-select" id="cl-sump"><option value="">—</option><option>Yes</option><option>No</option></select></div>
+          <div class="mf-group"><label class="mf-label">Remarks</label><input class="mf-input" id="cl-rem" placeholder="Remarks"></div>
+        </div>
+        <label class="mf-label" style="display:block;margin-bottom:4px;margin-top:8px">Premises Photos</label>
+        <div class="photo-zone"><input type="file" id="up-clean" accept="image/*" multiple onchange="addPhotos(this,'pg-clean')"><div class="pz-icon">🧹</div><div class="pz-text">Attach SS premises photos</div><div class="pz-sub">Switchyard, surroundings, washroom</div></div>
+        <div class="photo-grid" id="pg-clean"></div>
+      </div>
+    </div>
+
+    <!-- I Scrap -->
+    <div class="ms">
+      <div class="ms-head" onclick="toggleMS('scrap')">
+        <span class="ms-title">I — Scrap Details</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="ms-badge" style="background:var(--sf2);color:var(--tx2)">Sl 55–60</span><span class="ms-chev" id="chev-scrap">▼</span></div>
+      </div>
+      <div class="ms-body" id="body-scrap">
+        <table class="mt-table"><thead><tr><th>Sl</th><th>Equipment Type</th><th>Scrap Details</th><th>Survey Report</th><th>Devolved to Stores</th><th>Remarks</th></tr></thead><tbody id="scrap-body"></tbody></table>
+        <label class="mf-label" style="display:block;margin-bottom:4px;margin-top:8px">Scrap Photos / Survey Scan</label>
+        <div class="photo-zone"><input type="file" id="up-scrap" accept="image/*,.pdf" multiple onchange="addPhotos(this,'pg-scrap')"><div class="pz-icon">🗂️</div><div class="pz-text">Attach scrap photos or survey report</div><div class="pz-sub">CTs, PTs, Breakers, DTRs · JPG/PNG/PDF</div></div>
+        <div class="photo-grid" id="pg-scrap"></div>
+      </div>
+    </div>
+
+    <div class="save-bar">
+      <button class="btn-save" onclick="saveMaint()">💾 Save Maintenance Report</button>
+      <button class="btn-reset" onclick="resetMaint()">Reset All</button>
+      <span class="save-msg" id="maint-msg"></span>
+      <button class="btn-print" onclick="window.print()">⎙ Print Report</button>
+    </div>
+  </div>
+
+  <!-- TAB 3: CHARTS & ANALYTICS -->
+  <div class="panel" id="panel-charts">
+
+    <!-- Row 1: PTR gauge + PTR history bar -->
+    <div class="ch-row2">
+
+      <!-- PTR Gauge Dials -->
+      <div class="ch-card">
+        <div class="ch-head">
+          <span class="ch-title">PTR Loading — Present 2026</span>
+          <span class="ch-sub">Gauge per transformer · Green &lt;70% · Amber 70–79% · Red ≥80%</span>
+        </div>
+        <div class="gauge-row" id="gauge-row"></div>
+      </div>
+
+      <!-- PTR History Grouped Bar -->
+      <div class="ch-card">
+        <div class="ch-head">
+          <span class="ch-title">PTR Loading History</span>
+          <span class="ch-sub">Summer 2024 · Summer 2025 · Present 2026 · Anticipated</span>
+        </div>
+        <div class="ch-wrap"><canvas id="chart-ptr-hist"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Row 2: Feeder horizontal bar -->
+    <div class="ch-card" style="margin-bottom:16px">
+      <div class="ch-head">
+        <span class="ch-title">11 kV Feeder Loading — All 15 Feeders</span>
+        <span class="ch-sub">Recorded vs Max capacity · Click bar to highlight feeder</span>
+      </div>
+      <div style="position:relative;height:340px"><canvas id="chart-fdr-bar"></canvas></div>
+    </div>
+
+    <!-- Row 3: Feeder type donut + PTR contribution pie -->
+    <div class="ch-row2">
+      <div class="ch-card">
+        <div class="ch-head">
+          <span class="ch-title">Feeder Type Distribution</span>
+          <span class="ch-sub">OH · UG · Cable — by load (Amps)</span>
+        </div>
+        <div class="ch-wrap ch-wrap-sm"><canvas id="chart-type-donut"></canvas></div>
+      </div>
+      <div class="ch-card">
+        <div class="ch-head">
+          <span class="ch-title">PTR Load Contribution</span>
+          <span class="ch-sub">Share of total recorded station load</span>
+        </div>
+        <div class="ch-wrap ch-wrap-sm"><canvas id="chart-ptr-pie"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Row 4: Simulated 24-hr load trend -->
+    <div class="ch-card" style="margin-bottom:16px">
+      <div class="ch-head" style="justify-content:space-between;align-items:center">
+        <div>
+          <span class="ch-title">24-Hour Load Trend (Simulated)</span>
+          <span class="ch-sub" style="display:block">Station PTR aggregate · 11 kV Feeder sum · Based on typical distribution pattern</span>
+        </div>
+        <select class="mf-select" id="trend-ptr-sel" style="font-size:11px;padding:4px 8px;width:auto" onchange="updateTrend()">
+          <option value="all">All PTRs</option>
+          <option value="LV1">PTR-I (LV1)</option>
+          <option value="LV2">PTR-II (LV2)</option>
+          <option value="LV3">PTR-III (LV3)</option>
+          <option value="LV4">PTR-IV (LV4)</option>
+        </select>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="chart-trend"></canvas></div>
+    </div>
+
+    <!-- Row 5: Loading status matrix -->
+    <div class="ch-card" style="margin-bottom:16px">
+      <div class="ch-head">
+        <span class="ch-title">Loading Status Matrix</span>
+        <span class="ch-sub">All feeders grouped by PTR · colour = load status</span>
+      </div>
+      <div id="status-matrix" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0"></div>
+      <div style="display:flex;gap:16px;margin-top:10px;font-size:10px;color:var(--tx3)">
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#e1f5ee;border:1px solid #0f6e56;border-radius:2px;display:inline-block"></span>Normal &lt;70%</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#faeeda;border:1px solid #854f0b;border-radius:2px;display:inline-block"></span>High 70–79%</span>
+        <span style="display:flex;align-items:center;gap:4px"><span style="width:12px;height:12px;background:#fcebeb;border:1px solid #a32d2d;border-radius:2px;display:inline-block"></span>Overload ≥80%</span>
+      </div>
+    </div>
+
+  </div><!-- /panel-charts -->
+
+  <!-- TAB 4: SS MASTER DATA / INVENTORY -->
+  <div class="panel" id="panel-inventory">
+
+    <!-- Station Identity Card -->
+    <div class="inv-card">
+      <div class="inv-card-head" onclick="toggleInv('identity')">
+        <span class="inv-title">Station Identity</span>
+        <span class="inv-badge" style="background:var(--gn-bg);color:var(--gn-fg)">SS Details</span>
+        <span class="inv-chev" id="chev-identity">▾</span>
+      </div>
+      <div class="inv-body open" id="body-identity">
+        <div class="inv-grid">
+          <div class="inv-field"><label>SS Name</label><input class="mf-input" id="id-name" value="33/11 kV Golconda SS"></div>
+          <div class="inv-field"><label>SS Code</label><input class="mf-input" id="id-code" value="1103921401"></div>
+          <div class="inv-field"><label>SS Type</label><select class="mf-select" id="id-type"><option>Outdoor</option><option>Indoor</option><option>GIS</option></select></div>
+          <div class="inv-field"><label>Year of Commissioning</label><input class="mf-input" id="id-yr" value="2009"></div>
+          <div class="inv-field"><label>Lines Division</label><input class="mf-input" id="id-ldiv" value="Central"></div>
+          <div class="inv-field"><label>Lines Sub-Division</label><input class="mf-input" id="id-lsdiv" value="Golconda"></div>
+          <div class="inv-field"><label>Lines Section</label><input class="mf-input" id="id-lsec" value="Golconda"></div>
+          <div class="inv-field"><label>Operation Circle</label><input class="mf-input" id="id-ocir" value="Hyderabad Central"></div>
+          <div class="inv-field"><label>Operation Division</label><input class="mf-input" id="id-odiv" value="Hyderabad South"></div>
+          <div class="inv-field"><label>Operation Section</label><input class="mf-input" id="id-osec" value="Golconda"></div>
+          <div class="inv-field"><label>Latitude</label><input class="mf-input" id="id-lat" value="17.3616" placeholder="dd.dddd"></div>
+          <div class="inv-field"><label>Longitude</label><input class="mf-input" id="id-lon" value="78.3921" placeholder="dd.dddd"></div>
+          <div class="inv-field full"><label>Address / Location</label><input class="mf-input" id="id-addr" value="Golconda Fort Road, Golconda, Hyderabad — 500008"></div>
+          <div class="inv-field full">
+            <label>SS Photograph</label>
+            <div class="photo-zone" style="max-width:360px"><input type="file" id="up-ss-photo" accept="image/*" onchange="setSsPhoto(this)"><div class="pz-icon">🏭</div><div class="pz-text">Upload SS site photo</div><div class="pz-sub">JPG/PNG</div></div>
+            <div id="ss-photo-prev" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="inv-save-bar"><button class="btn-save" onclick="saveInv('identity')">Save</button><span class="save-msg" id="msg-identity"></span></div>
+      </div>
+    </div>
+
+    <!-- Power Transformers -->
+    <div class="inv-card">
+      <div class="inv-card-head" onclick="toggleInv('ptrs-inv')">
+        <span class="inv-title">Power Transformers</span>
+        <span class="inv-badge" style="background:var(--bl-bg);color:var(--bl-fg)">4 PTRs · 12.5 MVA each</span>
+        <span class="inv-chev" id="chev-ptrs-inv">▾</span>
+      </div>
+      <div class="inv-body open" id="body-ptrs-inv">
+        <div id="ptr-inv-forms"></div>
+        <div class="inv-save-bar"><button class="btn-save" onclick="saveInv('ptrs-inv')">Save PTRs</button><span class="save-msg" id="msg-ptrs-inv"></span></div>
+      </div>
+    </div>
+
+    <!-- 11 kV Bays / Feeders -->
+    <div class="inv-card">
+      <div class="inv-card-head" onclick="toggleInv('bays11')">
+        <span class="inv-title">11 kV Feeder Bays — LV Sides</span>
+        <span class="inv-badge" style="background:var(--gn-bg);color:var(--gn-fg)">15 Feeder Bays</span>
+        <span class="inv-chev" id="chev-bays11">▾</span>
+      </div>
+      <div class="inv-body" id="body-bays11">
+        <table class="dt" style="font-size:11px">
+          <thead><tr><th>Feeder</th><th>PTR</th><th>Type</th><th>CB Make</th><th>CB Year</th><th>CT Ratio</th><th>Relay Type</th><th>Cable/Line Spec</th><th>Remarks</th></tr></thead>
+          <tbody id="bay11-body"></tbody>
+        </table>
+        <div class="inv-save-bar"><button class="btn-save" onclick="saveInv('bays11')">Save</button><span class="save-msg" id="msg-bays11"></span></div>
+      </div>
+    </div>
+
+    <!-- Protection & Relay Register -->
+    <div class="inv-card">
+      <div class="inv-card-head" onclick="toggleInv('relay')">
+        <span class="inv-title">Protection &amp; Relay Register</span>
+        <span class="inv-badge" style="background:var(--pk-bg);color:var(--pk-fg)">Relay · CT · PT · Meter</span>
+        <span class="inv-chev" id="chev-relay">▾</span>
+      </div>
+      <div class="inv-body" id="body-relay">
+        <table class="dt" style="font-size:11px">
+          <thead><tr><th>Equipment</th><th>Location</th><th>Protection Function</th><th>Relay Make/Model</th><th>CT Ratio</th><th>PT Ratio</th><th>Last Test Date</th><th>Remarks</th></tr></thead>
+          <tbody>
+            <tr><td>Differential Protection</td><td>PTR-I / II / III / IV (HV)</td><td>87T</td><td><input class="mf-input" id="prot-diff-make" placeholder="REF615 / SEL"></td><td>400/1 A</td><td>33000/110 V</td><td><input class="mf-input" id="prot-diff-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-diff-rem" placeholder="Remarks"></td></tr>
+            <tr><td>Overcurrent + Earth Fault</td><td>PTR HV &amp; LV Sides</td><td>50/51, 50N/51N</td><td><input class="mf-input" id="prot-oc-make" placeholder="Numerical"></td><td>400/1 A</td><td>—</td><td><input class="mf-input" id="prot-oc-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-oc-rem" placeholder="Remarks"></td></tr>
+            <tr><td>REF (Restricted Earth Fault)</td><td>PTR LV Sides</td><td>64REF</td><td><input class="mf-input" id="prot-ref-make" placeholder="Numerical"></td><td>600/1 A</td><td>—</td><td><input class="mf-input" id="prot-ref-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-ref-rem" placeholder="Remarks"></td></tr>
+            <tr><td>Buchholz Relay</td><td>Each PTR</td><td>Surge + Gas</td><td><input class="mf-input" id="prot-buch-make" placeholder="Manufacturer"></td><td>—</td><td>—</td><td><input class="mf-input" id="prot-buch-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-buch-rem" placeholder="Remarks"></td></tr>
+            <tr><td>11 kV Feeder OC/EF</td><td>All 15 Feeder CBs</td><td>50/51, 50N/51N</td><td><input class="mf-input" id="prot-fdr-make" placeholder="Numerical/Static"></td><td>200/1 A</td><td>11000/110 V</td><td><input class="mf-input" id="prot-fdr-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-fdr-rem" placeholder="Remarks"></td></tr>
+            <tr><td>Auto Reclosing</td><td>Selected 11 kV Feeders</td><td>79</td><td><input class="mf-input" id="prot-arc-make" placeholder="Make/Model"></td><td>—</td><td>—</td><td><input class="mf-input" id="prot-arc-date" type="date" style="width:120px"></td><td><input class="mf-input" id="prot-arc-rem" placeholder="Remarks"></td></tr>
+            <tr><td>Bus PT (33 kV)</td><td>33 kV Bus</td><td>Voltage measurement</td><td>—</td><td>—</td><td>33000/110 V</td><td>—</td><td><input class="mf-input" id="prot-bpt-rem" placeholder="Remarks"></td></tr>
+          </tbody>
+        </table>
+        <div class="inv-save-bar"><button class="btn-save" onclick="saveInv('relay')">Save</button><span class="save-msg" id="msg-relay"></span></div>
+      </div>
+    </div>
+
+    <!-- SCADA / RTU -->
+    <div class="inv-card">
+      <div class="inv-card-head" onclick="toggleInv('scada')">
+        <span class="inv-title">SCADA / RTU Details</span>
+        <span class="inv-badge" style="background:var(--bl-bg);color:var(--bl-fg)">IEC 101/104</span>
+        <span class="inv-chev" id="chev-scada">▾</span>
+      </div>
+      <div class="inv-body" id="body-scada">
+        <div class="inv-grid">
+          <div class="inv-field"><label>RTU Make</label><input class="mf-input" id="rtu-make" placeholder="e.g. Schneider / ABB"></div>
+          <div class="inv-field"><label>RTU Model</label><input class="mf-input" id="rtu-model" placeholder="Model number"></div>
+          <div class="inv-field"><label>Protocol</label><select class="mf-select" id="rtu-proto"><option>IEC 101</option><option>IEC 104</option><option>DNP3</option><option>MODBUS</option></select></div>
+          <div class="inv-field"><label>RTU IP Address</label><input class="mf-input" id="rtu-ip" placeholder="e.g. 192.168.x.x"></div>
+          <div class="inv-field"><label>Comm Medium</label><select class="mf-select" id="rtu-comm"><option>Fiber Optic</option><option>GPRS</option><option>Leased Line</option><option>Radio</option></select></div>
+          <div class="inv-field"><label>Year of Installation</label><input class="mf-input" id="rtu-yr" type="number" placeholder="YYYY"></div>
+          <div class="inv-field"><label>Control Centre</label><input class="mf-input" id="rtu-cc" value="SLDC Hyderabad"></div>
+          <div class="inv-field"><label>No. of Analog Points</label><input class="mf-input" id="rtu-ai" type="number" placeholder="—"></div>
+          <div class="inv-field"><label>No. of Digital Points</label><input class="mf-input" id="rtu-di" type="number" placeholder="—"></div>
+          <div class="inv-field full"><label>SCADA Remarks</label><textarea class="mf-ta" id="rtu-rem" placeholder="Integration notes, issues, last maintenance…"></textarea></div>
+        </div>
+        <div class="inv-save-bar"><button class="btn-save" onclick="saveInv('scada')">Save</button><span class="save-msg" id="msg-scada"></span></div>
+      </div>
+    </div>
+
+  </div><!-- /panel-inventory -->
+
+  <!-- TAB 4: SINGLE LINE DIAGRAM -->
+  <div class="panel" id="panel-sld">
+    <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--sf2);border-bottom:0.5px solid var(--bd)">
+        <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3)">Single Line Diagram — 33/11 kV Golconda SS</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:10px;color:var(--tx3)">Click any bay for details</span>
+          <button class="pbtn" onclick="window.print()">⎙ Print SLD</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding:16px 12px;background:var(--sf)">
+        <svg id="sld-svg" viewBox="0 0 960 700" width="100%" style="min-width:700px;display:block;font-family:system-ui,sans-serif">
+
+          <!-- ══ SOURCE LABELS ══ -->
+          <text x="130" y="16" text-anchor="middle" font-size="9" fill="#185fa5" font-weight="600">132 KV ASIFNAGAR</text>
+          <text x="130" y="26" text-anchor="middle" font-size="8" fill="#185fa5">→ 33KV GOLCONDA</text>
+          <text x="330" y="16" text-anchor="middle" font-size="9" fill="#185fa5" font-weight="600">132 KV JUBILEE HILLS</text>
+          <text x="330" y="26" text-anchor="middle" font-size="8" fill="#185fa5">→ 33KV GOLCONDA</text>
+          <text x="580" y="16" text-anchor="middle" font-size="9" fill="#185fa5" font-weight="600">132 KV ASIFNAGAR</text>
+          <text x="580" y="26" text-anchor="middle" font-size="8" fill="#185fa5">→ 33KV SHAIKPET</text>
+          <text x="800" y="16" text-anchor="middle" font-size="9" fill="#854f0b" font-weight="600">400 KV RAIDURG SS</text>
+          <text x="800" y="26" text-anchor="middle" font-size="8" fill="#854f0b">→ 33KV SANDHYA</text>
+
+          <!-- Incomer drops -->
+          <line x1="130" y1="30" x2="130" y2="46" stroke="#185fa5" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="330" y1="30" x2="330" y2="46" stroke="#185fa5" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="580" y1="30" x2="580" y2="46" stroke="#185fa5" stroke-width="2" marker-end="url(#ah)"/>
+          <line x1="800" y1="30" x2="800" y2="46" stroke="#854f0b" stroke-width="2" marker-end="url(#ah)"/>
+
+          <!-- ══ 33 KV BUS ══ -->
+          <rect x="60" y="46" width="820" height="28" rx="4" fill="#e1f5ee" stroke="#0f6e56" stroke-width="1.5"/>
+          <text x="480" y="64" text-anchor="middle" font-size="12" font-weight="700" fill="#085041">33 kV Bus — Golconda SS</text>
+
+          <!-- ══ HV BAYS (4) ══ -->
+          <!-- PTR-I: x=130 -->
+          <line x1="130" y1="74" x2="130" y2="94" stroke="#555" stroke-width="1.5"/>
+          <rect x="98" y="94" width="64" height="36" rx="4" fill="#e6f1fb" stroke="#185fa5" stroke-width="1" style="cursor:pointer" onclick="showBay('HV-I','PTR-I','33 kV HV Bay','12.5 MVA','REF615','400/1A','33kV/110V','Dyn11','2009')"/>
+          <text x="130" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#0c447c">HV-I</text>
+          <text x="130" y="122" text-anchor="middle" font-size="8" fill="#185fa5" font-family="monospace">12.5 MVA</text>
+          <line x1="130" y1="130" x2="130" y2="158" stroke="#555" stroke-width="2"/>
+
+          <!-- PTR-II: x=330 -->
+          <line x1="330" y1="74" x2="330" y2="94" stroke="#555" stroke-width="1.5"/>
+          <rect x="298" y="94" width="64" height="36" rx="4" fill="#e6f1fb" stroke="#185fa5" stroke-width="1" style="cursor:pointer" onclick="showBay('HV-II','PTR-II','33 kV HV Bay','12.5 MVA','REF615','400/1A','33kV/110V','Dyn11','2011')"/>
+          <text x="330" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#0c447c">HV-II</text>
+          <text x="330" y="122" text-anchor="middle" font-size="8" fill="#185fa5" font-family="monospace">12.5 MVA</text>
+          <line x1="330" y1="130" x2="330" y2="158" stroke="#555" stroke-width="2"/>
+
+          <!-- PTR-III: x=580 -->
+          <line x1="580" y1="74" x2="580" y2="94" stroke="#555" stroke-width="1.5"/>
+          <rect x="548" y="94" width="64" height="36" rx="4" fill="#e6f1fb" stroke="#185fa5" stroke-width="1" style="cursor:pointer" onclick="showBay('HV-III','PTR-III','33 kV HV Bay','12.5 MVA','REF615','400/1A','33kV/110V','Dyn11','2013')"/>
+          <text x="580" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#0c447c">HV-III</text>
+          <text x="580" y="122" text-anchor="middle" font-size="8" fill="#185fa5" font-family="monospace">12.5 MVA</text>
+          <line x1="580" y1="130" x2="580" y2="158" stroke="#555" stroke-width="2"/>
+
+          <!-- PTR-IV: x=800 -->
+          <line x1="800" y1="74" x2="800" y2="94" stroke="#555" stroke-width="1.5"/>
+          <rect x="768" y="94" width="64" height="36" rx="4" fill="#e6f1fb" stroke="#185fa5" stroke-width="1" style="cursor:pointer" onclick="showBay('HV-IV','PTR-IV','33 kV HV Bay','12.5 MVA','REF615','400/1A','33kV/110V','Dyn11','2017')"/>
+          <text x="800" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#0c447c">HV-IV</text>
+          <text x="800" y="122" text-anchor="middle" font-size="8" fill="#185fa5" font-family="monospace">12.5 MVA</text>
+          <line x1="800" y1="130" x2="800" y2="158" stroke="#555" stroke-width="2"/>
+
+          <!-- ══ LV BAYS (4) ══ -->
+          <rect x="98" y="158" width="64" height="34" rx="4" fill="#eaf3de" stroke="#3b6d11" stroke-width="1" style="cursor:pointer" onclick="showBay('LV-I','PTR-I','11 kV LV Bay','12.5 MVA','Numerical','600/1A','11kV/110V','Dyn11','2009')"/>
+          <text x="130" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="#27500a">LV-I</text>
+          <text x="130" y="184" text-anchor="middle" font-size="8" fill="#3b6d11" font-family="monospace">PTR-I</text>
+
+          <rect x="298" y="158" width="64" height="34" rx="4" fill="#eaf3de" stroke="#3b6d11" stroke-width="1" style="cursor:pointer" onclick="showBay('LV-II','PTR-II','11 kV LV Bay','12.5 MVA','Numerical','600/1A','11kV/110V','Dyn11','2011')"/>
+          <text x="330" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="#27500a">LV-II</text>
+          <text x="330" y="184" text-anchor="middle" font-size="8" fill="#3b6d11" font-family="monospace">PTR-II</text>
+
+          <rect x="548" y="158" width="64" height="34" rx="4" fill="#eaf3de" stroke="#3b6d11" stroke-width="1" style="cursor:pointer" onclick="showBay('LV-III','PTR-III','11 kV LV Bay','12.5 MVA','Numerical','600/1A','11kV/110V','Dyn11','2013')"/>
+          <text x="580" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="#27500a">LV-III</text>
+          <text x="580" y="184" text-anchor="middle" font-size="8" fill="#3b6d11" font-family="monospace">PTR-III</text>
+
+          <rect x="768" y="158" width="64" height="34" rx="4" fill="#eaf3de" stroke="#3b6d11" stroke-width="1" style="cursor:pointer" onclick="showBay('LV-IV','PTR-IV','11 kV LV Bay','12.5 MVA','Numerical','600/1A','11kV/110V','Dyn11','2017')"/>
+          <text x="800" y="172" text-anchor="middle" font-size="11" font-weight="700" fill="#27500a">LV-IV</text>
+          <text x="800" y="184" text-anchor="middle" font-size="8" fill="#3b6d11" font-family="monospace">PTR-IV</text>
+
+          <!-- ══ 11 KV BUSES (4 segments) ══ -->
+          <line x1="130" y1="192" x2="130" y2="208" stroke="#555" stroke-width="1.5"/>
+          <rect x="66" y="208" width="128" height="14" rx="3" fill="#faeeda" stroke="#854f0b" stroke-width="1"/>
+          <text x="130" y="219" text-anchor="middle" font-size="8" font-weight="700" fill="#633806">11 kV Bus — LV1</text>
+
+          <line x1="330" y1="192" x2="330" y2="208" stroke="#555" stroke-width="1.5"/>
+          <rect x="264" y="208" width="132" height="14" rx="3" fill="#faeeda" stroke="#854f0b" stroke-width="1"/>
+          <text x="330" y="219" text-anchor="middle" font-size="8" font-weight="700" fill="#633806">11 kV Bus — LV2</text>
+
+          <line x1="580" y1="192" x2="580" y2="208" stroke="#555" stroke-width="1.5"/>
+          <rect x="514" y="208" width="132" height="14" rx="3" fill="#faeeda" stroke="#854f0b" stroke-width="1"/>
+          <text x="580" y="219" text-anchor="middle" font-size="8" font-weight="700" fill="#633806">11 kV Bus — LV3</text>
+
+          <line x1="800" y1="192" x2="800" y2="208" stroke="#555" stroke-width="1.5"/>
+          <rect x="734" y="208" width="132" height="14" rx="3" fill="#faeeda" stroke="#854f0b" stroke-width="1"/>
+          <text x="800" y="219" text-anchor="middle" font-size="8" font-weight="700" fill="#633806">11 kV Bus — LV4</text>
+
+          <!-- ══ 11 KV FEEDERS ══ Helper macro: feeder lines from bus -->
+          <!-- LV1 feeders: Golconda OH, Motimahal, Aditya Ngr UG -->
+          <g id="fdr-lv1">
+            <line x1="80"  y1="222" x2="56"  y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="50"  y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV GOLCONDA OH FEEDER')">Golconda OH</text>
+            <line x1="130" y1="222" x2="130" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="130" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV MOTIMAHAL FEEDER')">Motimahal</text>
+            <line x1="180" y1="222" x2="198" y2="256" stroke="#0c447c" stroke-width="1.2" marker-end="url(#ah-b)"/>
+            <text x="204" y="268" text-anchor="middle" font-size="8" fill="#0c447c" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV ADITYA NAGAR UG FEEDER')">Aditya Ngr UG</text>
+          </g>
+
+          <!-- LV2 feeders: Darga OH, Golconda Cable, Shaikpet WW, SA Colony -->
+          <g id="fdr-lv2">
+            <line x1="276" y1="222" x2="256" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="248" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV DARGA OH FEEDER')">Darga OH</text>
+            <line x1="304" y1="222" x2="298" y2="256" stroke="#72243e" stroke-width="1.2" marker-end="url(#ah-p)"/>
+            <text x="295" y="268" text-anchor="middle" font-size="8" fill="#72243e" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV GOLCONDA CABLE FEEDER')">Golconda Cable</text>
+            <line x1="348" y1="222" x2="356" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="360" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV SHAIKPET WW FEEDER')">Shaikpet WW</text>
+            <line x1="384" y1="222" x2="398" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="404" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV SA COLONY FEEDER')">SA Colony</text>
+          </g>
+
+          <!-- LV3 feeders: Aparna One, Darga UG, Aditya Ngr OH, OU Colony -->
+          <g id="fdr-lv3">
+            <line x1="526" y1="222" x2="510" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="504" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV APARNA ONE FEEDER')">Aparna One</text>
+            <line x1="552" y1="222" x2="548" y2="256" stroke="#0c447c" stroke-width="1.2" marker-end="url(#ah-b)"/>
+            <text x="544" y="268" text-anchor="middle" font-size="8" fill="#0c447c" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV DARGA UG FEEDER')">Darga UG</text>
+            <line x1="600" y1="222" x2="608" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="612" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV ADITYA NAGAR OH FEEDER')">Aditya Ngr OH</text>
+            <line x1="636" y1="222" x2="648" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="654" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV OU COLONY FEEDER')">OU Colony</text>
+          </g>
+
+          <!-- LV4 feeders: QQ Toombs, Brundhavan, Narayanamma, Diamond Hills -->
+          <g id="fdr-lv4">
+            <line x1="746" y1="222" x2="730" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="724" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV QQ TOOMBS FEEDER')">QQ Toombs</text>
+            <line x1="776" y1="222" x2="772" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="768" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV BRUNDHAVAN COLONY FEEDER')">Brundhavan</text>
+            <line x1="820" y1="222" x2="828" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="834" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV NARAYANAMMA FEEDER')">Narayanamma</text>
+            <line x1="854" y1="222" x2="866" y2="256" stroke="#3b6d11" stroke-width="1.2" marker-end="url(#ah-g)"/>
+            <text x="872" y="268" text-anchor="middle" font-size="8" fill="#27500a" font-weight="600" style="cursor:pointer" onclick="showFeeder('11KV DIAMOND HILLS FEEDER')">Diamond Hills</text>
+          </g>
+
+          <!-- ══ LIVE LOAD INDICATORS ══ (rendered by JS) -->
+          <g id="sld-load-bars"></g>
+
+          <!-- ══ STATION TRANSFORMER ══ -->
+          <rect x="20" y="100" width="56" height="28" rx="3" fill="#f4f3ef" stroke="#c5c3bb" stroke-width="0.8"/>
+          <text x="48" y="112" text-anchor="middle" font-size="8" fill="#56564e" font-weight="600">Stn. Tf.</text>
+          <text x="48" y="122" text-anchor="middle" font-size="7" fill="#96968e" font-family="monospace">100 kVA</text>
+          <line x1="76" y1="114" x2="98" y2="114" stroke="#c5c3bb" stroke-width="0.8" stroke-dasharray="3,2"/>
+
+          <!-- ══ BUS COUPLER SYMBOLS ══ -->
+          <line x1="194" y1="215" x2="264" y2="215" stroke="#854f0b" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="229" y="211" text-anchor="middle" font-size="7" fill="#854f0b">BC-1</text>
+          <line x1="396" y1="215" x2="514" y2="215" stroke="#854f0b" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="455" y="211" text-anchor="middle" font-size="7" fill="#854f0b">BC-2</text>
+          <line x1="646" y1="215" x2="734" y2="215" stroke="#854f0b" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="690" y="211" text-anchor="middle" font-size="7" fill="#854f0b">BC-3</text>
+
+          <!-- ══ LEGEND ══ -->
+          <rect x="30" y="300" width="10" height="10" rx="2" fill="#e1f5ee" stroke="#0f6e56" stroke-width="0.8"/>
+          <text x="46" y="309" font-size="9" fill="#56564e">33 kV Bus</text>
+          <rect x="110" y="300" width="10" height="10" rx="2" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.8"/>
+          <text x="126" y="309" font-size="9" fill="#56564e">HV Bay</text>
+          <rect x="185" y="300" width="10" height="10" rx="2" fill="#eaf3de" stroke="#3b6d11" stroke-width="0.8"/>
+          <text x="201" y="309" font-size="9" fill="#56564e">LV Bay</text>
+          <rect x="255" y="300" width="10" height="10" rx="2" fill="#faeeda" stroke="#854f0b" stroke-width="0.8"/>
+          <text x="271" y="309" font-size="9" fill="#56564e">11 kV Bus</text>
+          <line x1="340" y1="305" x2="356" y2="305" stroke="#3b6d11" stroke-width="1.5" marker-end="url(#ah-g)"/>
+          <text x="362" y="309" font-size="9" fill="#56564e">OH Feeder</text>
+          <line x1="430" y1="305" x2="446" y2="305" stroke="#0c447c" stroke-width="1.5" marker-end="url(#ah-b)"/>
+          <text x="452" y="309" font-size="9" fill="#56564e">UG Feeder</text>
+          <line x1="520" y1="305" x2="536" y2="305" stroke="#72243e" stroke-width="1.5" marker-end="url(#ah-p)"/>
+          <text x="542" y="309" font-size="9" fill="#56564e">Cable Feeder</text>
+          <line x1="630" y1="305" x2="646" y2="305" stroke="#854f0b" stroke-width="1" stroke-dasharray="4,3"/>
+          <text x="652" y="309" font-size="9" fill="#56564e">Bus Coupler</text>
+
+          <!-- Feeder load micro-bars label -->
+          <text x="30" y="330" font-size="9" fill="#96968e">■ Load bars show present 2026 loading %. Green &lt;70% · Amber 70–79% · Red ≥80%</text>
+
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <marker id="ah-g" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#3b6d11" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <marker id="ah-b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0c447c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+            <marker id="ah-p" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#72243e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- SLD feeder quick-reference table -->
+    <div class="section">
+      <div class="slabel"><span>Feeder Quick Reference — All 15 Feeders</span></div>
+      <table class="dt" style="font-size:11px">
+        <thead><tr><th>#</th><th>Feeder Name</th><th>Type</th><th>Source PTR</th><th>Max (A)</th><th>Present (A)</th><th>Load %</th><th>Area Served</th><th>Length</th></tr></thead>
+        <tbody id="sld-fdr-table"></tbody>
+      </table>
+    </div>
+  </div><!-- /panel-sld -->
+
+  <!-- TAB 5: SUMMARY -->
+  <div class="panel" id="panel-summary">
+
+    <!-- Station aggregate KPIs -->
+    <div class="section">
+      <div class="slabel"><span>Station Load Overview</span></div>
+      <div class="krow" style="margin-bottom:16px">
+        <div class="kpi ac"><div class="kl">Total PTR Capacity</div><div class="kv" id="sum-ptr-max">—</div><div class="ks">Amps at 33 kV</div></div>
+        <div class="kpi"><div class="kl">Station Recorded Load</div><div class="kv" id="sum-ptr-rec">—</div><div class="ks">Amps at 33 kV</div></div>
+        <div class="kpi"><div class="kl">Station Loading</div><div class="kv" id="sum-ptr-pct">—</div><div class="ks" id="sum-ptr-status">—</div></div>
+        <div class="kpi"><div class="kl">∑ Feeder Load</div><div class="kv" id="sum-fdr-rec">—</div><div class="ks">Sum of all 15 feeders</div></div>
+        <div class="kpi"><div class="kl">Technical Loss</div><div class="kv" id="sum-loss">—</div><div class="ks">PTR − ∑ feeders (A)</div></div>
+        <div class="kpi"><div class="kl">Overloaded Elements</div><div class="kv" id="sum-overload-count" style="color:var(--dn)">—</div><div class="ks" id="sum-overload-label">—</div></div>
+      </div>
+
+      <table class="dt">
+        <thead><tr><th>Parameter</th><th>Max Capacity (A)</th><th>Recorded Load (A)</th><th>Loading %</th><th>Status</th></tr></thead>
+        <tbody id="rpt-agg"></tbody>
+      </table>
+    </div>
+
+    <!-- Alerts -->
+    <div class="section">
+      <div class="slabel"><span>Alerts &amp; Attention Required</span></div>
+      <div id="alerts-panel" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+
+    <!-- Quick navigation -->
+    <div class="section">
+      <div class="slabel"><span>Quick Navigation</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--tx)">Loading Report</div>
+          <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;line-height:1.6">33 kV incomers · PTR loading with history · Feeder loading with tally · Station loss</div>
+          <button class="pbtn" style="width:100%;text-align:center" onclick="sw('loading',document.querySelector('.tab'))">→ Open Loading Report</button>
+        </div>
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--tx)">Maintenance Report</div>
+          <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Thermovision · Lightning Arrestors · Earth resistance · Safety equipment · Cleaning · Scrap</div>
+          <button class="pbtn" style="width:100%;text-align:center" onclick="sw('maint',document.querySelectorAll('.tab')[1])">→ Open Maintenance</button>
+        </div>
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--tx)">SS Master Data</div>
+          <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Station identity · PTR nameplate · Bay register · Protection details · SCADA/RTU</div>
+          <button class="pbtn" style="width:100%;text-align:center" onclick="sw('inventory',document.querySelectorAll('.tab')[2])">→ Open Master Data</button>
+        </div>
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:14px">
+          <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--tx)">Single Line Diagram</div>
+          <div style="font-size:11px;color:var(--tx2);margin-bottom:10px;line-height:1.6">Interactive SLD · Live load bars · Click bays and feeders for details · Feeder reference table</div>
+          <button class="pbtn" style="width:100%;text-align:center" onclick="sw('sld',document.querySelectorAll('.tab')[3])">→ Open SLD</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:4px;text-align:right">
+      <button class="pbtn" onclick="window.print()">⎙ Print full report</button>
+    </div>
+
+  </div><!-- /panel-summary -->
+
+  <div class="footer">
+    <p>TGSPDCL · 33/11 kV Golconda SS · Praja Palana Proforma</p>
+    <p>SCADA Circle · Hyderabad Central Division</p>
+    <p id="fdate"></p>
+  </div>
+</div>
+
+<div class="mover" id="modal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal"><div class="mhead"><span class="mtitle" id="modal-title"></span><button class="mx" onclick="document.getElementById('modal').classList.remove('show')">×</button></div><div class="mbody" id="modal-body"></div></div>
+</div>
+
+<script>
+// DATA
+const PTRS=[
+  {id:'LV1 (PTR-I)',lv:'LV1',hv:'HV-I',mva:12.5,maxA:219,recA:149,ratio:'33/11 kV',vector:'Dyn11',yr:2009,oilT:'62°C',wdgT:'72°C',tap:'0 (Nom.)',src:'132KV Asifnagar→33KV Golconda',s24:'31% (202A)',s25:'27% (176A)',ant:'35% (225A)',ops:'PTR-I can be operated on a separate 33 kV source independently'},
+  {id:'LV2 (PTR-II)',lv:'LV2',hv:'HV-II',mva:12.5,maxA:219,recA:162,ratio:'33/11 kV',vector:'Dyn11',yr:2011,oilT:'65°C',wdgT:'78°C',tap:'+1',src:'132KV Jubilee Hills→33KV Golconda',s24:'50% (212A)',s25:'40% (168A)',ant:'55% (225A)',ops:'PTR-II can be paralleled with PTR-III via 11 kV Bus Coupler'},
+  {id:'LV3 (PTR-III)',lv:'LV3',hv:'HV-III',mva:12.5,maxA:219,recA:177,ratio:'33/11 kV',vector:'Dyn11',yr:2013,oilT:'74°C',wdgT:'88°C',tap:'+2',src:'132KV Jubilee Hills→33KV Golconda',s24:'33% (140A)',s25:'27% (115A)',ant:'35% (150A)',ops:'PTR-III + PTR-II can be taken on alternate 33 kV sources together'},
+  {id:'LV4 (PTR-IV)',lv:'LV4',hv:'HV-IV',mva:12.5,maxA:219,recA:136,ratio:'33/11 kV',vector:'Dyn11',yr:2017,oilT:'58°C',wdgT:'68°C',tap:'0 (Nom.)',src:'132KV Asifnagar-Shaikpet / 400KV Raidurg',s24:'28% (122A)',s25:'24% (105A)',ant:'32% (140A)',ops:'PTR-IV fed from 400 kV Raidurg — alternate available via Sandhya feeder'},
+];
+const INC=[
+  {sl:'1',name:'33KV Imlibun–Osmania Feeder',type:'OH+UG',reg:'Regular',cur:'145 A'},
+  {sl:'2',name:'33KV Imlibun–Goshamahal Feeder',type:'UG',reg:'Alternate',cur:'169 A'},
+  {sl:'3',name:'33KV Imlibun–Exhibition Ckt-2',type:'UG',reg:'Alternate',cur:'Idle'},
+  {sl:'4',name:'33KV Imlibun–Seetarambagh Feeder',type:'OH',reg:'Alternate',cur:'Idle'},
+];
+const FDRS=[
+  {seq:'FDR-1',name:'11KV GOLCONDA OH FEEDER',ptr:'LV1',type:'OH',maxA:250,recA:145,area:'Golconda Fort area',len:'~4.2 km',s24:110,s25:82,ant:120},
+  {seq:'FDR-2',name:'11KV MOTIMAHAL FEEDER',ptr:'LV1',type:'OH',maxA:250,recA:178,area:'Motimahal locality',len:'~3.1 km',s24:85,s25:60,ant:100},
+  {seq:'FDR-3',name:'11KV ADITYA NAGAR UG FEEDER',ptr:'LV1',type:'UG',maxA:300,recA:110,area:'Aditya Nagar residential',len:'~2.8 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-4',name:'11KV DARGA OH FEEDER',ptr:'LV2',type:'OH',maxA:250,recA:158,area:'Darga area',len:'~3.6 km',s24:108,s25:94,ant:120},
+  {seq:'FDR-5',name:'11KV GOLCONDA CABLE FEEDER',ptr:'LV2',type:'Cable',maxA:300,recA:246,area:'Golconda town centre',len:'~1.9 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-6',name:'11KV SHAIKPET WW FEEDER',ptr:'LV2',type:'OH',maxA:250,recA:138,area:'HMWSSB Shaikpet WW',len:'~2.4 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-7',name:'11KV SA COLONY FEEDER',ptr:'LV2',type:'OH',maxA:250,recA:92,area:'SA Colony',len:'~2.0 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-8',name:'11KV APARNA ONE FEEDER',ptr:'LV3',type:'OH',maxA:250,recA:190,area:'Aparna One township',len:'~3.0 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-9',name:'11KV DARGA UG FEEDER',ptr:'LV3',type:'UG',maxA:300,recA:120,area:'Darga underground',len:'~2.2 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-10',name:'11KV ADITYA NAGAR OH FEEDER',ptr:'LV3',type:'OH',maxA:250,recA:172,area:'Aditya Nagar (OH)',len:'~3.3 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-11',name:'11KV OU COLONY FEEDER',ptr:'LV3',type:'OH',maxA:250,recA:220,area:'Osmania Univ. Colony',len:'~2.7 km',s24:103,s25:80,ant:115},
+  {seq:'FDR-12',name:'11KV QQ TOOMBS FEEDER',ptr:'LV4',type:'OH',maxA:250,recA:165,area:'Qutb Shahi Toombs',len:'~4.8 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-13',name:'11KV BRUNDHAVAN COLONY FEEDER',ptr:'LV4',type:'OH',maxA:250,recA:180,area:'Brundhavan Colony',len:'~3.5 km',s24:114,s25:82,ant:125},
+  {seq:'FDR-14',name:'11KV NARAYANAMMA FEEDER',ptr:'LV4',type:'OH',maxA:250,recA:132,area:'Narayanamma locality',len:'~2.9 km',s24:null,s25:null,ant:null},
+  {seq:'FDR-15',name:'11KV DIAMOND HILLS FEEDER',ptr:'LV4',type:'OH',maxA:250,recA:78,area:'Diamond Hills area',len:'~3.8 km',s24:null,s25:null,ant:null},
+];
+const SE_ITEMS=[{sl:'42',n:'Helmets'},{sl:'43',n:'Gloves'},{sl:'44',n:'Safety Mats'},{sl:'45',n:'Ladder'},{sl:'46',n:'Torch Light'}];
+const SC_ITEMS=[{sl:'56',n:'CTs'},{sl:'57',n:'PTs'},{sl:'58',n:'DTRs'},{sl:'59',n:'Breakers'},{sl:'60',n:'Any Other'}];
+
+// HELPERS
+const pct=(r,m)=>Math.min(Math.round(r/m*100),100);
+const lc=v=>v>=80?'var(--dn)':v>=70?'var(--wn)':'var(--ok)';
+const ll=v=>v>=80?'Overload':v>=70?'High':'Normal';
+const lbg=v=>v>=80?'var(--rb)':v>=70?'var(--am-bg)':'var(--gn-bg)';
+const lfg=v=>v>=80?'var(--rf)':v>=70?'var(--am-fg)':'var(--gn-fg)';
+const ts=t=>t==='OH'?{bg:'#eaf3de',fg:'#3b6d11'}:t==='UG'?{bg:'#e6f1fb',fg:'#0c447c'}:{bg:'#fbeaf0',fg:'#72243e'};
+const pc=lv=>({'LV1':'#e1f5ee|#085041','LV2':'#e6f1fb|#0c447c','LV3':'#faeeda|#633806','LV4':'#fbeaf0|#72243e'}[lv]||'#eee|#333').split('|');
+
+function sw(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+
+// LOADING TAB
+function renderInc(){
+  document.getElementById('inc-body').innerHTML=INC.map(i=>`<tr>
+    <td>${i.sl}</td><td style="font-weight:500">${i.name}</td>
+    <td><span class="inc-badge" style="background:#e6f1fb;color:#0c447c">${i.type}</span></td>
+    <td><span class="${i.reg==='Regular'?'reg-b':'alt-b'}">${i.reg}</span></td>
+    <td style="font-family:var(--m);color:var(--tx3)">—</td>
+    <td style="font-family:var(--m);color:var(--tx3)">—</td>
+    <td style="font-family:var(--m);font-weight:600;color:${i.cur==='Idle'?'var(--tx3)':'var(--tx)'}">${i.cur}</td>
+    <td style="font-size:10px;color:var(--tx2)">—</td>
+  </tr>`).join('');
+}
+
+function renderLoading(){
+  document.getElementById('ptrs').innerHTML=PTRS.map(p=>{
+    const lp=pct(p.recA,p.maxA);
+    const pF=FDRS.filter(f=>f.ptr===p.lv);
+    const fSumA=pF.reduce((s,f)=>s+f.recA,0);
+    const fMaxA=pF.reduce((s,f)=>s+f.maxA,0);
+    const fTp=pct(fSumA,fMaxA);
+    const diffA=p.recA-fSumA;
+    const dC=Math.abs(diffA)<=30?'var(--ok)':Math.abs(diffA)<=60?'var(--wn)':'var(--dn)';
+    const cls=lp>=80?'over':lp>=70?'warn':'';
+    const fRows=pF.map(f=>{
+      const fp=pct(f.recA,f.maxA);
+      const fts=ts(f.type);
+      return `<tr onclick="showFeeder('${f.name}')">
+        <td><div class="fn-cell"><span class="fbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span><span class="fn">${f.name.replace(/^11KV /,'').replace(/ FEEDER$/,'')}</span></div></td>
+        <td class="fa"><span class="fa-rec" style="color:${lc(fp)}">${f.recA}</span><span class="fa-max"> / ${f.maxA}A</span></td>
+        <td class="fa" style="color:var(--tx3)">${f.s24!=null?f.s24+'A':'—'}</td>
+        <td class="fa" style="color:var(--tx3)">${f.s25!=null?f.s25+'A':'—'}</td>
+        <td class="fa" style="color:var(--wn)">${f.ant!=null?f.ant+'A':'~'+Math.round(f.maxA*0.85)+'A'}</td>
+        <td class="fb-cell"><div class="fb-wrap"><div class="fb-bg"><div class="fb-fill" style="width:${fp}%;background:${lc(fp)}"></div></div><span class="fpct" style="color:${lc(fp)}">${fp}%</span></div></td>
+      </tr>`;
+    }).join('');
+    const tallyRow=`<tr class="tr-tally">
+      <td><div class="t-name">∑ Feeder Total <span style="font-weight:400;color:var(--tx3);font-size:10px">${pF.length} feeders</span></div></td>
+      <td class="fa"><strong style="color:var(--tx)">${fSumA}</strong><span class="fa-max"> / ${fMaxA}A</span></td>
+      <td colspan="3"></td>
+      <td class="fb-cell"><div class="fb-wrap"><div class="fb-bg"><div class="fb-fill" style="width:${fTp}%;background:${lc(fTp)}"></div></div><span class="fpct" style="color:${lc(fTp)}">${fTp}%</span></div></td>
+    </tr>`;
+    return `<div class="pc ${cls}">
+      <div class="pc-top">
+        <span class="pc-id"><span class="dot d${lp>=80?'dn':lp>=70?'wn':'ok'}"></span>${p.id}</span>
+        <span class="pc-mva">${p.mva} MVA</span>
+        <span class="pc-src">${p.src}</span>
+      </div>
+      <div class="pc-body">
+        <div class="pc-col">
+          <div class="pc-col-title">Transformer Specs</div>
+          <div class="sg">
+            <div><div class="sl">HV Bay</div><div class="sv">${p.hv}</div></div>
+            <div><div class="sl">LV Bay</div><div class="sv">${p.lv}</div></div>
+            <div><div class="sl">Ratio</div><div class="sv">${p.ratio}</div></div>
+            <div><div class="sl">Vector</div><div class="sv">${p.vector}</div></div>
+            <div><div class="sl">Year</div><div class="sv">${p.yr}</div></div>
+            <div><div class="sl">Tap</div><div class="sv">${p.tap}</div></div>
+            <div><div class="sl">Oil Temp</div><div class="sv">${p.oilT}</div></div>
+            <div><div class="sl">Wdg Temp</div><div class="sv">${p.wdgT}</div></div>
+          </div>
+        </div>
+        <div class="pc-col">
+          <div class="pc-col-title">PTR Loading — Present 2026</div>
+          <div class="amp-row">
+            <div><div class="ag-l">Max Capacity</div><div class="ag-v">${p.maxA}<span class="ag-u"> A</span></div><div class="ag-sub">33 kV FLC</div></div>
+            <div><div class="ag-l">Recorded Load</div><div class="ag-v" style="color:${lc(lp)}">${p.recA}<span class="ag-u" style="color:${lc(lp)}"> A</span></div><div class="ag-sub" style="color:${lc(lp)}">33 kV recorded</div></div>
+          </div>
+          <div class="ptr-bar-row">
+            <div class="bbar"><div class="bfill" style="width:${lp}%;background:${lc(lp)}"></div></div>
+            <span class="bpct" style="color:${lc(lp)}">${lp}%</span>
+            <span class="btag" style="background:${lbg(lp)};color:${lfg(lp)}">${ll(lp)}</span>
+          </div>
+          <div class="tally-mini">
+            <div><div class="tml">PTR Rec (A)</div><div class="tmv">${p.recA}A</div></div>
+            <div><div class="tml">∑ Feeders (A)</div><div class="tmv">${fSumA}A</div></div>
+            <div><div class="tml">Diff (losses)</div><div class="tmv" style="color:${dC}">${diffA>=0?'+':''}${diffA}A</div></div>
+          </div>
+        </div>
+        <div class="pc-col">
+          <div class="pc-col-title">Loading History</div>
+          <table class="hist-table">
+            <thead><tr><th>Period</th><th>PTR Load</th></tr></thead>
+            <tbody>
+              <tr><td>Summer 2024 Max</td><td style="color:var(--tx)">${p.s24}</td></tr>
+              <tr><td>Summer 2025 Max</td><td style="color:var(--tx)">${p.s25}</td></tr>
+              <tr><td>Present 2026</td><td style="color:${lc(lp)};font-weight:700">${lp}% (${p.recA}A)</td></tr>
+              <tr><td>Anticipated Max</td><td style="color:var(--wn)">${p.ant}</td></tr>
+            </tbody>
+          </table>
+          <div class="hist-note">${p.ops}</div>
+        </div>
+      </div>
+      <div class="fdr-section">
+        <div class="fdr-head">
+          <span class="fdr-hl">11 kV Feeders on ${p.lv} — ${pF.length} feeders</span>
+          <div class="fdr-cols"><span>Rec / Max (A)</span><span>Sm. 2024</span><span>Sm. 2025</span><span>Anticipated</span><span>Load %</span></div>
+        </div>
+        <table class="ftable"><tbody>${fRows}${tallyRow}</tbody></table>
+      </div>
+    </div>`;
+  }).join('');
+
+  const tPrec=PTRS.reduce((s,p)=>s+p.recA,0),tPmax=PTRS.reduce((s,p)=>s+p.maxA,0);
+  const tFrec=FDRS.reduce((s,f)=>s+f.recA,0),tFmax=FDRS.reduce((s,f)=>s+f.maxA,0);
+  const sp=pct(tPrec,tPmax),sf=pct(tFrec,tFmax);
+  const diff=tPrec-tFrec;
+  document.getElementById('stn-tally').innerHTML=`
+    <thead><tr><th>Parameter</th><th>Max (A)</th><th>Recorded (A)</th><th>Load %</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>All 4 PTRs (Station)</strong></td><td style="font-family:var(--m)">${tPmax}</td><td style="font-family:var(--m);font-weight:700;color:${lc(sp)}">${tPrec}</td><td style="font-weight:700;font-family:var(--m);color:${lc(sp)}">${sp}%</td><td><span class="status-pill" style="background:${lbg(sp)};color:${lfg(sp)}">${ll(sp)}</span></td></tr>
+      <tr><td><strong>All 15 Feeders (sum)</strong></td><td style="font-family:var(--m)">${tFmax}</td><td style="font-family:var(--m);font-weight:700">${tFrec}</td><td style="font-weight:700;font-family:var(--m)">${sf}%</td><td style="font-size:11px;color:var(--tx2)">Aggregate of all feeders</td></tr>
+      <tr style="background:var(--sf2)"><td><strong>Station Loss (PTR − Feeders)</strong></td><td colspan="2" style="font-family:var(--m);font-weight:700;color:${Math.abs(diff)<=60?'var(--ok)':'var(--wn)'}">+${diff} A</td><td colspan="2" style="font-size:11px;color:var(--tx2)">Technical losses + metering variance</td></tr>
+    </tbody>`;
+}
+
+function showFeeder(name){
+  const f=FDRS.find(x=>x.name===name);if(!f)return;
+  const fp=pct(f.recA,f.maxA);
+  document.getElementById('modal-title').textContent=f.name;
+  document.getElementById('modal-body').innerHTML=[
+    ['Sequence',f.seq],['Voltage','11 kV'],
+    ['Type',f.type==='OH'?'Overhead (OH)':f.type==='UG'?'Underground (UG)':'Cable'],
+    ['Source PTR',f.ptr],['Area Served',f.area],['Length',f.len],
+    ['Max Capacity',`<span style="font-family:var(--m)">${f.maxA} A</span>`],
+    ['Recorded (Present)',`<span style="color:${lc(fp)};font-weight:700;font-family:var(--m)">${f.recA} A</span>`],
+    ['Summer 2024 Max',`<span style="font-family:var(--m)">${f.s24!=null?f.s24+'A':'—'}</span>`],
+    ['Summer 2025 Max',`<span style="font-family:var(--m)">${f.s25!=null?f.s25+'A':'—'}</span>`],
+    ['Anticipated Max',`<span style="font-family:var(--m);color:var(--wn)">${f.ant!=null?f.ant+'A':'~'+Math.round(f.maxA*0.85)+'A'}</span>`],
+    ['Loading',`<span style="color:${lc(fp)};font-weight:700;font-family:var(--m)">${fp}% — ${ll(fp)}</span>`],
+  ].map(([l,v])=>`<div class="dr"><span class="dl">${l}</span><span class="dv">${v}</span></div>`).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+// SUMMARY TAB — station-level aggregate only, no duplicate tables
+function renderSummary(){
+  const tPA=PTRS.reduce((s,p)=>s+p.recA,0), tPM=PTRS.reduce((s,p)=>s+p.maxA,0);
+  const tFA=FDRS.reduce((s,f)=>s+f.recA,0), tFM=FDRS.reduce((s,f)=>s+f.maxA,0);
+  const sp=pct(tPA,tPM), loss=tPA-tFA;
+
+  // KPI cards
+  document.getElementById('sum-ptr-max').textContent=tPM+' A';
+  document.getElementById('sum-ptr-rec').textContent=tPA+' A';
+  const pctEl=document.getElementById('sum-ptr-pct');
+  pctEl.textContent=sp+'%';
+  pctEl.style.color=lc(sp);
+  document.getElementById('sum-ptr-status').textContent=ll(sp);
+  document.getElementById('sum-fdr-rec').textContent=tFA+' A';
+  const lossEl=document.getElementById('sum-loss');
+  lossEl.textContent='+'+loss+' A';
+  lossEl.style.color=loss<=60?'var(--ok)':'var(--wn)';
+
+  // Overload count
+  const ovPtrs=PTRS.filter(p=>pct(p.recA,p.maxA)>=70);
+  const ovFdrs=FDRS.filter(f=>pct(f.recA,f.maxA)>=80);
+  const total=ovPtrs.length+ovFdrs.length;
+  document.getElementById('sum-overload-count').textContent=total||'None';
+  document.getElementById('sum-overload-count').style.color=total?'var(--dn)':'var(--ok)';
+  document.getElementById('sum-overload-label').textContent=total?`${ovPtrs.length} PTR, ${ovFdrs.length} feeders`:'All normal';
+
+  // Aggregate table
+  document.getElementById('rpt-agg').innerHTML=`
+    <tr>
+      <td><strong>All 4 PTRs — Station Total</strong></td>
+      <td style="font-family:var(--m)">${tPM} A</td>
+      <td style="font-family:var(--m);font-weight:700;color:${lc(sp)}">${tPA} A</td>
+      <td style="font-weight:700;font-family:var(--m);color:${lc(sp)}">${sp}%</td>
+      <td><span class="status-pill" style="background:${lbg(sp)};color:${lfg(sp)}">${ll(sp)}</span></td>
+    </tr>
+    <tr>
+      <td><strong>All 15 Feeders — Sum</strong></td>
+      <td style="font-family:var(--m)">${tFM} A</td>
+      <td style="font-family:var(--m);font-weight:600">${tFA} A</td>
+      <td style="font-weight:700;font-family:var(--m)">${pct(tFA,tFM)}%</td>
+      <td style="font-size:11px;color:var(--tx2)">Aggregate of all 15 feeders</td>
+    </tr>
+    <tr style="background:var(--sf2)">
+      <td><strong>Station Loss (PTR − Feeders)</strong></td>
+      <td colspan="2" style="font-family:var(--m);font-weight:700;color:${loss<=60?'var(--ok)':'var(--wn)'}">+${loss} A</td>
+      <td colspan="2" style="font-size:11px;color:var(--tx2)">Technical losses + metering variance</td>
+    </tr>`;
+
+  // Alerts panel
+  const alerts=[];
+  ovPtrs.forEach(p=>{
+    const lp=pct(p.recA,p.maxA);
+    alerts.push({level:lp>=80?'danger':'warn', msg:`<strong>${p.id}</strong> is at <strong>${lp}%</strong> loading (${p.recA} A / ${p.maxA} A max). ${lp>=80?'Immediate attention required.':'Consider load redistribution.'}`});
+  });
+  ovFdrs.forEach(f=>{
+    const fp=pct(f.recA,f.maxA);
+    alerts.push({level:'danger', msg:`<strong>${f.name.replace(/^11KV /,'')}</strong> feeder is overloaded at <strong>${fp}%</strong> (${f.recA} A / ${f.maxA} A max).`});
+  });
+  if(!alerts.length) alerts.push({level:'ok', msg:'All PTRs and feeders are within normal loading limits.'});
+
+  document.getElementById('alerts-panel').innerHTML=alerts.map(a=>{
+    const bg=a.level==='ok'?'var(--gn-bg)':a.level==='warn'?'var(--am-bg)':'var(--rb)';
+    const fg=a.level==='ok'?'var(--gn-fg)':a.level==='warn'?'var(--am-fg)':'var(--rf)';
+    const icon=a.level==='ok'?'✓':a.level==='warn'?'⚠':'✕';
+    return `<div style="display:flex;gap:10px;align-items:flex-start;padding:10px 14px;background:${bg};border-radius:var(--r);font-size:12px;color:${fg}">
+      <span style="font-weight:700;flex-shrink:0">${icon}</span>
+      <span style="line-height:1.6">${a.msg}</span>
+    </div>`;
+  }).join('');
+}
+
+// MAINTENANCE TAB
+function toggleMS(id){
+  const body=document.getElementById('body-'+id);
+  const chev=document.getElementById('chev-'+id);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  if(chev) chev.style.transform=open?'':'rotate(180deg)';
+}
+function triggerUpload(id){document.getElementById(id).click();}
+function addPhotos(input,gridId){
+  const grid=document.getElementById(gridId);if(!grid)return;
+  Array.from(input.files).forEach(file=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const item=document.createElement('div');
+      item.className='pi';
+      item.innerHTML=`<img src="${e.target.result}" alt="${file.name}"><div class="pi-foot"><span class="pi-cap" title="${file.name}">${file.name}</span><button class="pi-del" onclick="this.closest('.pi').remove()" title="Remove">×</button></div>`;
+      grid.appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value='';
+}
+function buildSafetyRows(){
+  document.getElementById('se-body').innerHTML=SE_ITEMS.map(x=>`<tr>
+    <td>${x.sl}</td><td><strong>${x.n}</strong></td>
+    <td><input class="mf-input" id="se-${x.sl}-a" type="number" placeholder="—" style="width:60px"></td>
+    <td><input class="mf-input" id="se-${x.sl}-r" type="number" placeholder="—" style="width:60px"></td>
+    <td><select class="mf-select" id="se-${x.sl}-c" style="width:130px"><option value="">—</option><option>Good</option><option>Serviceable</option><option>Needs replacement</option></select></td>
+    <td><input class="mf-input" id="se-${x.sl}-rem" placeholder="Remarks"></td>
+  </tr>`).join('');
+}
+function buildScrapRows(){
+  document.getElementById('scrap-body').innerHTML=SC_ITEMS.map(x=>`<tr>
+    <td>${x.sl}</td><td><strong>${x.n}</strong></td>
+    <td><input class="mf-input" id="sc-${x.sl}-det" placeholder="Details of scrap"></td>
+    <td><select class="mf-select" id="sc-${x.sl}-surv" style="width:70px"><option value="">—</option><option>Yes</option><option>No</option></select></td>
+    <td><select class="mf-select" id="sc-${x.sl}-dev" style="width:70px"><option value="">—</option><option>Yes</option><option>No</option></select></td>
+    <td><input class="mf-input" id="sc-${x.sl}-rem" placeholder="Remarks"></td>
+  </tr>`).join('');
+}
+function saveMaint(){
+  const data={};
+  document.querySelectorAll('#panel-maint input[id],#panel-maint select[id],#panel-maint textarea[id]').forEach(el=>{data[el.id]=el.value;});
+  try{localStorage.setItem('gss_maint',JSON.stringify(data));}catch(e){}
+  const m=document.getElementById('maint-msg');
+  m.textContent='✓ Saved';setTimeout(()=>{m.textContent='';},3000);
+}
+function resetMaint(){
+  if(!confirm('Reset all maintenance entries?'))return;
+  try{localStorage.removeItem('gss_maint');}catch(e){}
+  document.querySelectorAll('#panel-maint input,#panel-maint select,#panel-maint textarea').forEach(el=>{el.value='';if(el.tagName==='SELECT')el.selectedIndex=0;});
+  document.querySelectorAll('#panel-maint .photo-grid').forEach(g=>{g.innerHTML='';});
+  document.getElementById('maint-msg').textContent='Reset done';setTimeout(()=>{document.getElementById('maint-msg').textContent='';},2000);
+}
+function loadMaint(){
+  let d={};try{d=JSON.parse(localStorage.getItem('gss_maint')||'{}');}catch(e){}
+  Object.entries(d).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+}
+// ── INVENTORY ────────────────────────────────────────────────────────
+const BAY33_ITEMS=[
+  {key:'HVI',  label:'HV-I Incomer (PTR-I)'},
+  {key:'HVII', label:'HV-II Incomer (PTR-II)'},
+  {key:'HVIII',label:'HV-III Incomer (PTR-III)'},
+  {key:'HVIV', label:'HV-IV Incomer (PTR-IV)'},
+  {key:'BC1',  label:'33 kV Bus Coupler BC-1'},
+  {key:'BC2',  label:'33 kV Bus Coupler BC-2'},
+  {key:'BC3',  label:'33 kV Bus Coupler BC-3'},
+];
+function buildInventory(){
+  document.getElementById('ptr-inv-forms').innerHTML=PTRS.map(p=>`
+    <div class="ptr-inv-block">
+      <span class="ptr-inv-title">${p.id} — ${p.mva} MVA</span>
+      <div class="inv-grid">
+        <div class="inv-field"><label>Make</label><input class="mf-input" id="inv-${p.lv}-make" placeholder="ABB / Siemens / BHEL"></div>
+        <div class="inv-field"><label>Serial Number</label><input class="mf-input" id="inv-${p.lv}-sno" placeholder="Mfr. serial no."></div>
+        <div class="inv-field"><label>Rated MVA</label><input class="mf-input" id="inv-${p.lv}-mva" value="${p.mva} MVA"></div>
+        <div class="inv-field"><label>Ratio (HV/LV)</label><input class="mf-input" id="inv-${p.lv}-ratio" value="${p.ratio}"></div>
+        <div class="inv-field"><label>Vector Group</label><input class="mf-input" id="inv-${p.lv}-vector" value="${p.vector}"></div>
+        <div class="inv-field"><label>Impedance (%)</label><input class="mf-input" id="inv-${p.lv}-imp" placeholder="e.g. 6.25%"></div>
+        <div class="inv-field"><label>Year of Manufacture</label><input class="mf-input" id="inv-${p.lv}-mfyr" type="number" placeholder="YYYY"></div>
+        <div class="inv-field"><label>Year Commissioned</label><input class="mf-input" id="inv-${p.lv}-yr" value="${p.yr}"></div>
+        <div class="inv-field"><label>Cooling Type</label><select class="mf-select" id="inv-${p.lv}-cool"><option>ONAN</option><option>ONAF</option><option>OFAF</option></select></div>
+        <div class="inv-field"><label>Oil Volume (litres)</label><input class="mf-input" id="inv-${p.lv}-oil" type="number" placeholder="—"></div>
+        <div class="inv-field"><label>Tap Range</label><input class="mf-input" id="inv-${p.lv}-taprng" placeholder="±2×2.5%"></div>
+        <div class="inv-field"><label>BDV Last Test (kV)</label><input class="mf-input" id="inv-${p.lv}-bdv" type="number" placeholder="Min 40 kV"></div>
+        <div class="inv-field"><label>Last Maintenance</label><input class="mf-input" id="inv-${p.lv}-lastmaint" type="date"></div>
+        <div class="inv-field full"><label>Remarks / History</label><textarea class="mf-ta" id="inv-${p.lv}-rem" placeholder="Issues, repair history, overhaul notes…" style="min-height:50px"></textarea></div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('bay11-body').innerHTML=FDRS.map(f=>{
+    const fts=ts(f.type);
+    const [bg,fg]=pc(f.ptr);
+    return `<tr>
+      <td style="font-weight:600;font-size:10px;white-space:nowrap">${f.name.replace(/^11KV /,'')}</td>
+      <td><span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:${bg};color:${fg}">${f.ptr}</span></td>
+      <td><span class="fbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span></td>
+      <td><input class="mf-input" id="b11-${f.seq}-make" placeholder="CB Make" style="width:90px"></td>
+      <td><input class="mf-input" id="b11-${f.seq}-yr" type="number" placeholder="YYYY" style="width:64px"></td>
+      <td><input class="mf-input" id="b11-${f.seq}-ct" placeholder="200/1A" style="width:72px"></td>
+      <td><input class="mf-input" id="b11-${f.seq}-relay" placeholder="Make/Model" style="width:90px"></td>
+      <td><input class="mf-input" id="b11-${f.seq}-spec" placeholder="${f.type==='OH'?'ACSR Dog / 100A':'XLPE 3C×185mm²'}" style="min-width:120px"></td>
+      <td><input class="mf-input" id="b11-${f.seq}-rem" placeholder="Remarks"></td>
+    </tr>`;
+  }).join('');
+
+  loadInv();
+}
+
+function toggleInv(id){
+  const body=document.getElementById('body-'+id);
+  const chev=document.getElementById('chev-'+id);
+  const open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  if(chev) chev.style.transform=open?'':'rotate(180deg)';
+}
+
+function setSsPhoto(input){
+  if(!input.files[0])return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const prev=document.getElementById('ss-photo-prev');
+    prev.innerHTML=`<div style="position:relative;display:inline-block;max-width:320px"><img src="${e.target.result}" style="width:100%;border-radius:var(--r);border:0.5px solid var(--bd)"><button style="position:absolute;top:4px;right:4px;background:var(--rb);color:var(--rf);border:none;border-radius:3px;padding:2px 7px;cursor:pointer;font-size:11px" onclick="document.getElementById('ss-photo-prev').innerHTML=''">×</button></div>`;
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+function saveInv(section){
+  const data={};
+  document.querySelectorAll('#panel-inventory input[id],#panel-inventory select[id],#panel-inventory textarea[id]').forEach(el=>{data[el.id]=el.value;});
+  try{const all=JSON.parse(localStorage.getItem('gss_inv')||'{}');Object.assign(all,data);localStorage.setItem('gss_inv',JSON.stringify(all));}catch(e){}
+  const m=document.getElementById('msg-'+section);
+  if(m){m.textContent='✓ Saved';setTimeout(()=>{m.textContent='';},2500);}
+}
+
+function loadInv(){
+  let data={};try{data=JSON.parse(localStorage.getItem('gss_inv')||'{}');}catch(e){}
+  Object.entries(data).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v;});
+}
+
+// ── SLD ──────────────────────────────────────────────────────────────
+function renderSLD(){
+  const barPos=[
+    {x:50, f:'11KV GOLCONDA OH FEEDER'},
+    {x:130,f:'11KV MOTIMAHAL FEEDER'},
+    {x:204,f:'11KV ADITYA NAGAR UG FEEDER'},
+    {x:248,f:'11KV DARGA OH FEEDER'},
+    {x:295,f:'11KV GOLCONDA CABLE FEEDER'},
+    {x:360,f:'11KV SHAIKPET WW FEEDER'},
+    {x:404,f:'11KV SA COLONY FEEDER'},
+    {x:504,f:'11KV APARNA ONE FEEDER'},
+    {x:544,f:'11KV DARGA UG FEEDER'},
+    {x:612,f:'11KV ADITYA NAGAR OH FEEDER'},
+    {x:654,f:'11KV OU COLONY FEEDER'},
+    {x:724,f:'11KV QQ TOOMBS FEEDER'},
+    {x:768,f:'11KV BRUNDHAVAN COLONY FEEDER'},
+    {x:834,f:'11KV NARAYANAMMA FEEDER'},
+    {x:872,f:'11KV DIAMOND HILLS FEEDER'},
+  ];
+  const W=32;
+  document.getElementById('sld-load-bars').innerHTML=barPos.map(b=>{
+    const f=FDRS.find(x=>x.name===b.f);if(!f)return'';
+    const fp=pct(f.recA,f.maxA);
+    const col=fp>=80?'#a32d2d':fp>=70?'#ba7517':'#1d9e75';
+    return `<rect x="${b.x-W/2}" y="278" width="${W}" height="5" rx="2" fill="#e4e2dc"/>
+            <rect x="${b.x-W/2}" y="278" width="${Math.round(W*fp/100)}" height="5" rx="2" fill="${col}"/>
+            <text x="${b.x}" y="292" text-anchor="middle" font-size="7" fill="${col}" font-weight="700">${fp}%</text>`;
+  }).join('');
+
+  document.getElementById('sld-fdr-table').innerHTML=FDRS.map((f,i)=>{
+    const fp=pct(f.recA,f.maxA);
+    const fts=ts(f.type);
+    const [bg,fg]=pc(f.ptr);
+    return `<tr style="cursor:pointer" onclick="showFeeder('${f.name}')">
+      <td style="font-family:var(--m);color:var(--tx3)">${String(i+1).padStart(2,'0')}</td>
+      <td style="font-weight:600">${f.name.replace(/^11KV /,'')}</td>
+      <td><span class="fbadge" style="background:${fts.bg};color:${fts.fg}">${f.type}</span></td>
+      <td><span style="font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;background:${bg};color:${fg}">${f.ptr}</span></td>
+      <td style="font-family:var(--m)">${f.maxA} A</td>
+      <td style="font-family:var(--m);font-weight:700;color:${fp>=80?'var(--dn)':fp>=70?'var(--wn)':'var(--ok)'}">${f.recA} A</td>
+      <td><div style="display:flex;align-items:center;gap:5px"><div style="width:48px;height:4px;background:var(--sf3);border-radius:2px;overflow:hidden"><div style="width:${fp}%;height:4px;background:${fp>=80?'var(--dn)':fp>=70?'var(--wn)':'var(--ok)'};border-radius:2px"></div></div><span style="font-size:10px;font-weight:700;font-family:var(--m);color:${fp>=80?'var(--dn)':fp>=70?'var(--wn)':'var(--ok)'}">${fp}%</span></div></td>
+      <td style="font-size:10px;color:var(--tx2)">${f.area}</td>
+      <td style="font-family:var(--m);color:var(--tx3)">${f.len}</td>
+    </tr>`;
+  }).join('');
+}
+
+function showBay(bay,ptr,type,mva,relay,ct,pt,vector,yr){
+  document.getElementById('modal-title').textContent=`${bay} — ${ptr}`;
+  document.getElementById('modal-body').innerHTML=[
+    ['Bay ID',bay],['PTR / CB',ptr],['Bay Type',type],
+    ['Transformer Rating',mva],['Vector Group',vector],
+    ['Year Commissioned',yr],['Relay Type',relay],
+    ['CT Ratio',ct],['PT Ratio',pt],
+  ].map(([l,v])=>`<div class="dr"><span class="dl">${l}</span><span class="dv">${v}</span></div>`).join('');
+  document.getElementById('modal').classList.add('show');
+}
+
+// INIT
+const td=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+document.getElementById('fdate').textContent='Generated: '+td;
+document.getElementById('pf-date').textContent='Date: '+td;
+document.getElementById('maint-date').textContent='Date: '+td;
+renderInc();
+renderLoading();
+renderSummary();
+buildSafetyRows();
+buildScrapRows();
+buildInventory();
+renderSLD();
+loadMaint();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ── CHART COLOURS ─────────────────────────────────────────────────────
+const C_OK='#1d9e75', C_WN='#ba7517', C_DN='#a32d2d';
+const C_OK_A='rgba(29,158,117,0.15)', C_WN_A='rgba(186,117,23,0.15)', C_DN_A='rgba(163,45,45,0.15)';
+const PTR_COLS=['#185fa5','#0f6e56','#854f0b','#72243e'];
+const PTR_COLS_A=['rgba(24,95,165,0.18)','rgba(15,110,86,0.18)','rgba(133,79,11,0.18)','rgba(114,36,62,0.18)'];
+const chartInstances={};
+
+function lc2(v){return v>=80?C_DN:v>=70?C_WN:C_OK;}
+function lca2(v){return v>=80?C_DN_A:v>=70?C_WN_A:C_OK_A;}
+
+function pct2(r,m){return Math.min(Math.round(r/m*100),100);}
+
+// ── GAUGE DIALS (SVG-based) ────────────────────────────────────────────
+function buildGauges(){
+  const row=document.getElementById('gauge-row');
+  if(!row)return;
+  row.innerHTML=PTRS.map(p=>{
+    const pF=FDRS.filter(f=>f.ptr===p.lv);
+    const lp=pct2(p.recA,p.maxA);
+    const col=lc2(lp);
+    const r=52, cx=64, cy=64;
+    const startAngle=Math.PI*0.75, endAngle=Math.PI*2.25;
+    const total=endAngle-startAngle;
+    const filled=total*(lp/100);
+    const x1=cx+r*Math.cos(startAngle), y1=cy+r*Math.sin(startAngle);
+    const x2=cx+r*Math.cos(startAngle+filled), y2=cy+r*Math.sin(startAngle+filled);
+    const large=filled>Math.PI?1:0;
+    const bgX1=cx+r*Math.cos(startAngle), bgY1=cy+r*Math.sin(startAngle);
+    const bgX2=cx+r*Math.cos(endAngle), bgY2=cy+r*Math.sin(endAngle);
+    const isDark=window.matchMedia('(prefers-color-scheme:dark)').matches;
+    const trackCol=isDark?'#2a2a27':'#e4e2dc';
+    return `<div class="gauge-item">
+      <svg width="128" height="80" viewBox="0 0 128 82">
+        <path d="M ${bgX1.toFixed(1)} ${bgY1.toFixed(1)} A ${r} ${r} 0 1 1 ${bgX2.toFixed(1)} ${bgY2.toFixed(1)}" fill="none" stroke="${trackCol}" stroke-width="10" stroke-linecap="round"/>
+        ${lp>0?`<path d="M ${x1.toFixed(1)} ${y1.toFixed(1)} A ${r} ${r} 0 ${large} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"/>`:''}
+        <text x="64" y="58" text-anchor="middle" font-size="18" font-weight="700" fill="${col}" font-family="monospace">${lp}%</text>
+        <text x="64" y="72" text-anchor="middle" font-size="9" fill="#96968e" font-family="system-ui">${p.recA}/${p.maxA} A</text>
+      </svg>
+      <div class="gauge-label">${p.id.replace(' (PTR','<br>(PTR')}</div>
+      <div class="gauge-val" style="color:${col}">${lp>=80?'Overload':lp>=70?'High':'Normal'}</div>
+      <div class="gauge-sub">${pF.length} feeders · ${p.mva} MVA</div>
+    </div>`;
+  }).join('');
+}
+
+// ── PTR HISTORY GROUPED BAR ───────────────────────────────────────────
+function buildPtrHistChart(){
+  const ctx=document.getElementById('chart-ptr-hist');
+  if(!ctx)return;
+  if(chartInstances.ptrHist){chartInstances.ptrHist.destroy();}
+  const labels=PTRS.map(p=>p.id.replace(' (PTR-','<br>PTR-').split(' ')[0]);
+
+  function parseAmp(str){
+    if(!str)return 0;
+    const m=str.match(/\((\d+)A\)/);
+    return m?parseInt(m[1]):0;
+  }
+  const s24=PTRS.map(p=>parseAmp(p.s24));
+  const s25=PTRS.map(p=>parseAmp(p.s25));
+  const cur=PTRS.map(p=>p.recA);
+  const ant=PTRS.map(p=>parseAmp(p.ant));
+
+  chartInstances.ptrHist=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:PTRS.map(p=>p.id.replace(/ \(PTR.*/,'')),
+      datasets:[
+        {label:'Summer 2024 Max',data:s24,backgroundColor:'rgba(186,117,23,0.5)',borderColor:'#ba7517',borderWidth:1.5,borderRadius:3},
+        {label:'Summer 2025 Max',data:s25,backgroundColor:'rgba(133,79,11,0.5)',borderColor:'#854f0b',borderWidth:1.5,borderRadius:3},
+        {label:'Present 2026',data:cur,backgroundColor:PTRS.map(p=>PTR_COLS_A[PTRS.indexOf(p)]),borderColor:PTR_COLS,borderWidth:2,borderRadius:3},
+        {label:'Anticipated Max',data:ant,backgroundColor:'rgba(163,45,45,0.2)',borderColor:C_DN,borderWidth:1.5,borderRadius:3,borderDash:[4,3]},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{size:10},boxWidth:12,padding:10}},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        x:{ticks:{font:{size:10}},grid:{display:false}},
+        y:{title:{display:true,text:'Amps (A)',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(128,128,128,0.1)'},max:250}
+      }
+    }
+  });
+}
+
+// ── FEEDER HORIZONTAL BAR ─────────────────────────────────────────────
+function buildFdrBarChart(){
+  const ctx=document.getElementById('chart-fdr-bar');
+  if(!ctx)return;
+  if(chartInstances.fdrBar){chartInstances.fdrBar.destroy();}
+  const sorted=[...FDRS].sort((a,b)=>pct2(b.recA,b.maxA)-pct2(a.recA,a.maxA));
+  const labels=sorted.map(f=>f.name.replace(/^11KV /,'').replace(/ FEEDER$/,''));
+  const recData=sorted.map(f=>f.recA);
+  const maxData=sorted.map(f=>f.maxA);
+  const bgColors=sorted.map(f=>{
+    const p=pct2(f.recA,f.maxA);
+    return p>=80?'rgba(163,45,45,0.75)':p>=70?'rgba(186,117,23,0.75)':'rgba(29,158,117,0.75)';
+  });
+  const borderColors=sorted.map(f=>lc2(pct2(f.recA,f.maxA)));
+
+  chartInstances.fdrBar=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        {label:'Max Capacity (A)',data:maxData,backgroundColor:'rgba(128,128,128,0.12)',borderColor:'rgba(128,128,128,0.4)',borderWidth:1,borderRadius:3,order:2},
+        {label:'Recorded Load (A)',data:recData,backgroundColor:bgColors,borderColor:borderColors,borderWidth:1.5,borderRadius:3,order:1}
+      ]
+    },
+    options:{
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{font:{size:10},boxWidth:12}},
+        tooltip:{
+          callbacks:{
+            afterLabel(ctx){
+              const f=sorted[ctx.dataIndex];
+              const p=pct2(f.recA,f.maxA);
+              return `Loading: ${p}% · ${p>=80?'OVERLOAD':p>=70?'HIGH':'Normal'}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{title:{display:true,text:'Amps (A)',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(128,128,128,0.08)'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+}
+
+// ── TYPE DONUT ────────────────────────────────────────────────────────
+function buildTypeDonut(){
+  const ctx=document.getElementById('chart-type-donut');
+  if(!ctx)return;
+  if(chartInstances.typeDon){chartInstances.typeDon.destroy();}
+  const oh=FDRS.filter(f=>f.type==='OH').reduce((s,f)=>s+f.recA,0);
+  const ug=FDRS.filter(f=>f.type==='UG').reduce((s,f)=>s+f.recA,0);
+  const cable=FDRS.filter(f=>f.type==='Cable').reduce((s,f)=>s+f.recA,0);
+  chartInstances.typeDon=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:['Overhead (OH)','Underground (UG)','Cable'],
+      datasets:[{data:[oh,ug,cable],backgroundColor:['rgba(29,158,117,0.8)','rgba(24,95,165,0.8)','rgba(114,36,62,0.8)'],borderColor:['#1d9e75','#185fa5','#72243e'],borderWidth:2,hoverOffset:6}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:10},boxWidth:12,padding:8}},
+        tooltip:{callbacks:{label(ctx){return ` ${ctx.label}: ${ctx.raw} A`;} }}
+      }
+    }
+  });
+}
+
+// ── PTR PIE ───────────────────────────────────────────────────────────
+function buildPtrPie(){
+  const ctx=document.getElementById('chart-ptr-pie');
+  if(!ctx)return;
+  if(chartInstances.ptrPie){chartInstances.ptrPie.destroy();}
+  chartInstances.ptrPie=new Chart(ctx,{
+    type:'doughnut',
+    data:{
+      labels:PTRS.map(p=>p.id.replace(/ \(PTR.*/,'')),
+      datasets:[{data:PTRS.map(p=>p.recA),backgroundColor:PTR_COLS.map(c=>c+'cc'),borderColor:PTR_COLS,borderWidth:2,hoverOffset:6}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{
+        legend:{position:'bottom',labels:{font:{size:10},boxWidth:12,padding:8}},
+        tooltip:{callbacks:{label(ctx){return ` ${ctx.label}: ${ctx.raw} A (${Math.round(ctx.raw/PTRS.reduce((s,p)=>s+p.recA,0)*100)}%)`;} }}
+      }
+    }
+  });
+}
+
+// ── 24-HR TREND (simulated) ───────────────────────────────────────────
+const HOURS=Array.from({length:25},(_, i)=>`${String(i).padStart(2,'0')}:00`);
+const LOAD_CURVE=[0.55,0.52,0.50,0.48,0.48,0.50,0.58,0.72,0.88,0.95,0.97,0.96,0.92,0.90,0.91,0.93,0.98,1.00,0.98,0.94,0.88,0.80,0.72,0.63,0.55];
+
+function getTrendData(ptrKey){
+  const ptrs=ptrKey==='all'?PTRS:PTRS.filter(p=>p.lv===ptrKey);
+  const baseA=ptrs.reduce((s,p)=>s+p.recA,0);
+  const maxA=ptrs.reduce((s,p)=>s+p.maxA,0);
+  return {
+    ptr:LOAD_CURVE.map(v=>Math.round(baseA*v*0.98)),
+    fdr:LOAD_CURVE.map(v=>Math.round(baseA*v*0.93)),
+    max:LOAD_CURVE.map(()=>maxA)
+  };
+}
+
+function updateTrend(){
+  const key=document.getElementById('trend-ptr-sel').value;
+  if(chartInstances.trend){chartInstances.trend.destroy();}
+  const ctx=document.getElementById('chart-trend');
+  if(!ctx)return;
+  const d=getTrendData(key);
+  chartInstances.trend=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:HOURS,
+      datasets:[
+        {label:'PTR Load (A)',data:d.ptr,borderColor:'#185fa5',backgroundColor:'rgba(24,95,165,0.08)',fill:true,tension:0.4,pointRadius:2,borderWidth:2},
+        {label:'∑ Feeder Load (A)',data:d.fdr,borderColor:'#1d9e75',backgroundColor:'rgba(29,158,117,0.06)',fill:true,tension:0.4,pointRadius:2,borderWidth:2,borderDash:[4,3]},
+        {label:'Max Capacity (A)',data:d.max,borderColor:'rgba(163,45,45,0.5)',backgroundColor:'transparent',fill:false,tension:0,pointRadius:0,borderWidth:1.5,borderDash:[6,4]},
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{labels:{font:{size:10},boxWidth:12,padding:10}},
+        tooltip:{callbacks:{afterBody(items){const d=items[0];if(d){const pct=Math.round(d.raw/items[2]?.raw*100);return `Loading: ~${pct||'—'}%`;}return '';}}}
+      },
+      scales:{
+        x:{ticks:{font:{size:9},maxRotation:0,maxTicksLimit:13},grid:{color:'rgba(128,128,128,0.06)'}},
+        y:{title:{display:true,text:'Amps (A)',font:{size:10}},ticks:{font:{size:10}},grid:{color:'rgba(128,128,128,0.08)'}}
+      }
+    }
+  });
+}
+
+// ── STATUS MATRIX ─────────────────────────────────────────────────────
+function buildStatusMatrix(){
+  const el=document.getElementById('status-matrix');
+  if(!el)return;
+  el.innerHTML=PTRS.map(p=>{
+    const pF=FDRS.filter(f=>f.ptr===p.lv);
+    const ptrPct=pct2(p.recA,p.maxA);
+    const ptrBg=ptrPct>=80?'#fcebeb':ptrPct>=70?'#faeeda':'#e1f5ee';
+    const ptrBd=ptrPct>=80?'#a32d2d':ptrPct>=70?'#854f0b':'#0f6e56';
+    const ptrFg=ptrPct>=80?'#501313':ptrPct>=70?'#633806':'#085041';
+    const chips=pF.map(f=>{
+      const fp=pct2(f.recA,f.maxA);
+      const bg=fp>=80?'#fcebeb':fp>=70?'#faeeda':'#e1f5ee';
+      const bd=fp>=80?'#a32d2d':fp>=70?'#854f0b':'#0f6e56';
+      const fg=fp>=80?'#501313':fp>=70?'#633806':'#085041';
+      const nm=f.name.replace(/^11KV /,'').replace(/ FEEDER$/,'').replace(/ FEEDER/,'');
+      return `<span class="sm-chip" style="background:${bg};border-color:${bd};color:${fg}" title="${f.name} — ${f.recA}/${f.maxA}A = ${fp}%" onclick="showFeeder('${f.name}')">${nm}<br><span style="font-size:9px;opacity:.85">${fp}%</span></span>`;
+    }).join('');
+    return `<div class="sm-group">
+      <div class="sm-group-title" style="color:${ptrFg}">${p.id} — ${ptrPct}%
+        <span style="background:${ptrBg};border:1px solid ${ptrBd};color:${ptrFg};font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px">${ptrPct>=80?'Overload':ptrPct>=70?'High':'OK'}</span>
+      </div>
+      <div class="sm-chips">${chips}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── BUILD ALL CHARTS ──────────────────────────────────────────────────
+function buildAllCharts(){
+  buildGauges();
+  buildPtrHistChart();
+  buildFdrBarChart();
+  buildTypeDonut();
+  buildPtrPie();
+  updateTrend();
+  buildStatusMatrix();
+}
+
+// Charts built on first tab click (lazy) or if already active
+let chartsBuilt=false;
+const origSw=sw;
+window.sw=function(id,el){
+  origSw(id,el);
+  if(id==='charts'&&!chartsBuilt){
+    // small delay so canvas is visible before Chart.js measures
+    setTimeout(()=>{buildAllCharts();chartsBuilt=true;},60);
+  }
+};
+
+// ── DEEP LINK FROM GRID MAP ───────────────────────────────────────────
+// Usage: append ?ss=golconda to the URL from your grid map
+// The grid map can link as: golconda_ss_dashboard.html?ss=golconda
+// Or pass a hash: golconda_ss_dashboard.html#tab=charts
+(function(){
+  const params=new URLSearchParams(location.search);
+  const hash=location.hash;
+
+  // Support ?tab=loading|maint|charts|inventory|sld|summary
+  const tabParam=params.get('tab')||(hash.startsWith('#tab=')?hash.slice(5):null);
+  if(tabParam){
+    const targetTab=document.querySelector(`.tab[onclick*="sw('${tabParam}'"]`);
+    if(targetTab){
+      setTimeout(()=>{
+        targetTab.click();
+        if(tabParam==='charts') setTimeout(()=>{buildAllCharts();chartsBuilt=true;},120);
+      },100);
+    }
+  }
+
+  // Support postMessage from parent grid map iframe
+  // Grid map should call: iframeEl.contentWindow.postMessage({type:'openSS',ssId:'golconda',tab:'loading'},'*')
+  window.addEventListener('message',(e)=>{
+    if(!e.data||e.data.type!=='openSS')return;
+    const tab=e.data.tab||'loading';
+    const targetTab=document.querySelector(`.tab[onclick*="sw('${tab}'"]`);
+    if(targetTab){
+      targetTab.click();
+      if(tab==='charts') setTimeout(()=>{buildAllCharts();chartsBuilt=true;},120);
+    }
+    // Scroll to top
+    window.scrollTo(0,0);
+  });
+})();
+</script>
+</body>
