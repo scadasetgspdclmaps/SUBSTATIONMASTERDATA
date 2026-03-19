@@ -836,18 +836,16 @@ document.addEventListener('DOMContentLoaded', function(){
     <!-- ── INTERACTIVE CHARTS ── -->
     <div class="sec">
       <div class="sec-lbl">
-        <span>Interactive Load Charts &amp; Forecasting</span>
-        <span style="font-weight:400;font-size:10px;color:var(--blf)">Summer 2025 vs Mar 2026 · Per-feeder loads · Forecast for Summer 2026</span>
+        <span>Interactive Load Charts</span>
+        <span style="font-weight:400;font-size:10px;color:var(--blf)">Summer 2025 vs Mar 2026 · Per-feeder loads · Load distribution</span>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
         <button onclick="showChart('bar')" id="ct-bar" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--bl);background:var(--bl);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">📊 PTR Loading Comparison</button>
         <button onclick="showChart('feeder')" id="ct-feeder" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--bd2);background:var(--sf);color:var(--tx2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">📈 11kV Feeder Loads</button>
-        <button onclick="showChart('forecast')" id="ct-forecast" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--bd2);background:var(--sf);color:var(--tx2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">🔮 Summer 2026 Forecast</button>
         <button onclick="showChart('pie')" id="ct-pie" style="padding:6px 14px;border-radius:20px;border:0.5px solid var(--bd2);background:var(--sf);color:var(--tx2);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--f)">🥧 Load Distribution</button>
       </div>
       <div id="chart-bar" style="position:relative;height:340px"><canvas id="cv-bar"></canvas></div>
       <div id="chart-feeder" style="position:relative;height:380px;display:none"><canvas id="cv-feeder"></canvas></div>
-      <div id="chart-forecast" style="position:relative;height:360px;display:none"><canvas id="cv-forecast"></canvas></div>
       <div id="chart-pie" style="position:relative;height:360px;display:none">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;height:100%">
           <div style="position:relative"><canvas id="cv-pie1"></canvas></div>
@@ -2770,7 +2768,7 @@ function resetZoom(){ sldScale=1; const w=document.getElementById('sld-zoom-wrap
 let chartInstances = {};
 
 function showChart(type) {
-  ['bar','feeder','forecast','pie'].forEach(t => {
+  ['bar','feeder','pie'].forEach(t => {
     document.getElementById('chart-'+t).style.display = t===type ? 'block' : 'none';
     const btn = document.getElementById('ct-'+t);
     if(btn) {
@@ -3092,6 +3090,29 @@ function loadSLDPdf(input) {
     return arr;
   }
 
+
+
+  function renderSLDFeeders(){
+    const host = document.getElementById('sld-feeder-groups');
+    if(!host || !Array.isArray(FEEDERS)) return;
+    const order = ['LV-I','LV-II','LV-III','LV-IV'];
+    const grouped = order.map(lv => ({lv, items: FEEDERS.filter(f => f.lv===lv)})).filter(g => g.items.length);
+    host.innerHTML = grouped.map(g => `
+      <div style="border:0.5px solid var(--bd);border-radius:var(--rl);background:var(--sf);overflow:hidden">
+        <div style="padding:10px 12px;background:var(--sf2);border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <div style="font-size:12px;font-weight:700;color:var(--tx)">${g.lv}</div>
+          <div style="font-size:10px;color:var(--tx3)">${g.items.length} feeder${g.items.length>1?'s':''}</div>
+        </div>
+        <div style="padding:10px 12px">
+          ${g.items.map((f, idx) => `
+            <div style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:${idx===g.items.length-1?'none':'0.5px solid var(--bd)'}">
+              <div style="font-size:11px;color:var(--tx);font-weight:500">${f.seq.replace('FEEDER-','F')}. ${f.name}</div>
+              <div style="font-size:10px;color:var(--tx3);white-space:nowrap">${f.type} · ${f.recA} A</div>
+            </div>`).join('')}
+        </div>
+      </div>`).join('');
+  }
+
   async function renderSLD(){
     const loading = document.getElementById('sld-loading');
     try {
@@ -3285,9 +3306,9 @@ function loadSLDPdf(input) {
     "name": "11KV MOTIMAHAL",
     "lv": "LV-I",
     "type": "OH",
-    "maxA": 128,
+    "maxA": 120,
     "recA": 80,
-    "maxMVA": 2.44,
+    "maxMVA": 2.29,
     "recMVA": 1.52,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI21015496",
@@ -3311,9 +3332,9 @@ function loadSLDPdf(input) {
     "name": "11KV ADITYA NAGAR UG",
     "lv": "LV-I",
     "type": "UG",
-    "maxA": 63,
+    "maxA": 120,
     "recA": 34,
-    "maxMVA": 1.2,
+    "maxMVA": 2.29,
     "recMVA": 0.65,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI19102068",
@@ -3337,9 +3358,9 @@ function loadSLDPdf(input) {
     "name": "11KV DARGA OH FEEDER",
     "lv": "LV-II",
     "type": "OH",
-    "maxA": 75,
+    "maxA": 120,
     "recA": 32,
-    "maxMVA": 1.43,
+    "maxMVA": 2.29,
     "recMVA": 0.61,
     "bkrMake": "CGL",
     "bkrSr": "95077VP",
@@ -3363,9 +3384,9 @@ function loadSLDPdf(input) {
     "name": "11KV GOLKONDA CABLE FEEDER",
     "lv": "LV-II",
     "type": "Cable",
-    "maxA": 98,
+    "maxA": 120,
     "recA": 50,
-    "maxMVA": 1.87,
+    "maxMVA": 2.29,
     "recMVA": 0.95,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI19102069",
@@ -3389,9 +3410,9 @@ function loadSLDPdf(input) {
     "name": "11KV SHAIKPET FEEDER",
     "lv": "LV-II",
     "type": "OH",
-    "maxA": 108,
+    "maxA": 120,
     "recA": 68,
-    "maxMVA": 2.06,
+    "maxMVA": 2.29,
     "recMVA": 1.3,
     "bkrMake": "CGL",
     "bkrSr": "84354VP",
@@ -3415,9 +3436,9 @@ function loadSLDPdf(input) {
     "name": "11KV APARNA ONE",
     "lv": "LV-III",
     "type": "OH",
-    "maxA": 49,
+    "maxA": 120,
     "recA": 24,
-    "maxMVA": 0.93,
+    "maxMVA": 2.29,
     "recMVA": 0.46,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI21121580",
@@ -3441,9 +3462,9 @@ function loadSLDPdf(input) {
     "name": "11KV OU COLONY FEEDER",
     "lv": "LV-III",
     "type": "OH",
-    "maxA": 128,
+    "maxA": 120,
     "recA": 50,
-    "maxMVA": 2.44,
+    "maxMVA": 2.29,
     "recMVA": 0.95,
     "bkrMake": "CGL",
     "bkrSr": "46675VP",
@@ -3467,9 +3488,9 @@ function loadSLDPdf(input) {
     "name": "11KV ADITYA NAGAR FEEDER",
     "lv": "LV-III",
     "type": "OH",
-    "maxA": 86,
+    "maxA": 120,
     "recA": 58,
-    "maxMVA": 1.64,
+    "maxMVA": 2.29,
     "recMVA": 1.11,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI17076481",
@@ -3493,9 +3514,9 @@ function loadSLDPdf(input) {
     "name": "11KV DARGA UG FEEDER",
     "lv": "LV-III",
     "type": "UG",
-    "maxA": 76,
+    "maxA": 120,
     "recA": 56,
-    "maxMVA": 1.45,
+    "maxMVA": 2.29,
     "recMVA": 1.07,
     "bkrMake": "STELMEC",
     "bkrSr": "SLI20104999",
@@ -3519,9 +3540,9 @@ function loadSLDPdf(input) {
     "name": "11KV SA COLONY FEEDER",
     "lv": "LV-III",
     "type": "OH",
-    "maxA": 60,
+    "maxA": 120,
     "recA": 38,
-    "maxMVA": 1.14,
+    "maxMVA": 2.29,
     "recMVA": 0.72,
     "bkrMake": "CGL",
     "bkrSr": "124494VP",
@@ -3545,9 +3566,9 @@ function loadSLDPdf(input) {
     "name": "11KV DIAMOND HILLS",
     "lv": "LV-IV",
     "type": "OH",
-    "maxA": 80,
+    "maxA": 120,
     "recA": 52,
-    "maxMVA": 1.52,
+    "maxMVA": 2.29,
     "recMVA": 0.99,
     "bkrMake": "CGL",
     "bkrSr": "124492VP",
@@ -3571,9 +3592,9 @@ function loadSLDPdf(input) {
     "name": "11KV QQ TOMBS",
     "lv": "LV-IV",
     "type": "OH",
-    "maxA": 30,
+    "maxA": 120,
     "recA": 22,
-    "maxMVA": 0.57,
+    "maxMVA": 2.29,
     "recMVA": 0.42,
     "bkrMake": "CGL",
     "bkrSr": "\u2014",
@@ -3597,9 +3618,9 @@ function loadSLDPdf(input) {
     "name": "11KV BRUNDHAVAN COLONY FEEDER",
     "lv": "LV-IV",
     "type": "OH",
-    "maxA": 118,
+    "maxA": 120,
     "recA": 80,
-    "maxMVA": 2.25,
+    "maxMVA": 2.29,
     "recMVA": 1.52,
     "bkrMake": "CGL",
     "bkrSr": "\u2014",
@@ -3623,9 +3644,9 @@ function loadSLDPdf(input) {
     "name": "11KV NARAYANAMMA FEEDER",
     "lv": "LV-IV",
     "type": "OH",
-    "maxA": 52,
+    "maxA": 120,
     "recA": 30,
-    "maxMVA": 0.99,
+    "maxMVA": 2.29,
     "recMVA": 0.57,
     "bkrMake": "CGL",
     "bkrSr": "\u2014",
@@ -3804,6 +3825,7 @@ function loadSLDPdf(input) {
 renderPTRLoadingSummary();
 renderHierarchy();
 renderLoading();
+renderSLDFeeders();
 renderInventory();
 renderMaintenance();
 renderReports();
@@ -3962,9 +3984,10 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
   }
   window.renderForecastTab = renderForecastTab;
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded', renderForecastTab);
+    document.addEventListener('DOMContentLoaded', function(){ renderForecastTab(); renderSLDFeeders(); });
   } else {
     renderForecastTab();
+    renderSLDFeeders();
   }
 })();
 </script>
