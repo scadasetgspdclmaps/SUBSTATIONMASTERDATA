@@ -176,6 +176,23 @@ html{color-scheme:light}body{font-family:var(--f);background:var(--bg);color:var
 .rep-btn{font-size:12px;padding:5px 13px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)}
 .rep-btn:hover{background:var(--sf2);color:var(--tx)}
 
+
+
+/* REPORT SELECTOR */
+.report-filter-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px}
+.report-field{display:flex;flex-direction:column;gap:4px;min-width:190px}
+.report-field label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3)}
+.report-select{font-size:12px;padding:8px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx);font-family:var(--f);outline:none}
+.report-select:focus{border-color:var(--bl);box-shadow:0 0 0 2px var(--blb)}
+.report-mini-note{font-size:11px;color:var(--tx3);margin-top:2px}
+.report-box{border:0.5px solid var(--bd);border-radius:var(--rl);overflow:hidden;background:var(--sf)}
+.report-box-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 14px;background:var(--sf2);border-bottom:0.5px solid var(--bd)}
+.report-box-head strong{font-size:12px;color:var(--tx)}
+.report-box-head span{font-size:11px;color:var(--tx3)}
+.report-scroll{overflow:auto}
+.report-kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;padding:14px}
+.report-kv .ibox{margin-top:0}
+
 /* MODAL */
 .ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center;padding:16px}
 .ov.show{display:flex}
@@ -1403,6 +1420,36 @@ document.addEventListener('DOMContentLoaded', function(){
         <tbody id="agg-rpt"></tbody>
       </table>
     </div>
+    <div class="sec">
+      <div class="sec-lbl"><span>Custom Report Extractor</span><span style="font-weight:400">Select any tab dataset and view only the required information</span></div>
+      <div class="report-filter-bar">
+        <div class="report-field">
+          <label for="report-source">Source Tab</label>
+          <select id="report-source" class="report-select" onchange="updateReportDatasetOptions()">
+            <option value="inventory">Inventory</option>
+            <option value="loading">Loading</option>
+            <option value="forecast">Forecast</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="identity">SS Identity</option>
+            <option value="sld">Single Line Diagram</option>
+          </select>
+        </div>
+        <div class="report-field">
+          <label for="report-dataset">Required Data</label>
+          <select id="report-dataset" class="report-select" onchange="renderSelectedReport()"></select>
+        </div>
+        <div class="report-field" style="min-width:150px">
+          <label>&nbsp;</label>
+          <button class="rep-btn" onclick="renderSelectedReport()">Refresh Selection</button>
+        </div>
+      </div>
+      <div class="report-mini-note">Use this section to extract only the specific inventory, forecast, loading, maintenance or SLD data needed for printing or review.</div>
+      <div id="selected-report-wrap" class="report-box" style="margin-top:12px">
+        <div class="report-box-head"><strong>Selected Report</strong><span>Choose a source tab and dataset</span></div>
+        <div id="selected-report-output" class="report-scroll"></div>
+      </div>
+    </div>
+
     <div class="rep-grid">
       <div class="rep-card"><h3>Equipment Master Report</h3><p>Full hierarchy of all equipment from 132 kV source through to 11 kV feeders with breaker, relay and meter details.</p><button class="rep-btn" onclick="st('inventory',document.querySelector('.tab'))">View Inventory</button></div>
       <div class="rep-card"><h3>Overloaded Elements</h3><p id="ov-para">Analysing...</p><button class="rep-btn" onclick="st('loading',document.querySelectorAll('.tab')[1])">View Loading</button></div>
@@ -2120,6 +2167,191 @@ function renderInventory(){
 // ══════════════════════════════════════════════════
 // RENDER REPORTS TAB
 // ══════════════════════════════════════════════════
+
+const REPORT_DATASETS = {
+  inventory:[
+    {value:'inventory_incomers', label:'33 kV Incomers'},
+    {value:'inventory_hv', label:'HV Bay Details'},
+    {value:'inventory_ptr', label:'PTR Details'},
+    {value:'inventory_feeders', label:'11 kV Feeder Master'},
+    {value:'inventory_aux', label:'Station Auxiliaries'}
+  ],
+  loading:[
+    {value:'loading_ptr', label:'PTR Loading Summary'},
+    {value:'loading_feeders', label:'11 kV Feeder Loads'},
+    {value:'loading_critical', label:'Critical / High Load Feeders'},
+    {value:'loading_station', label:'Station Aggregate'}
+  ],
+  forecast:[
+    {value:'forecast_feeders', label:'Feeder Forecast & Remedies'},
+    {value:'forecast_ptr', label:'PTR Forecast & Remedies'},
+    {value:'forecast_transfer', label:'Transfer Suggestions'}
+  ],
+  maintenance:[
+    {value:'maintenance_earth', label:'Earth Resistance'},
+    {value:'maintenance_breakers', label:'Breaker Maintenance'},
+    {value:'maintenance_ptr', label:'PTR Maintenance'},
+    {value:'maintenance_relay', label:'Relay Testing'},
+    {value:'maintenance_battery', label:'Battery / Charger'},
+    {value:'maintenance_cap', label:'Capacitor Bank'},
+    {value:'maintenance_la', label:'Lightning Arrestors'}
+  ],
+  identity:[
+    {value:'identity_basic', label:'SS Basic Information'},
+    {value:'identity_sources', label:'Incoming Source Summary'}
+  ],
+  sld:[
+    {value:'sld_feeders', label:'LV-wise 11 kV Feeder Arrangement'},
+    {value:'sld_path', label:'Hierarchy Path Overview'}
+  ]
+};
+
+function reportStatusBadge(status){
+  const s=(status||'').toLowerCase();
+  if(['critical','overload','overloaded','high'].includes(s)) return `<span style="background:var(--amb);color:var(--amf);padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${status}</span>`;
+  if(['due','watch'].includes(s)) return `<span style="background:var(--amb);color:var(--amf);padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${status}</span>`;
+  if(['ok','normal','healthy'].includes(s)) return `<span style="background:var(--gnb);color:var(--gnf);padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${status}</span>`;
+  return `<span style="background:var(--sf3);color:var(--tx2);padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600">${status||'—'}</span>`;
+}
+
+function makeReportTable(title, subtitle, columns, rows){
+  return `
+    <div class="report-box-head"><strong>${title}</strong><span>${subtitle||''}</span></div>
+    <div class="report-scroll"><table class="dtbl"><thead><tr>${columns.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${rows || `<tr><td colspan="${columns.length}" style="text-align:center;color:var(--tx3);font-style:italic">No data available</td></tr>`}</tbody></table></div>`;
+}
+
+function makeInfoGrid(title, subtitle, items){
+  return `
+    <div class="report-box-head"><strong>${title}</strong><span>${subtitle||''}</span></div>
+    <div class="report-kv">${items.map(([k,v])=>`<div class="ibox"><div class="kl">${k}</div><div class="kv" style="font-size:18px">${v}</div></div>`).join('')}</div>`;
+}
+
+function getForecastFeederRows(){
+  return FEEDERS.map(f=>{
+    const fcA = Math.round(f.recA*1.08);
+    const fcPct = Math.round(fcA/120*100);
+    let status='Normal';
+    if(fcA>=120 || fcPct>=100) status='Critical';
+    else if(fcA>=110) status='Watch';
+    const spare = FEEDERS.filter(x=>x.seq!==f.seq && x.recA<70).sort((a,b)=>a.recA-b.recA)[0];
+    const transfer = status==='Critical' ? `${f.seq} → ${spare?spare.seq+' ('+spare.name.replace(/^11 KV /,'')+')':'Field study required'}` : 'No transfer required';
+    let remedy='Continue routine monitoring.';
+    if(status==='Watch') remedy='Record evening peak, review DT-wise loading, and prepare switching plan before summer rise.';
+    if(status==='Critical') remedy='Immediate load bifurcation / transfer, thermography of breaker and terminations, and hold new heavy releases until balancing is completed.';
+    return {f,fcA,fcPct,status,transfer,remedy};
+  });
+}
+
+function getForecastPTRRows(){
+  return PTRS_DETAIL.map(p=>{
+    const baseA=Math.max(p.sumMax25A||0,p.recA||0);
+    const fcA=Math.round(baseA*1.08);
+    const fcPct=Math.round(fcA/(p.lvFLC||656)*10000)/100;
+    const trend=(p.recA>p.sumMax25A)?'Rising above previous summer base':'Below previous summer but seasonal watch needed';
+    let remedy='Normal watch.';
+    if(fcPct>=55) remedy='Keep PTR under seasonal watch, monitor OTI/WTI, breather, bushings, and avoid shifting additional feeder load onto this PTR.';
+    if(fcPct>=65) remedy='Plan feeder balancing from this PTR, intensify temperature logging, and verify cooling path and oil health before summer peak.';
+    return {p,fcA,fcPct,trend,remedy};
+  });
+}
+
+function updateReportDatasetOptions(){
+  const src=document.getElementById('report-source').value;
+  const ds=document.getElementById('report-dataset');
+  ds.innerHTML=(REPORT_DATASETS[src]||[]).map((o,i)=>`<option value="${o.value}" ${i===0?'selected':''}>${o.label}</option>`).join('');
+  renderSelectedReport();
+}
+
+function renderSelectedReport(){
+  const ds=(document.getElementById('report-dataset')||{}).value;
+  const out=document.getElementById('selected-report-output');
+  if(!out || !ds) return;
+  let html='';
+  if(ds==='inventory_incomers'){
+    html=makeReportTable('33 kV Incomers','Inventory tab → 33 kV Incomer details',['Seq','EHT SS','Feeder','Type','Max Capacity (A)','LV Coverage','Breaker Make','Relay','Meter'],INC33.map(i=>`<tr><td>${i.seq}</td><td>${i.ehtSS}</td><td>${i.feeder}</td><td>${i.lineType}</td><td class="fnum">${i.maxCapA}</td><td>${i.lvs}</td><td>${i.bkrMake}</td><td>${i.relayMake} / ${i.relayType}</td><td>${i.mtrMake}</td></tr>`).join(''));
+  } else if(ds==='inventory_hv'){
+    html=makeReportTable('HV Bay Details','Inventory tab → HV bay breaker, relay and meter details',['HV Bay','Breaker Make','Sr.No','MFG','CTR Adopted','Relay','Meter'],HV_BAYS.map(h=>`<tr><td>${h.id}</td><td>${h.bkrMake}</td><td>${h.bkrSr}</td><td>${h.bkrMfg}</td><td>${h.ctrAdopt}</td><td>${h.relayMake} / ${h.relayType}</td><td>${h.mtrMake}</td></tr>`).join(''));
+  } else if(ds==='inventory_ptr'){
+    html=makeReportTable('PTR Details','Inventory tab → PTR technical details',['PTR','Make','Capacity','Year','Source','WTI','OTI','Remark'],PTRS_DETAIL.map(p=>`<tr><td>${p.id}</td><td>${p.ptrMake}</td><td>${p.ptrCap}</td><td>${p.yr}</td><td>${p.src}</td><td>${p.wti}°C</td><td>${p.oti}°C</td><td>${p.remark}</td></tr>`).join(''));
+  } else if(ds==='inventory_feeders'){
+    html=makeReportTable('11 kV Feeder Master','Inventory tab → feeder equipment master',['#','Feeder','PTR','Type','Breaker Make','Relay','Meter','Area'],FEEDERS.map((f,i)=>`<tr><td>${String(i+1).padStart(2,'0')}</td><td>${f.name}</td><td>${f.lv}</td><td>${f.type}</td><td>${f.bkrMake}</td><td>${f.relayMake} / ${f.relayType}</td><td>${f.mtrMake}</td><td>${f.area||'—'}</td></tr>`).join(''));
+  } else if(ds==='inventory_aux'){
+    html=makeReportTable('Station Auxiliaries','Inventory tab → auxiliaries summary',['Item','Make','Capacity / Rating','Year / Sr.No','Remark'],[
+      ['Station Transformer','ECE','100 kVA','—','11 kV / LV auxiliary supply'],
+      ['11 kV LAs','—','3 Nos','—','Station type'],
+      ['11 kV PT','—','11KV/110V','—','Available'],
+      ['Capacitor Bank','SHREEM','2 MVAR','Sr: 557777','Installed 2006'],
+      ['Battery Charger','AMARRAJA','110V DC','Sr: 32572','Station DC supply'],
+      ['RMU','—','Not Available','—','—']
+    ].map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join(''));
+  } else if(ds==='loading_ptr'){
+    html=makeReportTable('PTR Loading Summary','Loading tab → current PTR loading',['PTR','Recorded A','Recorded MVA','Loading %','Prev Summer A','Prev Summer %'],PTRS_DETAIL.map(p=>`<tr><td>${p.id}</td><td class="fnum">${p.recA}</td><td class="fnum">${p.recMVA.toFixed(2)}</td><td>${reportStatusBadge(p.recPct+'%')}</td><td class="fnum">${p.sumMax25A}</td><td class="fnum">${p.sumMax25Pct}%</td></tr>`).join(''));
+  } else if(ds==='loading_feeders'){
+    html=makeReportTable('11 kV Feeder Loads','Loading tab → feeder present loading against 120 A basis',['Feeder','PTR','Type','Recorded A','Ceiling (A)','Load %','Status'],FEEDERS.map(f=>{const lp=Math.round(f.recA/120*100); return `<tr><td>${f.seq}: ${f.name}</td><td>${f.lv}</td><td>${f.type}</td><td class="fnum">${f.recA}</td><td class="fnum">120</td><td class="fnum">${lp}%</td><td>${reportStatusBadge(lp>=100?'Critical':lp>=90?'Watch':'Normal')}</td></tr>`;}).join(''));
+  } else if(ds==='loading_critical'){
+    const critical=FEEDERS.map(f=>({...f,lp:Math.round(f.recA/120*100)})).filter(f=>f.lp>=85).sort((a,b)=>b.lp-a.lp);
+    html=makeReportTable('Critical / High Load Feeders','Loading tab → feeders requiring operational attention',['Feeder','PTR','Recorded A','Load %','Recommended Action'],critical.map(f=>`<tr><td>${f.seq}: ${f.name}</td><td>${f.lv}</td><td class="fnum">${f.recA}</td><td class="fnum">${f.lp}%</td><td>${f.lp>=100?'Immediate load transfer and no new heavy release':'Daily watch and prepare transfer path'}</td></tr>`).join(''));
+  } else if(ds==='loading_station'){
+    const totPrec=r2(PTRS_DETAIL.reduce((s,p)=>s+p.recMVA,0));
+    const totPmax=r2(PTRS_DETAIL.reduce((s,p)=>s+p.mva,0));
+    const totFrec=r2(FEEDERS.reduce((s,f)=>s+f.recMVA,0));
+    const diff=r2(totPrec-totFrec);
+    html=makeInfoGrid('Station Aggregate','Loading tab → station totals',[
+      ['PTR Installed Capacity',`${totPmax.toFixed(2)} MVA`],
+      ['PTR Recorded Load',`${totPrec.toFixed(2)} MVA`],
+      ['Feeder Recorded Sum',`${totFrec.toFixed(2)} MVA`],
+      ['Difference / Losses',`${diff>=0?'+':''}${diff.toFixed(2)} MVA`],
+      ['Total 11 kV Feeders',`${FEEDERS.length}`]
+    ]);
+  } else if(ds==='forecast_feeders'){
+    const rows=getForecastFeederRows();
+    html=makeReportTable('Feeder Forecast & Remedies','Forecast tab → feeder forecast using +8% seasonal stress',['Feeder','PTR','Present A','Forecast A','Forecast % of 120A','Status','Remedy'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td>${r.f.lv}</td><td class="fnum">${r.f.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${reportStatusBadge(r.status)}</td><td>${r.remedy}</td></tr>`).join(''));
+  } else if(ds==='forecast_ptr'){
+    const rows=getForecastPTRRows();
+    html=makeReportTable('PTR Forecast & Remedies','Forecast tab → seasonal PTR watch based on previous summer and March 2026',['PTR','Prev Summer A','Mar 2026 A','Forecast A','Forecast %','Trend','Remedy'],rows.map(r=>`<tr><td>${r.p.id}</td><td class="fnum">${r.p.sumMax25A}</td><td class="fnum">${r.p.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${r.trend}</td><td>${r.remedy}</td></tr>`).join(''));
+  } else if(ds==='forecast_transfer'){
+    const rows=getForecastFeederRows().filter(r=>r.status==='Critical' || r.status==='Watch');
+    html=makeReportTable('Transfer Suggestions','Forecast tab → suggested feeder-to-feeder relief paths',['Stressed Feeder','Present A','Forecast A','Suggested Transfer','Field Note'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td class="fnum">${r.f.recA}</td><td class="fnum">${r.fcA}</td><td>${r.transfer}</td><td>Confirm topology, voltage profile and protection coordination before execution.</td></tr>`).join(''));
+  } else if(ds==='maintenance_earth'){
+    html=makeReportTable('Earth Resistance','Maintenance tab → earth test results',['Location','Value','Date','Limit','Status'],EARTH_DATA.map(e=>`<tr><td>${e.loc}</td><td>${e.value}</td><td>${e.date}</td><td>${e.limit}</td><td>${reportStatusBadge(e.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_breakers'){
+    html=makeReportTable('Breaker Maintenance','Maintenance tab → breaker schedule and test values',['Bay / Feeder','Make','Last Date','Next Due','Close ms','Trip ms','Status'],BKR_MAINT.map(b=>`<tr><td>${b.bay}</td><td>${b.make}</td><td>${b.lastDate}</td><td>${b.nextDate}</td><td>${b.closeMs}</td><td>${b.tripMs}</td><td>${reportStatusBadge(b.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_ptr'){
+    html=makeReportTable('PTR Maintenance','Maintenance tab → transformer condition',['PTR','BDV','Oil Temp','Wdg Temp','Last Filter','Next Maint.','Status'],PTR_MAINT.map(p=>`<tr><td>${p.ptr}</td><td>${p.bdvKV}</td><td>${p.oilTemp}</td><td>${p.wdgTemp}</td><td>${p.lastFilt}</td><td>${p.nextMaint}</td><td>${reportStatusBadge(p.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_relay'){
+    html=makeReportTable('Relay Testing','Maintenance tab → relay schedule',['Bay','Make','Type','Last Test','Next Due','Trip Test','Status'],RELAY_MAINT.map(r=>`<tr><td>${r.bay}</td><td>${r.make}</td><td>${r.type}</td><td>${r.lastTest}</td><td>${r.nextDue}</td><td>${r.tripTest}</td><td>${reportStatusBadge(r.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_battery'){
+    html=makeReportTable('Battery / Charger','Maintenance tab → DC system health',['Item','Make','Capacity','Float V','Boost V','Next Due','Status'],BATT_MAINT.map(b=>`<tr><td>${b.item}</td><td>${b.make}</td><td>${b.cap}</td><td>${b.floatV}</td><td>${b.boostV}</td><td>${b.nextDue}</td><td>${reportStatusBadge(b.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_cap'){
+    html=makeReportTable('Capacitor Bank','Maintenance tab → capacitor bank condition',['Item','Make','Capacity','Last Insp.','Next Due','Capacitance','Status'],CAP_MAINT.map(c=>`<tr><td>${c.item}</td><td>${c.make}</td><td>${c.cap}</td><td>${c.lastInsp}</td><td>${c.nextDue}</td><td>${c.capacitance}</td><td>${reportStatusBadge(c.status)}</td></tr>`).join(''));
+  } else if(ds==='maintenance_la'){
+    html=makeReportTable('Lightning Arrestors','Maintenance tab → LA condition',['Location','Type','Qty','Leakage','Last Test','Next Due','Condition'],LA_MAINT.map(l=>`<tr><td>${l.loc}</td><td>${l.type}</td><td>${l.qty}</td><td>${l.leakage}</td><td>${l.lastTest}</td><td>${l.nextDue}</td><td>${l.condition}</td></tr>`).join(''));
+  } else if(ds==='identity_basic'){
+    html=makeInfoGrid('SS Basic Information','SS Identity tab → key fields',[
+      ['SS Name',document.getElementById('id-ssname')?.value||'33/11 KV GOLCONDA SS'],
+      ['SS Code',document.getElementById('id-sscode')?.value||'1103921401'],
+      ['Type of SS',document.getElementById('id-type')?.value||'Outdoor'],
+      ['Operation Circle',document.getElementById('id-circle')?.value||'Hyderabad Central'],
+      ['Operation Division',document.getElementById('id-division')?.value||'Mehdipatnam'],
+      ['Operation Sub-Division',document.getElementById('id-subdivision')?.value||'Golconda']
+    ]);
+  } else if(ds==='identity_sources'){
+    html=makeReportTable('Incoming Source Summary','SS Identity tab → incoming source allocation',['Source','Voltage','Type','Feeds LV','Recorded Max A','Date','Time'],INC33.map(i=>`<tr><td>${i.name}</td><td>${i.kv} kV</td><td>${i.type}</td><td>${i.lvs}</td><td>${i.maxRecA||'—'}</td><td>${i.maxRecDate}</td><td>${i.maxRecTime}</td></tr>`).join(''));
+  } else if(ds==='sld_feeders'){
+    const groups=['LV-I','LV-II','LV-III','LV-IV'];
+    html=makeReportTable('LV-wise 11 kV Feeder Arrangement','SLD tab → feeder arrangement used in single line diagram',['LV','No. of Feeders','Feeder Names'],groups.map(lv=>{const list=FEEDERS.filter(f=>f.lv===lv).map(f=>f.name.replace(/^11 KV /,'')).join(', '); return `<tr><td>${lv}</td><td class="fnum">${FEEDERS.filter(f=>f.lv===lv).length}</td><td>${list}</td></tr>`;}).join(''));
+  } else if(ds==='sld_path'){
+    html=makeInfoGrid('Hierarchy Path Overview','SLD / Inventory relationship',[
+      ['132 / 400 kV Sources',`${INC33.length}`],
+      ['HV Bays',`${HV_BAYS.length}`],
+      ['PTRs',`${PTRS_DETAIL.length}`],
+      ['11 kV Feeders',`${FEEDERS.length}`],
+      ['Hierarchy',`132/400 → 33 kV → HV → PTR → LV → 11 kV Feeders`]
+    ]);
+  }
+  out.innerHTML=html;
+}
+
 function renderReports(){
   document.getElementById('ptr-rpt').innerHTML = PTRS_DETAIL.map(p=>{
     const lp=pct(p.recMVA,p.mva);
@@ -3829,6 +4061,7 @@ renderSLDFeeders();
 renderInventory();
 renderMaintenance();
 renderReports();
+updateReportDatasetOptions();
 renderSafetyGrid();
 window.addEventListener('load', function(){
   if(typeof Chart !== 'undefined') buildChart('bar');
