@@ -4245,5 +4245,161 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
 })();
 </script>
 
+
+<script>
+(function(){
+  const invData = {
+    incomers: [
+      {no:'33 KV INCOMER-1', name:'ASIFNAGAR EHT SS → 33 KV SHAIKPET', type:'Regular', bkrMake:'CGL', bkrSr:'9357VP', mfg:'2024', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'ASHIDA', relayType:'ASDR140', relaySr:'7456834', meterMake:'ELSTER', meterSr:'505032518', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {no:'33 KV INCOMER-2', name:'RAYADURGAM EHT SS → 33 KV SANDYA FEEDER', type:'Regular', bkrMake:'ABB', bkrSr:'RDG3321', mfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'ABB', relayType:'REF615', relaySr:'091823', meterMake:'SECURE', meterSr:'TS094312', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {no:'33 KV INCOMER-3', name:'33KV ASIFNAGAR - GOLCONDA (ALTERNATE)', type:'Alternate', bkrMake:'BHEL', bkrSr:'ALT1132', mfg:'2012', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5111', relaySr:'ALT7451', meterMake:'ELSTER', meterSr:'ALT230145', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {no:'33 KV INCOMER-4', name:'33KV JUBILEE HILLS - GOLCONDA (ALTERNATE)', type:'Alternate', bkrMake:'CGL', bkrSr:'ALT2244', mfg:'2015', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'ALT8823', meterMake:'SECURE', meterSr:'ALT998211', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'}
+    ],
+    hv: [
+      {id:'HV-I', bkrMake:'CGL', sr:'8734VP', mfg:'2008', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5111', relaySr:'053636337', meterMake:'SECURE', meterSr:'AP54789', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {id:'HV-II', bkrMake:'CGL', sr:'2533VP', mfg:'2008', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'066527', meterMake:'ELSTER', meterSr:'023546', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {id:'HV-III', bkrMake:'CGL', sr:'3421VP', mfg:'2013', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'078432', meterMake:'ELSTER', meterSr:'041287', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'},
+      {id:'HV-IV', bkrMake:'ABB', sr:'7812VP', mfg:'2017', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'ABB', relayType:'REF615', relaySr:'091823', meterMake:'SECURE', meterSr:'TS094312', mCtr:'400/1', mPtr:'33KV/110V', cls:'0.5s', mf:'1'}
+    ],
+    ptr: [
+      {id:'PTR-I', make:'ECE', cap:'12.5 MVA', sr:'19288283', tmu:'ECE', tmuSr:'TMU-1101', oti:'50°C', wti:'52°C'},
+      {id:'PTR-II', make:'ECE', cap:'12.5 MVA', sr:'19288284', tmu:'ECE', tmuSr:'TMU-1102', oti:'48°C', wti:'50°C'},
+      {id:'PTR-III', make:'ALIND', cap:'12.5 MVA', sr:'19300561', tmu:'ALIND', tmuSr:'TMU-1103', oti:'55°C', wti:'57°C'},
+      {id:'PTR-IV', make:'ALIND', cap:'12.5 MVA', sr:'19300562', tmu:'ALIND', tmuSr:'TMU-1104', oti:'49°C', wti:'51°C'}
+    ],
+    lv: [
+      {id:'LV-I', bkrMake:'BHEL', sr:'97540', mfg:'2009', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'034527', meterMake:'ELSTER', meterSr:'09011872', mCtr:'400/1', mPtr:'11KV/110V', cls:'0.5s', mf:'1'},
+      {id:'LV-II', bkrMake:'BHEL', sr:'97541', mfg:'2009', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'034528', meterMake:'ELSTER', meterSr:'09011873', mCtr:'400/1', mPtr:'11KV/110V', cls:'0.5s', mf:'1'},
+      {id:'LV-III', bkrMake:'BHEL', sr:'97542', mfg:'2010', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'034529', meterMake:'ELSTER', meterSr:'09011874', mCtr:'400/1', mPtr:'11KV/110V', cls:'0.5s', mf:'1'},
+      {id:'LV-IV', bkrMake:'BHEL', sr:'97543', mfg:'2010', ctrAvail:'400-200/1', ctrAdopt:'400/1', relayMake:'SIEMENS', relayType:'7SR5421', relaySr:'034530', meterMake:'ELSTER', meterSr:'09011875', mCtr:'400/1', mPtr:'11KV/110V', cls:'0.5s', mf:'1'}
+    ],
+    feeders: [
+      ['11 KV GOLCONDA OH FEEDER','OH','CGL','847456VP','2000'],
+      ['11 KV MOTIMAHAL FEEDER','OH','ALSTOM','23747','1999'],
+      ['11 KV ADITYA NAGAR UG FEEDER','UG','BHEL','985775','1998'],
+      ['11 KV DARGA OH FEEDER','OH','CGL','664351VP','2002'],
+      ['11 KV GOLCONDA UG FEEDER','UG','ABB','772341','2012'],
+      ['11 KV SHAIKPET FEEDER','OH','CGL','112873VP','2016'],
+      ['11 KV APARNA ONE FEEDER','OH','ABB','APO2211','2019'],
+      ['11 KV OU COLONY FEEDER','OH','ABB','OUC7741','2017'],
+      ['11 KV ADITYA NAGAR FEEDER','OH','CGL','ADN6651','2015'],
+      ['11 KV DARGA UG FEEDER','UG','ABB','DUG5521','2018'],
+      ['11 KV SA COLONY FEEDER','OH','CGL','SAC8841','2014'],
+      ['11 KV DIAMOND HILLS FEEDER','OH','ABB','DMH2215','2013'],
+      ['11 KV QQ TOMBS FEEDER','OH','CGL','QQT5581','2011'],
+      ['11 KV BRUNDHAVAN COLONY FEEDER','OH','ABB','BRC9912','2018'],
+      ['11 KV NARAYANAMMA FEEDER','OH','ABB','NRM2811','2019']
+    ]
+  };
+
+  const maint = {
+    earth: [
+      ['PTR-I Body Earth','0.42','0.40','0.43','0.38','15.03.2026','AE/SCADA','Within limit','ok'],
+      ['PTR-II Body Earth','0.39','0.41','0.40','0.36','15.03.2026','AE/SCADA','Within limit','ok'],
+      ['PTR-III Body Earth','0.48','0.47','0.46','0.41','15.03.2026','AE/SCADA','Retest during summer peak','due'],
+      ['PTR-IV Body Earth','0.44','0.45','0.43','0.39','15.03.2026','AE/SCADA','Within limit','ok']
+    ],
+    breakers: [
+      ['HV-I','CGL / 8734VP','12.02.2026','12.08.2026','58','41','86 µΩ','5.8 bar','ok','Normal'],
+      ['HV-II','CGL / 2533VP','12.02.2026','12.08.2026','60','42','92 µΩ','5.7 bar','ok','Normal'],
+      ['LV-III','BHEL / 97542','28.02.2026','28.05.2026','66','46','108 µΩ','NA','due','Monitor contact resistance'],
+      ['FEEDER-8 OU COLONY','ABB / OUC7741','05.03.2026','05.06.2026','64','43','111 µΩ','NA','due','Peak feeder – keep under watch']
+    ],
+    ptrs: [
+      ['PTR-I','62','10.03.2026','50°C','52°C','Healthy','Healthy','Blue','15.01.2026','15.07.2026','ok'],
+      ['PTR-II','61','10.03.2026','48°C','50°C','Healthy','Healthy','Blue','15.01.2026','15.07.2026','ok'],
+      ['PTR-III','58','10.03.2026','55°C','57°C','Healthy','Healthy','Pink','20.12.2025','20.06.2026','due'],
+      ['PTR-IV','60','10.03.2026','49°C','51°C','Healthy','Healthy','Blue','20.12.2025','20.06.2026','ok']
+    ],
+    relay: [
+      ['HV-I','SIEMENS / 7SR5111','10.01.2026','10.07.2026','1.25','0.10','Pass','ok','Vendor'],
+      ['HV-II','SIEMENS / 7SR5421','10.01.2026','10.07.2026','1.25','0.10','Pass','ok','Vendor'],
+      ['LV-III','SIEMENS / 7SR5421','18.12.2025','18.06.2026','1.30','0.12','Pass','due','SCADA testing wing'],
+      ['OU COLONY','ABB / REF615','18.12.2025','18.06.2026','1.35','0.15','Pass','due','Peak feeder setting review']
+    ],
+    batt: [
+      ['110V Battery Bank','AMARA RAJA','110V/300Ah','122.4V','132V','2.24V','1.220','05.03.2026','05.09.2026','ok'],
+      ['Battery Charger','AMARA RAJA','110V DC','122.2V','131.8V','—','—','05.03.2026','05.09.2026','ok']
+    ],
+    cap: [
+      ['Capacitor Bank','SHREEM','2 MVAR','05.03.2026','05.09.2026','1.98 MVAR','>200 MΩ','ok'],
+      ['Bus PT / Metering','SECURE','11KV/110V','05.03.2026','05.09.2026','Healthy','>200 MΩ','ok']
+    ],
+    la: [
+      ['33 KV Yard','Station Type LA','3','0.42 mA','128','03.03.2026','03.09.2026','Healthy'],
+      ['11 KV Bus','Station Type LA','3','0.38 mA','98','03.03.2026','03.09.2026','Healthy']
+    ],
+    sched: [
+      ['Earth resistance testing','15.03.2026','15.09.2026','Half-yearly','ok'],
+      ['Breaker mechanism test','28.02.2026','28.05.2026','Quarterly','due'],
+      ['PTR oil BDV / thermography','10.03.2026','10.06.2026','Quarterly','due'],
+      ['Relay secondary injection test','18.12.2025','18.06.2026','Half-yearly','due'],
+      ['Battery bank discharge check','05.03.2026','05.09.2026','Half-yearly','ok'],
+      ['Capacitor bank inspection','05.03.2026','05.09.2026','Half-yearly','ok'],
+      ['Lightning arrestor leakage test','03.03.2026','03.09.2026','Half-yearly','ok'],
+      ['Summer peak feeder thermography','01.03.2026','25.04.2026','Seasonal','overdue']
+    ]
+  };
+
+  function badge(s){
+    if(s==='ok') return '<span class="maint-status ms-ok">OK</span>';
+    if(s==='due') return '<span class="maint-status ms-due">Due</span>';
+    return '<span class="maint-status ms-overdue">Overdue</span>';
+  }
+
+  function fillInventory(){
+    const inc = document.getElementById('inc33-inv-body');
+    if(inc) inc.innerHTML = invData.incomers.map(r=>`<tr><td><strong>${r.no}</strong></td><td>${r.name}</td><td>${r.type}</td><td>${r.bkrMake}</td><td>${r.bkrSr}</td><td>${r.mfg}</td><td>${r.ctrAvail}</td><td>${r.ctrAdopt}</td><td>${r.relayMake}</td><td>${r.relayType}</td><td>${r.relaySr}</td><td>${r.meterMake}</td><td>${r.meterSr}</td><td>${r.mCtr}</td><td>${r.mPtr}</td><td>${r.cls}</td><td>${r.mf}</td></tr>`).join('');
+    const hv = document.getElementById('hv-inv');
+    if(hv) hv.innerHTML = invData.hv.map(r=>`<tr><td><strong>${r.id}</strong></td><td>${r.bkrMake}</td><td>${r.sr}</td><td>${r.mfg}</td><td>${r.ctrAvail}</td><td>${r.ctrAdopt}</td><td>${r.relayMake}</td><td>${r.relayType}</td><td>${r.relaySr}</td><td>${r.meterMake}</td><td>${r.meterSr}</td><td>${r.mCtr}</td><td>${r.mPtr}</td><td>${r.cls}</td><td>${r.mf}</td></tr>`).join('');
+    const ptr = document.getElementById('ptr-inv');
+    if(ptr) ptr.innerHTML = invData.ptr.map(r=>`<tr><td><strong>${r.id}</strong></td><td>${r.make}</td><td>${r.cap}</td><td>${r.sr}</td><td>${r.tmu}</td><td>${r.tmuSr}</td><td>${r.oti}</td><td>${r.wti}</td></tr>`).join('');
+    const lv = document.getElementById('lv-inv');
+    if(lv) lv.innerHTML = invData.lv.map(r=>`<tr><td><strong>${r.id}</strong></td><td>${r.bkrMake}</td><td>${r.sr}</td><td>${r.mfg}</td><td>${r.ctrAvail}</td><td>${r.ctrAdopt}</td><td>${r.relayMake}</td><td>${r.relayType}</td><td>${r.relaySr}</td><td>${r.meterMake}</td><td>${r.meterSr}</td><td>${r.mCtr}</td><td>${r.mPtr}</td><td>${r.cls}</td><td>${r.mf}</td></tr>`).join('');
+    const fi = document.getElementById('fdr-inv');
+    if(fi) fi.innerHTML = invData.feeders.map((r,i)=>`<tr><td><strong>FEEDER-${i+1}: ${r[0]}</strong></td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>200/1</td><td>200/1</td><td>${r[2]==='ABB'?'ABB':'CGL'}</td><td>${r[1]==='UG'?'REF615':'7SR5111'}</td><td>RL${String(i+1).padStart(4,'0')}</td><td>${i%2===0?'SECURE':'ELSTER'}</td><td>MT${String(i+1).padStart(5,'0')}</td><td>200/1</td><td>11KV/110V</td><td>0.5s</td><td>1</td></tr>`).join('');
+  }
+
+  function fillMaintenance(){
+    const eb = document.getElementById('earth-prev-body');
+    if(eb) eb.innerHTML = maint.earth.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${badge(r[8])}</td><td></td></tr>`).join('');
+    const bb = document.getElementById('bkr-maint-body');
+    if(bb) bb.innerHTML = maint.breakers.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${badge(r[8])}</td><td>${r[9]}</td><td></td></tr>`).join('');
+    const pb = document.getElementById('ptr-maint-body');
+    if(pb) pb.innerHTML = maint.ptrs.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]} kV</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${r[9]}</td><td>${badge(r[10])}</td><td></td></tr>`).join('');
+    const rb = document.getElementById('relay-maint-body');
+    if(rb) rb.innerHTML = maint.relay.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${badge(r[7])}</td><td>${r[8]}</td><td></td></tr>`).join('');
+    const bat = document.getElementById('batt-maint-body');
+    if(bat) bat.innerHTML = maint.batt.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td>${r[8]}</td><td>${badge(r[9])}</td><td></td></tr>`).join('');
+    const cap = document.getElementById('cap-maint-body');
+    if(cap) cap.innerHTML = maint.cap.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${badge(r[7])}</td><td></td></tr>`).join('');
+    const la = document.getElementById('la-maint-body');
+    if(la) la.innerHTML = maint.la.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td>${r[6]}</td><td>${r[7]}</td><td></td></tr>`).join('');
+
+    const sched = document.getElementById('maint-sched');
+    if(sched) sched.innerHTML = maint.sched.map(r=>`<div class="maint-sched-card" style="border-left:3px solid ${r[4]==='ok'?'var(--ok)':r[4]==='due'?'var(--wn)':'var(--dg)'}"><div class="msc-title">${r[0]}</div><div class="msc-date">Last: ${r[1]} → Next: <strong>${r[2]}</strong></div><div style="display:flex;align-items:center;justify-content:space-between"><span class="msc-freq">${r[3]}</span>${badge(r[4])}</div></div>`).join('');
+
+    const logData = {
+      'log-earth':[ ['15.03.2026','PTR-I to PTR-IV', ['R:0.42Ω','Y:0.40Ω','B:0.43Ω','N:0.38Ω']], ['15.03.2026','Earth pit audit', ['4 pits tested','1 pit watering suggested']] ],
+      'log-bkr':[ ['28.02.2026','LV-III breaker', ['Close:66ms','Trip:46ms','Res:108µΩ']], ['05.03.2026','OU Colony feeder', ['Peak feeder','Contact cleaning advised']] ],
+      'log-ptr':[ ['10.03.2026','PTR-III', ['BDV:58kV','OTI:55°C','WTI:57°C']], ['10.03.2026','PTR-I', ['BDV:62kV','Cooling:Normal']] ],
+      'log-relay':[ ['18.12.2025','LV-III / OU Colony', ['Secondary injection done','Trip test pass']], ['10.01.2026','HV relays', ['Settings verified']] ],
+      'log-batt':[ ['05.03.2026','Battery bank', ['Float:122.4V','Boost:132V','Cell:2.24V']], ['05.03.2026','Charger', ['Output healthy']] ],
+      'log-cap':[ ['05.03.2026','Capacitor bank', ['2MVAR healthy','IR > 200MΩ']], ['05.03.2026','Bus PT', ['Visual inspection done']] ],
+      'log-la':[ ['03.03.2026','33KV / 11KV LA', ['Leakage normal','Counter verified']], ['03.03.2026','Surge counter check', ['No anomaly']] ]
+    };
+    Object.entries(logData).forEach(([id, rows])=>{
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = rows.map(r=>`<div class="maint-log-entry"><div class="mle-head"><span class="mle-title">${r[1]}</span><span class="mle-date">${r[0]}</span></div><div class="mle-vals">${r[2].map(v=>`<span class="mle-val">${v}</span>`).join('')}</div></div>`).join('');
+    });
+  }
+
+  function runPatch(){ fillInventory(); fillMaintenance(); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', ()=>setTimeout(runPatch,600));
+  else setTimeout(runPatch,600);
+})();
+</script>
+
 </body>
 </html>
