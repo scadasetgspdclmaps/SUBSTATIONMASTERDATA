@@ -290,21 +290,18 @@ select.mi{cursor:pointer}
 @media(max-width:600px){.maint-new-body{grid-template-columns:1fr}.maint-grid{grid-template-columns:1fr 1fr}.maint-sched-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.pg-wrap{padding:14px 10px 44px}.kpi-row{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:repeat(2,1fr)}.tally-strip{grid-template-columns:1fr 1fr}.id-row{grid-template-columns:1fr 1fr}.ptr-form-row{grid-template-columns:1fr 1fr}.id-kpi{min-width:50%}}
 
-/* ── FORECAST TAB ADDITIONS ── */
-.forecast-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.forecast-card{background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--rl);padding:12px 14px;box-shadow:0 2px 8px rgba(21,101,192,.06)}
-.forecast-k{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:4px}
-.forecast-v{font-size:22px;font-weight:700;color:var(--tx);line-height:1.1}
-.forecast-s{font-size:11px;color:var(--tx2);margin-top:4px}
-.badge-watch{background:var(--amb);color:var(--amf)}
-.badge-critical{background:var(--rb);color:var(--rf)}
-.badge-normal{background:var(--gnb);color:var(--gnf)}
-.blink-red{animation:forecastBlink 1.1s infinite;border-left:4px solid var(--dg)!important}
-.blink-chip{animation:forecastBlink 1.1s infinite}
-@keyframes forecastBlink{0%,100%{box-shadow:0 0 0 rgba(192,57,43,0);opacity:1}50%{box-shadow:0 0 0 3px rgba(192,57,43,.18);opacity:.78}}
-.forecast-note{padding:12px 14px;border-radius:var(--r);border:0.5px solid var(--bd);background:var(--sf2);font-size:12px;color:var(--tx2);line-height:1.65}
-.transfer-path{font-weight:700;color:var(--tx)}
-.transfer-amt{font-family:var(--m);font-size:11px;font-weight:700}
+/* Forecast additions */
+.blink-forecast-critical{animation:forecastBlink 1s infinite;background:rgba(192,57,43,.12)!important;}
+@keyframes forecastBlink{0%,100%{box-shadow:inset 0 0 0 9999px rgba(192,57,43,.10)}50%{box-shadow:inset 0 0 0 9999px rgba(192,57,43,.22)}}
+.fc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:16px}
+.fc-card{background:var(--sf);border:0.5px solid var(--bd);border-left:4px solid var(--bl);border-radius:var(--rl);padding:12px 14px}
+.fc-card h3{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:4px}
+.fc-card .v{font-size:24px;font-weight:700;color:var(--tx)}
+.fc-card .s{font-size:11px;color:var(--tx2);margin-top:2px}
+.forecast-note{padding:12px 14px;border:0.5px solid var(--bd);border-radius:var(--r);background:linear-gradient(135deg,var(--sf2),var(--sf));font-size:12px;color:var(--tx2);line-height:1.6}
+.remedy-cell{font-size:11px;line-height:1.5;color:var(--tx2);min-width:300px}
+.path-cell{font-size:11px;font-weight:600;color:var(--blf);min-width:220px}
+.small-muted{font-size:11px;color:var(--tx3)}
 
 </style>
 
@@ -639,9 +636,9 @@ document.addEventListener('DOMContentLoaded', function(){
     <button class="tab" onclick="st('sld',this)">Single Line Diagram</button>
     <button class="tab" onclick="st('inventory',this)">SS Inventory / Master Data</button>
     <button class="tab" onclick="st('loading',this)">Loading Details</button>
-    <button class="tab" onclick="st('forecast',this)">Forecast</button>
     <button class="tab" onclick="st('maintenance',this)">Maintenance</button>
     <button class="tab" onclick="st('reports',this)">Reports of SS</button>
+    <button class="tab" onclick="st('forecast',this)">Forecast</button>
   </div>
 
   <!-- ══════════════════════════════════════
@@ -949,93 +946,6 @@ document.addEventListener('DOMContentLoaded', function(){
           </tr></thead>
           <tbody id="feeder-load-body"></tbody>
           <tfoot id="feeder-load-foot"></tfoot>
-        </table>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- ══════════════════════════════════════
-       TAB FORECAST — PLANNING / REDISTRIBUTION
-       ══════════════════════════════════════ -->
-  <div class="panel" id="panel-forecast">
-
-    <div class="sec">
-      <div class="sec-lbl">
-        <span>Forecast Summary</span>
-        <span style="font-weight:400;font-size:10px">Auto-calculated from live feeder currents with 120 A feeder ceiling</span>
-      </div>
-      <div id="forecast-summary-cards" class="forecast-cards"></div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-lbl">
-        <span>Live & Forecast Feeder Position</span>
-        <span style="font-weight:400;font-size:10px">Live +10% and +20% growth with historical-peak reference</span>
-      </div>
-      <div class="forecast-note" id="forecast-note-box" style="margin-bottom:12px"></div>
-      <div style="overflow-x:auto">
-        <table class="dtbl">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Feeder</th>
-              <th>LV</th>
-              <th>Type</th>
-              <th>Live A</th>
-              <th>Historical Max A</th>
-              <th>Forecast +10%</th>
-              <th>Forecast +20%</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="forecast-feeder-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-lbl">
-        <span>Suggested Feeder-to-Feeder Transfer Paths</span>
-        <span style="font-weight:400;font-size:10px">Priority based on same-LV spare margin first, then other low-loaded feeders</span>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="dtbl">
-          <thead>
-            <tr>
-              <th>Priority</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Suggested Transfer</th>
-              <th>Reason</th>
-              <th>Implementation Note</th>
-            </tr>
-          </thead>
-          <tbody id="forecast-transfer-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="sec">
-      <div class="sec-lbl">
-        <span>PTR Forecast Watch</span>
-        <span style="font-weight:400;font-size:10px">PTR planning view under 10–20% feeder demand rise</span>
-      </div>
-      <div style="overflow-x:auto">
-        <table class="dtbl">
-          <thead>
-            <tr>
-              <th>PTR / LV</th>
-              <th>Present A</th>
-              <th>Present %</th>
-              <th>Forecast +10%</th>
-              <th>Forecast +20%</th>
-              <th>Status</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="forecast-ptr-body"></tbody>
         </table>
       </div>
     </div>
@@ -1500,6 +1410,80 @@ document.addEventListener('DOMContentLoaded', function(){
       <div class="rep-card"><h3>Overloaded Elements</h3><p id="ov-para">Analysing...</p><button class="rep-btn" onclick="st('loading',document.querySelectorAll('.tab')[1])">View Loading</button></div>
       <div class="rep-card"><h3>Print Full Report</h3><p>Prints all tabs: hierarchy, loading details, inventory, and reports in a single printout.</p><button class="rep-btn" onclick="window.print()">⎙ Print All</button></div>
     </div>
+  </div>
+
+
+  <div class="panel" id="panel-forecast">
+
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>Forecast Assumptions & Seasonal Risk</span>
+        <span style="font-weight:400">Fuel-related demand shift · Forecast uses present live feeder loading and seasonal PTR history</span>
+      </div>
+      <div class="forecast-note">
+        <strong>Operating basis used:</strong> 11 kV feeders are checked against a <strong>120 A operational ceiling</strong>. Forecast loading is computed from the <strong>present recorded feeder load</strong> with an <strong>+8% summer stress factor</strong>. PTR forecast compares the <strong>previous summer peak</strong> and the <strong>March 2026 recorded load</strong>, then applies the same summer stress factor to the higher of the two. This forecast should be read as a planning layer for increased electricity consumption under prevailing fuel issues.
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>Forecast Dashboard</span>
+        <span style="font-weight:400">Auto-generated from existing dashboard data</span>
+      </div>
+      <div id="forecast-kpis" class="fc-grid"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>Feeder Forecast, Transfer Paths & Remedies</span>
+        <span style="font-weight:400">Critical feeders are highlighted in red and mapped to receiving feeders with spare margin</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead>
+            <tr>
+              <th>Feeder</th>
+              <th>PTR</th>
+              <th>Type</th>
+              <th>Present Load (A)</th>
+              <th>120 A Ceiling</th>
+              <th>Forecast Summer 2026 (A)</th>
+              <th>Forecast Status</th>
+              <th>Suggested Transfer Path</th>
+              <th>Forecast Remedy / Field Action</th>
+            </tr>
+          </thead>
+          <tbody id="forecast-feeder-body"></tbody>
+        </table>
+      </div>
+      <div class="small-muted" style="margin-top:10px">Transfer paths are rule-based suggestions using currently low-loaded feeders in the dashboard. Actual execution shall be finalized only after network feasibility, voltage profile, protection coordination and field switching confirmation.</div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>PTR Seasonal Forecast & Remedies</span>
+        <span style="font-weight:400">Includes previous summer trend to guide preventive steps</span>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dtbl">
+          <thead>
+            <tr>
+              <th>PTR</th>
+              <th>Previous Summer Peak (A)</th>
+              <th>Previous Summer %</th>
+              <th>Mar 2026 Recorded (A)</th>
+              <th>Mar 2026 %</th>
+              <th>Forecast Summer 2026 (A)</th>
+              <th>Forecast %</th>
+              <th>Trend</th>
+              <th>Forecast Remedy / Preventive Action</th>
+            </tr>
+          </thead>
+          <tbody id="forecast-ptr-body"></tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
 
   <div class="foot">
@@ -3815,311 +3799,6 @@ function loadSLDPdf(input) {
 
 
 // ══════════════════════════════════════════════════
-// FORECAST ENGINE / LIVE FEEDER PATCH
-// ══════════════════════════════════════════════════
-const FEEDER_OPERATING_LIMIT = 120;
-const FEEDER_WATCH_LEVEL = 100;
-const FEEDER_NEAR_LEVEL = 110;
-const FEEDER_TRANSFER_TARGET = 90;
-
-function normalizeFeederName(v){
-  return String(v||'')
-    .toUpperCase()
-    .replace(/\b11\s*KV\b/g,'')
-    .replace(/\bFEEDER\b/g,'')
-    .replace(/\bWATER\s*WORKS\b/g,'SHAIKPET')
-    .replace(/\bOH\b/g,'OH')
-    .replace(/\bUG\b/g,'UG')
-    .replace(/TOOMBS/g,'TOMBS')
-    .replace(/[\.\-_/]/g,' ')
-    .replace(/\s+/g,' ')
-    .trim();
-}
-function parseAmp(v){
-  if(v==null || v==='—') return 0;
-  const m = String(v).match(/-?\d+(\.\d+)?/);
-  return m ? Number(m[0]) : 0;
-}
-function ampToMVA(a){
-  return Number((Math.sqrt(3) * 11 * Number(a||0) / 1000).toFixed(2));
-}
-const WORKBOOK_FEEDER_LIVE = [
-  {name:'11KV GOLKONDA OH FEEDER', lv:'LV-I',   type:'OH', liveA:70, peakA:120, minA:62},
-  {name:'11KV MOTIMAHAL',          lv:'LV-I',   type:'OH', liveA:80, peakA:128, minA:68},
-  {name:'11KV ADITYA NAGAR UG',    lv:'LV-I',   type:'UG', liveA:34, peakA:63,  minA:30},
-  {name:'11KV DARGA OH FEEDER',    lv:'LV-II',  type:'OH', liveA:32, peakA:75,  minA:36},
-  {name:'11KV GOLKONDA CABLE FEEDER', lv:'LV-II',type:'UG', liveA:50, peakA:98, minA:44},
-  {name:'11KV SHAIKPET FEEDER',    lv:'LV-II',  type:'OH', liveA:68, peakA:108, minA:66},
-  {name:'11KV APARNA ONE',         lv:'LV-III', type:'UG', liveA:24, peakA:49,  minA:20},
-  {name:'11KV OU COLONY FEEDER',   lv:'LV-III', type:'OH', liveA:50, peakA:128, minA:50},
-  {name:'11KV ADITYA NAGAR FEEDER',lv:'LV-III', type:'OH', liveA:58, peakA:86,  minA:46},
-  {name:'11KV DARGA UG FEEDER',    lv:'LV-III', type:'UG', liveA:56, peakA:76,  minA:32},
-  {name:'11KV SA COLONY FEEDER',   lv:'LV-III', type:'OH', liveA:38, peakA:60,  minA:34},
-  {name:'11KV DIAMOND HILLS',      lv:'LV-IV',  type:'OH', liveA:52, peakA:80,  minA:46},
-  {name:'11KV QQ TOMBS',           lv:'LV-IV',  type:'OH', liveA:22, peakA:30,  minA:20},
-  {name:'11KV BRUNDHAVAN COLONY FEEDER', lv:'LV-IV', type:'OH', liveA:80, peakA:118, minA:66},
-  {name:'11KV NARAYANAMMA FEEDER', lv:'LV-IV',  type:'OH', liveA:30, peakA:52,  minA:20}
-];
-
-function applyWorkbookFeederPatch(){
-  const wbMap = Object.fromEntries(WORKBOOK_FEEDER_LIVE.map(f=>[normalizeFeederName(f.name), f]));
-  FEEDERS.forEach((f, idx)=>{
-    const key = normalizeFeederName(f.name);
-    const alt = normalizeFeederName(f.name.replace(/\bOH\b/g,'').replace(/\bUG\b/g,''));
-    const hit = wbMap[key] || wbMap[alt];
-    if(!hit) return;
-    f.name = hit.name.replace(/\s+/g,' ').trim();
-    f.lv = hit.lv;
-    f.type = hit.type;
-    f.liveA = hit.liveA;
-    f.histMaxA = hit.peakA;
-    f.minA = hit.minA;
-    f.recA = hit.liveA;
-    f.maxA = hit.peakA;
-    f.recMVA = ampToMVA(hit.liveA);
-    f.maxMVA = ampToMVA(hit.peakA);
-  });
-  // Add workbook-only feeders if any are missing in original FEEDERS array.
-  WORKBOOK_FEEDER_LIVE.forEach(hit=>{
-    const exists = FEEDERS.some(f=>normalizeFeederName(f.name)===normalizeFeederName(hit.name));
-    if(!exists){
-      FEEDERS.push({
-        seq:`FEEDER-${FEEDERS.length+1}`,
-        name:hit.name.replace(/\s+/g,' ').trim(),
-        lv:hit.lv, type:hit.type, liveA:hit.liveA, histMaxA:hit.peakA, minA:hit.minA,
-        recA:hit.liveA, maxA:hit.peakA, recMVA:ampToMVA(hit.liveA), maxMVA:ampToMVA(hit.peakA),
-        bkrMake:'—', bkrSr:'—', bkrMfg:'—', ctrAvail:'—', ctrAdopt:'—', relayMake:'—', relayType:'—',
-        relaySr:'—', mtrMake:'—', mtrSr:'—', mCtr:'—', mPtr:'—', mClass:'—', mMF:'1', area:'—', len:'—'
-      });
-    }
-  });
-}
-applyWorkbookFeederPatch();
-
-function getFeederStatusNum(f){
-  const a = Number(f.liveA ?? f.recA ?? 0);
-  return a >= FEEDER_OPERATING_LIMIT ? 'overload' : a >= FEEDER_NEAR_LEVEL ? 'high' : 'normal';
-}
-function getFeederStatusLabel(v){
-  return v === 'overload' ? 'Overloaded' : v === 'high' ? 'Near Limit' : 'Normal';
-}
-function getFeederOperatingBand(a){
-  a = Number(a||0);
-  if(a >= FEEDER_OPERATING_LIMIT) return {code:'critical', label:'Critical', cls:'badge-critical'};
-  if(a >= FEEDER_NEAR_LEVEL) return {code:'near', label:'Near limit', cls:'badge-watch'};
-  if(a >= FEEDER_WATCH_LEVEL) return {code:'watch', label:'Watch', cls:'badge-watch'};
-  return {code:'normal', label:'Normal', cls:'badge-normal'};
-}
-function getForecastBaseA(f){
-  return Math.max(Number(f.liveA ?? f.recA ?? 0), Number(f.histMaxA ?? f.maxA ?? 0));
-}
-function forecastA(f, growth){
-  return Number((getForecastBaseA(f) * (1 + growth)).toFixed(1));
-}
-function htmlEscape(s){
-  return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
-function getActionText(f){
-  const live = Number(f.liveA ?? f.recA ?? 0);
-  const fc20 = forecastA(f, 0.20);
-  if(fc20 >= FEEDER_OPERATING_LIMIT){
-    return 'Prepare transfer path, daily peak log, thermography, restrict additional heavy load.';
-  }
-  if(live >= FEEDER_WATCH_LEVEL || forecastA(f, 0.10) >= FEEDER_NEAR_LEVEL){
-    return 'Watch feeder closely during evening peak; keep switching plan ready.';
-  }
-  return 'Healthy margin available; retain as support / balancing candidate.';
-}
-function getForecastPriorityScore(f){
-  const fc20 = forecastA(f,0.20), fc10 = forecastA(f,0.10), live = Number(f.liveA ?? f.recA ?? 0);
-  return (fc20 - FEEDER_OPERATING_LIMIT) * 10 + (fc10 - FEEDER_NEAR_LEVEL) * 2 + live;
-}
-function suggestTransferPaths(){
-  const rows = [];
-  const stressed = FEEDERS
-    .map(f=>({
-      ...f,
-      over20: Math.max(0, forecastA(f,0.20)-FEEDER_OPERATING_LIMIT),
-      over10: Math.max(0, forecastA(f,0.10)-FEEDER_OPERATING_LIMIT),
-      live:Number(f.liveA ?? f.recA ?? 0)
-    }))
-    .filter(f=>f.over20>0 || f.live>=FEEDER_NEAR_LEVEL || f.over10>0)
-    .sort((a,b)=>getForecastPriorityScore(b)-getForecastPriorityScore(a));
-
-  stressed.forEach(src=>{
-    const need = Math.max(src.over20, Math.max(0, src.live - FEEDER_TRANSFER_TARGET), src.over10);
-    if(need<=0) return;
-    const sameLV = FEEDERS.filter(t=>t.name!==src.name && t.lv===src.lv).map(t=>({...t, spare:Math.max(0, FEEDER_TRANSFER_TARGET - Number(t.liveA ?? t.recA ?? 0))}));
-    const otherLV = FEEDERS.filter(t=>t.name!==src.name && t.lv!==src.lv).map(t=>({...t, spare:Math.max(0, FEEDER_TRANSFER_TARGET - Number(t.liveA ?? t.recA ?? 0))}));
-    const cands = sameLV.sort((a,b)=>b.spare-a.spare).concat(otherLV.sort((a,b)=>b.spare-a.spare)).filter(t=>t.spare>0);
-    let remaining = need;
-    cands.forEach(t=>{
-      if(remaining<=0) return;
-      const shift = Math.min(remaining, t.spare);
-      if(shift<=0) return;
-      rows.push({
-        priority: rows.length+1,
-        from: src,
-        to: t,
-        amt: Number(shift.toFixed(1)),
-        reason: src.lv===t.lv ? 'Same LV with spare margin' : 'Cross-LV support candidate with low live current',
-        note: src.lv===t.lv ? 'Can be evaluated first through sectionalising / network rearrangement.' : 'Use tie / back-feed only after protection, voltage-drop and switching feasibility check.'
-      });
-      remaining = Number((remaining-shift).toFixed(1));
-    });
-    if(remaining>0){
-      rows.push({
-        priority: rows.length+1,
-        from: src,
-        to: {name:'No immediate spare path identified', lv:'—'},
-        amt: Number(remaining.toFixed(1)),
-        reason:'Residual stress after available support feeders',
-        note:'Consider DT bifurcation, mobile support, or new outgoing path if this scenario persists.'
-      });
-    }
-  });
-
-  return rows.slice(0,12);
-}
-function renderForecastTab(){
-  const cards = document.getElementById('forecast-summary-cards');
-  const body = document.getElementById('forecast-feeder-body');
-  const transferBody = document.getElementById('forecast-transfer-body');
-  const ptrBody = document.getElementById('forecast-ptr-body');
-  const note = document.getElementById('forecast-note-box');
-  if(!cards || !body || !transferBody || !ptrBody || !note) return;
-
-  const stressed10 = FEEDERS.filter(f=>forecastA(f,0.10)>=FEEDER_OPERATING_LIMIT);
-  const stressed20 = FEEDERS.filter(f=>forecastA(f,0.20)>=FEEDER_OPERATING_LIMIT);
-  const liveCritical = FEEDERS.filter(f=>Number(f.liveA ?? f.recA ?? 0)>=FEEDER_OPERATING_LIMIT);
-  const liveWatch = FEEDERS.filter(f=>Number(f.liveA ?? f.recA ?? 0)>=FEEDER_WATCH_LEVEL && Number(f.liveA ?? f.recA ?? 0)<FEEDER_OPERATING_LIMIT);
-  const bestSupport = FEEDERS.slice().sort((a,b)=>(Number(a.liveA ?? a.recA ?? 0)-Number(b.liveA ?? b.recA ?? 0))).slice(0,3);
-
-  cards.innerHTML = `
-    <div class="forecast-card ${liveCritical.length ? 'blink-red':''}">
-      <div class="forecast-k">Live critical feeders</div>
-      <div class="forecast-v">${liveCritical.length}</div>
-      <div class="forecast-s">At or above ${FEEDER_OPERATING_LIMIT} A right now</div>
-    </div>
-    <div class="forecast-card">
-      <div class="forecast-k">Watch feeders</div>
-      <div class="forecast-v">${liveWatch.length}</div>
-      <div class="forecast-s">Between ${FEEDER_WATCH_LEVEL} A and ${FEEDER_OPERATING_LIMIT-1} A live</div>
-    </div>
-    <div class="forecast-card ${stressed20.length ? 'blink-red':''}">
-      <div class="forecast-k">Forecast +20% stressed</div>
-      <div class="forecast-v">${stressed20.length}</div>
-      <div class="forecast-s">Feeders projected to cross ${FEEDER_OPERATING_LIMIT} A</div>
-    </div>
-    <div class="forecast-card">
-      <div class="forecast-k">Best support feeders</div>
-      <div class="forecast-v">${bestSupport.map(f=>f.name.replace(/^11KV\s*/,'')).slice(0,2).join(' / ')}</div>
-      <div class="forecast-s">Lowest live currents available for balancing</div>
-    </div>
-  `;
-
-  note.innerHTML = `
-    <strong>Forecast basis:</strong> live feeder current from workbook present-load column, with planning projection at <strong>+10%</strong> and <strong>+20%</strong>.
-    For prudence, the forecast uses the higher of <strong>live current</strong> and <strong>historical recorded maximum</strong> before applying growth.
-    This captures prevailing fuel-driven migration to electric usage and avoids under-forecasting of already stressed feeders.
-  `;
-
-  const ordered = FEEDERS.slice().sort((a,b)=>getForecastPriorityScore(b)-getForecastPriorityScore(a));
-  body.innerHTML = ordered.map((f, i)=>{
-    const live = Number(f.liveA ?? f.recA ?? 0);
-    const hist = Number(f.histMaxA ?? f.maxA ?? 0);
-    const f10 = forecastA(f,0.10);
-    const f20 = forecastA(f,0.20);
-    const band = f20 >= FEEDER_OPERATING_LIMIT ? {label:'Forecast critical', cls:'badge-critical'} :
-                 f10 >= FEEDER_NEAR_LEVEL ? {label:'Forecast watch', cls:'badge-watch'} :
-                 getFeederOperatingBand(live);
-    const rowCls = (live >= FEEDER_OPERATING_LIMIT || f20 >= FEEDER_OPERATING_LIMIT) ? 'blink-red' : '';
-    return `<tr class="${rowCls}">
-      <td>${i+1}</td>
-      <td style="font-weight:700">${htmlEscape(f.name)}</td>
-      <td>${htmlEscape(f.lv)}</td>
-      <td><span class="vb ${f.type==='UG'?'v132':'v33'}">${htmlEscape(f.type)}</span></td>
-      <td class="fnum">${live.toFixed(1)}</td>
-      <td class="fnum">${hist.toFixed(1)}</td>
-      <td class="fnum" style="color:${f10>=FEEDER_NEAR_LEVEL?'var(--wn)':'var(--tx)'}">${f10.toFixed(1)}</td>
-      <td class="fnum" style="font-weight:700;color:${f20>=FEEDER_OPERATING_LIMIT?'var(--dg)':f20>=FEEDER_NEAR_LEVEL?'var(--wn)':'var(--ok)'}">${f20.toFixed(1)}</td>
-      <td><span class="vb ${band.cls} ${f20>=FEEDER_OPERATING_LIMIT?'blink-chip':''}">${band.label}</span></td>
-      <td>${htmlEscape(getActionText(f))}</td>
-    </tr>`;
-  }).join('');
-
-  const paths = suggestTransferPaths();
-  transferBody.innerHTML = paths.length ? paths.map((r, i)=>`
-    <tr class="${r.amt >= 20 ? 'blink-red' : ''}">
-      <td>${i+1}</td>
-      <td><span class="transfer-path">${htmlEscape(r.from.name)}</span><br><span style="font-size:10px;color:var(--tx3)">${htmlEscape(r.from.lv)} · live ${Number(r.from.liveA ?? r.from.recA ?? 0).toFixed(1)} A · forecast20 ${forecastA(r.from,0.20).toFixed(1)} A</span></td>
-      <td><span class="transfer-path">${htmlEscape(r.to.name)}</span><br><span style="font-size:10px;color:var(--tx3)">${htmlEscape(r.to.lv || '—')} · live ${Number(r.to.liveA ?? r.to.recA ?? 0).toFixed ? Number(r.to.liveA ?? r.to.recA ?? 0).toFixed(1) : '—'} A</span></td>
-      <td class="transfer-amt">${r.amt.toFixed(1)} A</td>
-      <td>${htmlEscape(r.reason)}</td>
-      <td>${htmlEscape(r.note)}</td>
-    </tr>
-  `).join('') : `<tr><td colspan="6">No immediate transfer path is required from the present live values. Keep this section active for forecast scenarios.</td></tr>`;
-
-  ptrBody.innerHTML = PTRS_DETAIL.map(p=>{
-    const a0 = Number(p.recA || 0);
-    const p0 = Number(p.recPct || 0);
-    const a10 = Number((a0*1.10).toFixed(1));
-    const a20 = Number((a0*1.20).toFixed(1));
-    const pct10 = Number((p0*1.10).toFixed(1));
-    const pct20 = Number((p0*1.20).toFixed(1));
-    const status = pct20 >= 75 ? ['Urgent balancing','badge-critical'] : pct20 >= 60 ? ['Watch','badge-watch'] : ['Normal','badge-normal'];
-    const action = pct20 >= 75 ? 'Peak-hour balancing, cooling readiness, and no additional transfer onto this PTR.' :
-                   pct20 >= 60 ? 'Watch PTR temperatures, oil level, and prepare feeder balancing.' :
-                   'PTR has margin; feeder-side action should be prioritized first.';
-    return `<tr class="${pct20>=75?'blink-red':''}">
-      <td style="font-weight:700">${htmlEscape(p.lv)}</td>
-      <td class="fnum">${a0.toFixed(1)}</td>
-      <td class="fnum">${p0.toFixed(2)}%</td>
-      <td class="fnum">${a10.toFixed(1)} A / ${pct10.toFixed(1)}%</td>
-      <td class="fnum" style="font-weight:700;color:${pct20>=75?'var(--dg)':pct20>=60?'var(--wn)':'var(--ok)'}">${a20.toFixed(1)} A / ${pct20.toFixed(1)}%</td>
-      <td><span class="vb ${status[1]}">${status[0]}</span></td>
-      <td>${htmlEscape(action)}</td>
-    </tr>`;
-  }).join('');
-}
-function applyDynamicFeederHighlighting(){
-  const rows = document.querySelectorAll('#feeder-load-body tr');
-  rows.forEach(tr=>{
-    const feederName = tr.children[1]?.textContent?.trim();
-    const f = FEEDERS.find(x=>x.name.trim()===feederName);
-    if(!f) return;
-    const live = Number(f.liveA ?? f.recA ?? 0);
-    const fc20 = forecastA(f,0.20);
-    tr.classList.remove('blink-red');
-    if(live >= FEEDER_OPERATING_LIMIT || fc20 >= FEEDER_OPERATING_LIMIT){
-      tr.classList.add('blink-red');
-    }
-    const statusCell = tr.children[9];
-    if(statusCell){
-      statusCell.innerHTML = `<span class="vb ${fc20>=FEEDER_OPERATING_LIMIT?'badge-critical':'badge-watch'} ${fc20>=FEEDER_OPERATING_LIMIT?'blink-chip':''}">${
-        live >= FEEDER_OPERATING_LIMIT ? 'Live critical' : fc20>=FEEDER_OPERATING_LIMIT ? 'Forecast critical' : live>=FEEDER_WATCH_LEVEL ? 'Watch' : 'Normal'
-      }</span>`;
-    }
-  });
-}
-
-// Patch loading render so existing Loading Details view uses workbook live values and dynamic highlight.
-const _origRenderLoadingForecastPatch = renderLoading;
-renderLoading = function(){
-  _origRenderLoadingForecastPatch();
-  applyDynamicFeederHighlighting();
-  renderForecastTab();
-};
-
-const _origApplyFeederFiltersForecastPatch = applyFeederFilters;
-applyFeederFilters = function(){
-  _origApplyFeederFiltersForecastPatch();
-  applyDynamicFeederHighlighting();
-  renderForecastTab();
-};
-
-
-// ══════════════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════════════
 renderPTRLoadingSummary();
@@ -4134,5 +3813,161 @@ window.addEventListener('load', function(){
 });
 document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
 </script>
+
+<script>
+(function(){
+  function cleanName(name){
+    return String(name||'').replace(/^11\s*KV\s*/i,'').replace(/\s+FEEDER$/i,'').trim();
+  }
+  function lvIndex(lv){
+    const m=String(lv||'').match(/IV|III|II|I/);
+    const map={I:1,II:2,III:3,IV:4};
+    return m?map[m[0]]:99;
+  }
+  function feederForecastA(f){ return +(f.recA*1.08).toFixed(1); }
+  function feederStatus(f){
+    const fc=feederForecastA(f);
+    if(f.recA>=120 || fc>=130) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
+    if(fc>=120 || f.recA>=110) return {key:'watch',label:'Watch',bg:'var(--amb)',fg:'var(--amf)'};
+    return {key:'healthy',label:'Healthy',bg:'var(--gnb)',fg:'var(--gnf)'};
+  }
+  function ptrForecastA(p){ return +(Math.max(+p.sumMax24A||0,+p.recA||0)*1.08).toFixed(1); }
+  function ptrForecastPct(p){ return +((ptrForecastA(p)/(+p.lvFLC||1))*100).toFixed(2); }
+  function ptrTrend(p){
+    const delta=(+p.recA||0)-(+p.sumMax24A||0);
+    if(delta>15) return `Rising by ${delta} A vs previous summer`;
+    if(delta<-15) return `Lower by ${Math.abs(delta)} A vs previous summer`;
+    return 'Broadly stable vs previous summer';
+  }
+  function feederRemedy(f, target1, target2){
+    const fc=feederForecastA(f), status=feederStatus(f).key;
+    const moves=[];
+    if(status==='critical'){
+      moves.push('Immediate evening-peak watch and no further heavy releases on this feeder.');
+      if(target1) moves.push(`Shift 10–20 A in stages towards ${cleanName(target1.name)} after field confirmation.`);
+      if(target2) moves.push(`Keep ${cleanName(target2.name)} as alternate receiving feeder for contingency support.`);
+      moves.push('Carry out thermography on breaker, CT terminals, jumpers and cable terminations; verify phase balance and review major DT / apartment pockets.');
+    } else if(status==='watch'){
+      moves.push('Prepare switching plan before peak season and monitor daily maximum demand.');
+      if(target1) moves.push(`Pre-identify load blocks that can be shifted to ${cleanName(target1.name)}.`);
+      moves.push('Check hot spots, loose contacts and voltage complaints before summer escalation.');
+    } else {
+      moves.push('Maintain as support feeder with spare margin.');
+      moves.push('Can receive limited transferred load after voltage-drop and protection checks.');
+    }
+    if(fc>=120) moves.push(`Forecast crosses the 120 A ceiling at ${fc} A under summer stress.`);
+    return moves.join(' ');
+  }
+  function ptrRemedy(p){
+    const prev=+p.sumMax24A||0, rec=+p.recA||0, fcA=ptrForecastA(p), fcPct=ptrForecastPct(p);
+    const arr=[];
+    if(rec>prev){
+      arr.push('Current loading has already moved above the previous summer base; avoid additional feeder transfers into this PTR.');
+    } else {
+      arr.push('Present loading is below the previous summer peak; keep it available as limited balancing support only after review.');
+    }
+    if(fcPct>=55){
+      arr.push('Treat this PTR as first-priority watch transformer: monitor WTI/OTI, breather, bushing cleanliness, cooling readiness and hourly peak trend.');
+    } else if(fcPct>=45){
+      arr.push('Continue preventive watch: record daily peak loading and verify tap position, oil temperature trend and auxiliary cooling readiness.');
+    } else {
+      arr.push('Transformer loading remains moderate; primary focus should stay at feeder level.');
+    }
+    if(prev>=300) arr.push('Because the previous summer peak was high, keep contingency switching and emergency load-shedding blocks ready.');
+    return arr.join(' ');
+  }
+  function transferTargets(source){
+    const candidates = FEEDERS.filter(t => t.name!==source.name)
+      .map(t => ({...t, margin:+(120 - t.recA).toFixed(1), sameLv:t.lv===source.lv, dist:Math.abs(lvIndex(t.lv)-lvIndex(source.lv))}))
+      .filter(t => t.margin>8)
+      .sort((a,b)=> (b.sameLv-a.sameLv) || (b.margin-a.margin) || (a.dist-b.dist) || (a.recA-b.recA));
+    return candidates.slice(0,2);
+  }
+  function renderForecastTab(){
+    const feederRows = FEEDERS.map(f=>{
+      const forecastA=feederForecastA(f);
+      const st=feederStatus(f);
+      const [t1,t2]=transferTargets(f);
+      return {f, forecastA, st, t1, t2};
+    });
+    const critical = feederRows.filter(r=>r.st.key==='critical');
+    const watch = feederRows.filter(r=>r.st.key==='watch');
+    const support = feederRows.filter(r=>r.st.key==='healthy').sort((a,b)=>a.f.recA-b.f.recA).slice(0,4);
+    const ptrWatch = PTRS_DETAIL.map(p=>({p,fcA:ptrForecastA(p),fcPct:ptrForecastPct(p)})).sort((a,b)=>b.fcPct-a.fcPct);
+
+    const kpi = document.getElementById('forecast-kpis');
+    if(kpi){
+      kpi.innerHTML = `
+        <div class="fc-card"><h3>Critical feeders</h3><div class="v">${critical.length}</div><div class="s">At or beyond present / forecast ceiling</div></div>
+        <div class="fc-card"><h3>Watch feeders</h3><div class="v">${watch.length}</div><div class="s">Likely to tighten during summer peak</div></div>
+        <div class="fc-card"><h3>Best receiving feeders</h3><div class="v">${support.map(x=>cleanName(x.f.name)).join(', ')}</div><div class="s">Lowest recorded feeders with spare operational margin</div></div>
+        <div class="fc-card"><h3>First watch PTR</h3><div class="v">${ptrWatch[0]?.p.lv||'—'}</div><div class="s">Forecast ${ptrWatch[0]?.fcPct?.toFixed ? ptrWatch[0].fcPct.toFixed(2):'—'}% LV-side loading</div></div>`;
+    }
+
+    const feederBody=document.getElementById('forecast-feeder-body');
+    if(feederBody){
+      feederBody.innerHTML = feederRows.sort((a,b)=> (a.st.key===b.st.key? b.forecastA-a.forecastA : (a.st.key==='critical'?-1:b.st.key==='critical'?1:a.st.key==='watch'?-1:1))).map(({f,forecastA,st,t1,t2})=>`
+        <tr class="${st.key==='critical' ? 'blink-forecast-critical' : ''}">
+          <td style="font-weight:600">${cleanName(f.name)}</td>
+          <td>${f.lv}</td>
+          <td>${f.type}</td>
+          <td class="fnum">${f.recA}</td>
+          <td class="fnum">120</td>
+          <td class="fnum" style="font-weight:700;color:${st.key==='critical'?'var(--rf)':st.key==='watch'?'var(--amf)':'var(--gnf)'}">${forecastA}</td>
+          <td><span class="vb" style="background:${st.bg};color:${st.fg}">${st.label}</span></td>
+          <td class="path-cell">${t1 ? `${cleanName(f.name)} → ${cleanName(t1.name)}` : 'Keep on watch'}${t2 ? `<br><span class="small-muted">Alt: ${cleanName(f.name)} → ${cleanName(t2.name)}</span>` : ''}</td>
+          <td class="remedy-cell">${feederRemedy(f,t1,t2)}</td>
+        </tr>`).join('');
+    }
+
+    const ptrBody=document.getElementById('forecast-ptr-body');
+    if(ptrBody){
+      ptrBody.innerHTML = PTRS_DETAIL.map(p=>{
+        const fcA=ptrForecastA(p), fcPct=ptrForecastPct(p);
+        const trend=ptrTrend(p);
+        const hot = fcPct>=55;
+        return `
+          <tr class="${hot?'blink-forecast-critical':''}">
+            <td style="font-weight:700">${p.lv}</td>
+            <td class="fnum">${p.sumMax24A}</td>
+            <td class="fnum">${(+p.sumMax24Pct).toFixed(2)}%</td>
+            <td class="fnum">${p.recA}</td>
+            <td class="fnum">${(+p.recPct).toFixed(2)}%</td>
+            <td class="fnum" style="font-weight:700">${fcA}</td>
+            <td class="fnum" style="font-weight:700;color:${hot?'var(--rf)':'var(--tx)'}">${fcPct.toFixed(2)}%</td>
+            <td style="font-size:11px">${trend}</td>
+            <td class="remedy-cell">${ptrRemedy(p)}</td>
+          </tr>`;
+      }).join('');
+    }
+    applyForecastHighlights(feederRows, ptrWatch);
+  }
+  function applyForecastHighlights(feederRows, ptrRows){
+    const feederMap = Object.fromEntries(feederRows.map(r=>[cleanName(r.f.name), r]));
+    document.querySelectorAll('#feeder-load-body tr').forEach(tr=>{
+      const cell = tr.querySelector('td');
+      if(!cell) return;
+      const key = cleanName(cell.textContent);
+      const row = feederMap[key];
+      if(row && row.st.key==='critical') tr.classList.add('blink-forecast-critical');
+    });
+    const ptrMap = Object.fromEntries(ptrRows.map(r=>[String(r.p.lv).trim(), r]));
+    document.querySelectorAll('#ptr-load-body tr').forEach(tr=>{
+      const cell = tr.querySelector('td');
+      if(!cell) return;
+      const key = String(cell.textContent).trim();
+      const row = ptrMap[key];
+      if(row && row.fcPct>=55) tr.classList.add('blink-forecast-critical');
+    });
+  }
+  window.renderForecastTab = renderForecastTab;
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded', renderForecastTab);
+  } else {
+    renderForecastTab();
+  }
+})();
+</script>
+
 </body>
 </html>
