@@ -544,7 +544,7 @@ function applyFeederFilters(){
       <td>${i+1}</td>
       <td style="font-weight:600">${f.name}</td>
       <td>${f.lv}</td>
-      <td><span class="vb ${f.type==='UG'?'v132':'v33'}">${f.type}</span></td>
+      <td><span class="vb ${String(f.type).toUpperCase()==='UG'?'v132':'v33'}">${f.type}</span></td>
       <td class="fnum">${f.maxA}</td>
       <td class="fnum">${Number(f.maxMVA).toFixed(2)}</td>
       <td class="fnum">${f.recA}</td>
@@ -1490,9 +1490,9 @@ document.addEventListener('DOMContentLoaded', function(){
               <th>Feeder</th>
               <th>PTR</th>
               <th>Type</th>
-              <th>Present Load (A)</th>
+              <th>Current Load (A)</th>
               <th>120 A Ceiling</th>
-              <th>Forecast Summer 2026 (A)</th>
+              <th>Forecast Summer 2026 from Peak Basis (A)</th>
               <th>Forecast Status</th>
               <th>Suggested Transfer Path</th>
               <th>Forecast Remedy / Field Action</th>
@@ -1518,7 +1518,7 @@ document.addEventListener('DOMContentLoaded', function(){
               <th>Previous Summer %</th>
               <th>Mar 2026 Recorded (A)</th>
               <th>Mar 2026 %</th>
-              <th>Forecast Summer 2026 (A)</th>
+              <th>Forecast Summer 2026 from Peak Basis (A)</th>
               <th>Forecast %</th>
               <th>Trend</th>
               <th>Forecast Remedy / Preventive Action</th>
@@ -1755,7 +1755,7 @@ const FEEDERS = [
    bkrMake:'MEGAWIN', bkrSr:'46447',    bkrMfg:'2000', ctrAvail:'400-200/1', ctrAdopt:'200/1',
    relayMake:'CGL',    relayType:'7SR5111', relaySr:'822335',
    mtrMake:'SECURE',   mtrSr:'TS04438',  mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Hussain Sagar Darga area', len:'~3.6 km'},
-  {seq:'FEEDER-5', name:'11 KV GOLCONDA CABLE FEEDER',       lv:'LV-II', type:'Cable',maxA:300, recA:246, maxMVA:5.72, recMVA:4.69,
+  {seq:'FEEDER-5', name:'11 KV GOLCONDA CABLE FEEDER',       lv:'LV-II', type:'UG',maxA:300, recA:246, maxMVA:5.72, recMVA:4.69,
    bkrMake:'ALSTOM',  bkrSr:'25447',    bkrMfg:'1999', ctrAvail:'400-200/1', ctrAdopt:'200/1',
    relayMake:'CGL',    relayType:'7SR5111', relaySr:'354564',
    mtrMake:'SECURE',   mtrSr:'TS09238',  mCtr:'200/1', mPtr:'11KV/110V', mClass:'0.5s', mMF:'1', area:'Golconda town centre', len:'~1.9 km'},
@@ -2305,7 +2305,7 @@ function renderSelectedReport(){
     ]);
   } else if(ds==='forecast_feeders'){
     const rows=getForecastFeederRows();
-    html=makeReportTable('Feeder Forecast & Remedies','Forecast tab → feeder forecast using +8% seasonal stress',['Feeder','PTR','Present A','Forecast A','Forecast % of 120A','Status','Remedy'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td>${r.f.lv}</td><td class="fnum">${r.f.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${reportStatusBadge(r.status)}</td><td>${r.remedy}</td></tr>`).join(''));
+    html=makeReportTable('Feeder Forecast & Remedies','Forecast tab → feeder forecast using +8% seasonal stress on latest feeder peak',['Feeder','PTR','Type','Current A','Peak Basis A','Forecast A','Forecast % of 120A','Status','Remedy'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td>${r.f.lv}</td><td>${r.f.type}</td><td class="fnum">${r.f.recA}</td><td class="fnum">${r.f.maxRecordedA||r.f.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${reportStatusBadge(r.status)}</td><td>${r.remedy}</td></tr>`).join(''));
   } else if(ds==='forecast_ptr'){
     const rows=getForecastPTRRows();
     html=makeReportTable('PTR Forecast & Remedies','Forecast tab → seasonal PTR watch based on previous summer and March 2026',['PTR','Prev Summer A','Mar 2026 A','Forecast A','Forecast %','Trend','Remedy'],rows.map(r=>`<tr><td>${r.p.id}</td><td class="fnum">${r.p.sumMax25A}</td><td class="fnum">${r.p.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${r.trend}</td><td>${r.remedy}</td></tr>`).join(''));
@@ -2417,7 +2417,7 @@ function showFeeder(seq){
   document.getElementById('mod-body').innerHTML=[
     ['Sequence',         f.seq],
     ['Voltage',          '11 kV'],
-    ['Type',             f.type==='OH'?'Overhead (OH)':f.type==='UG'?'Underground (UG)':'Cable'],
+    ['Type',             String(f.type).toUpperCase()==='UG'?'Underground (UG)':'Overhead (OH)'],
     ['Source PTR (LV)',  f.lv],
     ['Area Served',      f.area],
     ['Approx. Length',   f.len],
@@ -3170,12 +3170,12 @@ function buildChart(type) {
     // Pie 2: Feeder type distribution by load
     const ohLoad   = FEEDERS.filter(f=>f.type==='OH').reduce((s,f)=>s+f.recA,0);
     const ugLoad   = FEEDERS.filter(f=>f.type==='UG').reduce((s,f)=>s+f.recA,0);
-    const cableLoad= FEEDERS.filter(f=>f.type==='Cable').reduce((s,f)=>s+f.recA,0);
+    const cableLoad=0;
     const ctx2 = document.getElementById('cv-pie2').getContext('2d');
     chartInstances['pie2'] = new Chart(ctx2, {
       type: 'doughnut',
       data: {
-        labels: ['OH Feeders','UG Feeders','Cable Feeders'],
+        labels: ['OH Feeders','UG Feeders','Reserved'],
         datasets: [{ data: [ohLoad,ugLoad,cableLoad], backgroundColor:['rgba(192,57,43,0.85)','rgba(21,101,192,0.85)','rgba(11,122,92,0.85)'], borderWidth:2, borderColor:'#fff' }]
       },
       options: {
@@ -3514,24 +3514,25 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 70,
+    "maxRecordedA": 120,
     "maxMVA": 2.29,
     "recMVA": 1.33,
     "bkrMake": "CGL",
-    "bkrSr": "\u2014",
+    "bkrSr": "847456VP",
     "bkrMfg": "2016",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "7SR5111",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-2",
@@ -3540,6 +3541,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 80,
+    "maxRecordedA": 128,
     "maxMVA": 2.29,
     "recMVA": 1.52,
     "bkrMake": "STELMEC",
@@ -3547,17 +3549,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2021",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "7SR5111",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-3",
@@ -3566,6 +3568,7 @@ function loadSLDPdf(input) {
     "type": "UG",
     "maxA": 120,
     "recA": 34,
+    "maxRecordedA": 63,
     "maxMVA": 2.29,
     "recMVA": 0.65,
     "bkrMake": "STELMEC",
@@ -3573,17 +3576,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2019",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "7SR5111",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-4",
@@ -3592,6 +3595,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 32,
+    "maxRecordedA": 75,
     "maxMVA": 2.29,
     "recMVA": 0.61,
     "bkrMake": "CGL",
@@ -3599,25 +3603,26 @@ function loadSLDPdf(input) {
     "bkrMfg": "2018",
     "ctrAvail": "600-300/1-1A",
     "ctrAdopt": "300/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
-    "mCtr": "300/1A",
-    "mPtr": "11KV/110V",
-    "mClass": "\u2014",
-    "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "relayMake": "SIEMENS",
+    "relayType": "IED",
+    "relaySr": "GF1-01511972",
+    "mtrMake": "SECURE",
+    "mtrSr": "XE498091",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "2000",
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-5",
     "name": "11KV GOLKONDA CABLE FEEDER",
     "lv": "LV-II",
-    "type": "Cable",
+    "type": "UG",
     "maxA": 120,
     "recA": 50,
+    "maxRecordedA": 98,
     "maxMVA": 2.29,
     "recMVA": 0.95,
     "bkrMake": "STELMEC",
@@ -3625,17 +3630,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2019",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-6",
@@ -3644,6 +3649,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 68,
+    "maxRecordedA": 108,
     "maxMVA": 2.29,
     "recMVA": 1.3,
     "bkrMake": "CGL",
@@ -3651,17 +3657,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2017",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-7",
@@ -3670,6 +3676,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 24,
+    "maxRecordedA": 49,
     "maxMVA": 2.29,
     "recMVA": 0.46,
     "bkrMake": "STELMEC",
@@ -3677,17 +3684,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2021",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
-    "mCtr": "200/1A",
-    "mPtr": "11KV/110V",
-    "mClass": "\u2014",
-    "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "FB762D",
+    "mtrMake": "SECURE",
+    "mtrSr": "XC531536",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "2000",
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-8",
@@ -3696,6 +3703,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 50,
+    "maxRecordedA": 128,
     "maxMVA": 2.29,
     "recMVA": 0.95,
     "bkrMake": "CGL",
@@ -3703,17 +3711,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2012",
     "ctrAvail": "600-300/1-1A",
     "ctrAdopt": "300/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "300/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-9",
@@ -3722,6 +3730,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 58,
+    "maxRecordedA": 86,
     "maxMVA": 2.29,
     "recMVA": 1.11,
     "bkrMake": "STELMEC",
@@ -3729,17 +3738,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2017",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-10",
@@ -3748,6 +3757,7 @@ function loadSLDPdf(input) {
     "type": "UG",
     "maxA": 120,
     "recA": 56,
+    "maxRecordedA": 76,
     "maxMVA": 2.29,
     "recMVA": 1.07,
     "bkrMake": "STELMEC",
@@ -3755,17 +3765,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2020",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-11",
@@ -3774,6 +3784,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 38,
+    "maxRecordedA": 60,
     "maxMVA": 2.29,
     "recMVA": 0.72,
     "bkrMake": "CGL",
@@ -3781,17 +3792,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2024",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-12",
@@ -3800,6 +3811,7 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 52,
+    "maxRecordedA": 80,
     "maxMVA": 2.29,
     "recMVA": 0.99,
     "bkrMake": "CGL",
@@ -3807,17 +3819,17 @@ function loadSLDPdf(input) {
     "bkrMfg": "2024",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-13",
@@ -3826,24 +3838,25 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 22,
+    "maxRecordedA": 30,
     "maxMVA": 2.29,
     "recMVA": 0.42,
     "bkrMake": "CGL",
-    "bkrSr": "\u2014",
-    "bkrMfg": "\u2014",
+    "bkrSr": "Not visible",
+    "bkrMfg": "Not visible",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-14",
@@ -3852,24 +3865,25 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 80,
+    "maxRecordedA": 118,
     "maxMVA": 2.29,
     "recMVA": 1.52,
     "bkrMake": "CGL",
-    "bkrSr": "\u2014",
-    "bkrMfg": "\u2014",
+    "bkrSr": "Not visible",
+    "bkrMfg": "Not visible",
     "ctrAvail": "600-300/1-1A",
     "ctrAdopt": "300/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "300/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   },
   {
     "seq": "FEEDER-15",
@@ -3878,24 +3892,25 @@ function loadSLDPdf(input) {
     "type": "OH",
     "maxA": 120,
     "recA": 30,
+    "maxRecordedA": 52,
     "maxMVA": 2.29,
     "recMVA": 0.57,
     "bkrMake": "CGL",
-    "bkrSr": "\u2014",
-    "bkrMfg": "\u2014",
+    "bkrSr": "Not visible",
+    "bkrMfg": "Not visible",
     "ctrAvail": "400-200-100/1-1A",
     "ctrAdopt": "200/1A",
-    "relayMake": "\u2014",
-    "relayType": "\u2014",
-    "relaySr": "\u2014",
-    "mtrMake": "\u2014",
-    "mtrSr": "\u2014",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "—",
+    "mtrMake": "SECURE",
+    "mtrSr": "—",
     "mCtr": "200/1A",
     "mPtr": "11KV/110V",
-    "mClass": "\u2014",
+    "mClass": "0.5s",
     "mMF": "1",
-    "area": "\u2014",
-    "len": "\u2014"
+    "area": "—",
+    "len": "—"
   }
 ]);
   INC33.splice(0, INC33.length, ...[
@@ -4079,11 +4094,12 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
     const map={I:1,II:2,III:3,IV:4};
     return m?map[m[0]]:99;
   }
-  function feederForecastA(f){ return +(f.recA*1.08).toFixed(1); }
+  function feederStressBaseA(f){ return Math.max(+(f.recA||0), +(f.maxRecordedA||0)); }
+  function feederForecastA(f){ return +(feederStressBaseA(f)*1.08).toFixed(1); }
   function feederStatus(f){
-    const fc=feederForecastA(f);
-    if(f.recA>=120 || fc>=130) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
-    if(fc>=120 || f.recA>=110) return {key:'watch',label:'Watch',bg:'var(--amb)',fg:'var(--amf)'};
+    const peak=feederStressBaseA(f), fc=feederForecastA(f);
+    if(peak>=120 || fc>=130) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
+    if(peak>=110 || fc>=120) return {key:'watch',label:'Watch',bg:'var(--amb)',fg:'var(--amf)'};
     return {key:'healthy',label:'Healthy',bg:'var(--gnb)',fg:'var(--gnf)'};
   }
   function ptrForecastA(p){ return +(Math.max(+p.sumMax24A||0,+p.recA||0)*1.08).toFixed(1); }
@@ -4095,8 +4111,12 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
     return 'Broadly stable vs previous summer';
   }
   function feederRemedy(f, target1, target2){
-    const fc=feederForecastA(f), status=feederStatus(f).key;
+    const fc=feederForecastA(f), status=feederStatus(f).key, peak=+(f.maxRecordedA||0);
     const moves=[];
+    if(peak){
+      if(peak>=120) moves.push(`Actual feeder peak has already touched / exceeded the 120 A ceiling at ${peak} A.`);
+      else moves.push(`Latest recorded feeder peak is ${peak} A; monitor rise against the 120 A ceiling.`);
+    }
     if(status==='critical'){
       moves.push('Immediate evening-peak watch and no further heavy releases on this feeder.');
       if(target1) moves.push(`Shift 10–20 A in stages towards ${cleanName(target1.name)} after field confirmation.`);
@@ -4171,7 +4191,7 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
           <td class="fnum" style="font-weight:700;color:${st.key==='critical'?'var(--rf)':st.key==='watch'?'var(--amf)':'var(--gnf)'}">${forecastA}</td>
           <td><span class="vb" style="background:${st.bg};color:${st.fg}">${st.label}</span></td>
           <td class="path-cell">${t1 ? `${cleanName(f.name)} → ${cleanName(t1.name)}` : 'Keep on watch'}${t2 ? `<br><span class="small-muted">Alt: ${cleanName(f.name)} → ${cleanName(t2.name)}</span>` : ''}</td>
-          <td class="remedy-cell">${feederRemedy(f,t1,t2)}</td>
+          <td class="remedy-cell"><div><span class="small-muted">Peak basis: ${f.maxRecordedA||f.recA} A</span><br>${feederRemedy(f,t1,t2)}</div></td>
         </tr>`).join('');
     }
 
