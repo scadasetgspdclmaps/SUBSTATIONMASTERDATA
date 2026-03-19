@@ -291,7 +291,284 @@ select.mi{cursor:pointer}
 @media(max-width:600px){.pg-wrap{padding:14px 10px 44px}.kpi-row{grid-template-columns:repeat(2,1fr)}.detail-grid{grid-template-columns:repeat(2,1fr)}.tally-strip{grid-template-columns:1fr 1fr}.id-row{grid-template-columns:1fr 1fr}.ptr-form-row{grid-template-columns:1fr 1fr}.id-kpi{min-width:50%}}
 </style>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js">
+// ══════════════════════════════════════════════════
+// ENHANCEMENTS — persistence, smart summary, feeder filters/export
+// ══════════════════════════════════════════════════
+const DASHBOARD_STORAGE_KEY = 'golconda_ss_dashboard_v2';
+const IDENTITY_FIELDS = ['ssname','sscode','phone','type','gps','circle','division','subdivision'];
+
+function readDashboardStore(){
+  try{
+    const raw = localStorage.getItem(DASHBOARD_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {identity:{}, maintLog:{}};
+  }catch(e){
+    return {identity:{}, maintLog:{}};
+  }
+}
+function writeDashboardStore(){
+  try{
+    localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify({
+      identity: collectIdentityValues(),
+      maintLog: maintLog
+    }));
+  }catch(e){
+    console.warn('LocalStorage unavailable:', e);
+  }
+}
+function collectIdentityValues(){
+  const out = {};
+  IDENTITY_FIELDS.forEach(k=>{
+    const el = document.getElementById('id-' + k);
+    if(el) out[k] = el.value || '';
+  });
+  return out;
+}
+function applyStoredIdentity(){
+  const store = readDashboardStore();
+  const identity = store.identity || {};
+  IDENTITY_FIELDS.forEach(k=>{
+    const el = document.getElementById('id-' + k);
+    if(el && identity[k] !== undefined) el.value = identity[k];
+  });
+}
+function applyStoredMaintLogs(){
+  const store = readDashboardStore();
+  const saved = store.maintLog || {};
+  Object.keys(maintLog).forEach(sec=>{
+    maintLog[sec] = Array.isArray(saved[sec]) ? saved[sec] : maintLog[sec];
+  });
+}
+function flashButton(btn, label='✓ Saved!'){
+  if(!btn) return;
+  const orig = btn.textContent;
+  const origBg = btn.style.background;
+  const origColor = btn.style.color;
+  const origBorder = btn.style.borderColor;
+  btn.textContent = label;
+  btn.style.background = 'var(--ok)';
+  btn.style.color = '#fff';
+  btn.style.borderColor = 'var(--ok)';
+  setTimeout(()=>{
+    btn.textContent = orig;
+    btn.style.background = origBg;
+    btn.style.color = origColor;
+    btn.style.borderColor = origBorder;
+  }, 1500);
+}
+
+// Override saveIdentity to persist edits
+saveIdentity = function(evt){
+  writeDashboardStore();
+  const btn = evt?.target || document.querySelector('#panel-identity .sec button');
+  flashButton(btn);
+  renderSmartOpsSummary();
+};
+
+// Wrap maintenance save/delete to persist
+const _origSaveEntry = saveEntry;
+saveEntry = function(section){
+  _origSaveEntry(section);
+  writeDashboardStore();
+  renderSmartOpsSummary();
+};
+const _origDeleteEntry = deleteEntry;
+deleteEntry = function(section,idx){
+  _origDeleteEntry(section,idx);
+  writeDashboardStore();
+  renderSmartOpsSummary();
+};
+const _origExportMaintLog = exportMaintLog;
+exportMaintLog = function(){
+  writeDashboardStore();
+  _origExportMaintLog();
+};
+
+function getFeederStatusNum(f){
+  const p = Math.round((f.recA / f.maxA) * 100);
+  return p >= 80 ? 'overload' : p >= 70 ? 'high' : 'normal';
+}
+function getFeederStatusLabel(v){
+  return v === 'overload' ? 'Overload' : v === 'high' ? 'High' : 'Normal';
+}
+
+function renderSmartOpsSummary(){
+  const el = document.getElementById('smart-ops-summary');
+  if(!el) return;
+
+  const overloadedFeeders = FEEDERS.filter(f=>getFeederStatusNum(f)==='overload');
+  const highFeeders = FEEDERS.filter(f=>getFeederStatusNum(f)==='high');
+  const ptrAtRisk = PTRS_DETAIL.filter(p=>Math.round((p.recMVA/p.mva)*100)>=70);
+  const dueSched = (typeof SCHED!=='undefined' ? SCHED.filter(s=>s.status!=='ok') : []);
+  const savedCount = Object.values(maintLog).reduce((s,a)=>s + (Array.isArray(a)?a.length:0), 0);
+
+  const totalRecMVA = FEEDERS.reduce((s,f)=>s + f.recMVA, 0);
+  const totalMaxMVA = FEEDERS.reduce((s,f)=>s + f.maxMVA, 0);
+  const overallPct = totalMaxMVA ? Math.round(totalRecMVA/totalMaxMVA*100) : 0;
+  const dominantLV = PTRS_DETAIL.slice().sort((a,b)=>((b.recMVA/b.mva)-(a.recMVA/a.mva)))[0];
+  const dominantSource = INC33_LOADS.slice().sort((a,b)=>b.maxRecA-a.maxRecA)[0];
+
+  const recommendations = [];
+  if(overloadedFeeders.length){
+    recommendations.push(`Shift load review first for ${overloadedFeeders.map(f=>f.seq).join(', ')}.`);
+  }
+  if(ptrAtRisk.length){
+    recommendations.push(`Watch ${ptrAtRisk.map(p=>p.id).join(', ')} for peak-hour balancing and cooling readiness.`);
+  }
+  if(dueSched.length){
+    recommendations.push(`${dueSched.length} maintenance tasks are due/overdue; prioritize the oldest schedule items.`);
+  }
+  if(!recommendations.length){
+    recommendations.push('No immediate red flags in the current static dataset; continue routine monitoring.');
+  }
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px">
+      ${[
+        ['Overall feeder loading', `${overallPct}%`, `${totalRecMVA.toFixed(2)} / ${totalMaxMVA.toFixed(2)} MVA`,'var(--bl)'],
+        ['Feeders at overload', overloadedFeeders.length, '≥ 80% of feeder capacity','var(--dg)'],
+        ['PTRs at risk', ptrAtRisk.length, '≥ 70% of PTR capacity','var(--am)'],
+        ['Due maint. tasks', dueSched.length, 'From schedule summary','var(--pk)'],
+        ['Saved log entries', savedCount, 'Stored in browser','var(--gn)'],
+      ].map(card=>`
+        <div style="background:var(--sf);border:0.5px solid var(--bd);border-top:3px solid ${card[3]};border-radius:var(--r);padding:12px 14px">
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:4px">${card[0]}</div>
+          <div style="font-size:26px;font-weight:700;line-height:1;color:var(--tx)">${card[1]}</div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:4px">${card[2]}</div>
+        </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1.2fr .8fr;gap:12px">
+      <div style="background:var(--sf2);border:0.5px solid var(--bd);border-radius:var(--r);padding:12px 14px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:8px">Operational Recommendations</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${recommendations.map((r,i)=>`<div style="font-size:12px;color:var(--tx);padding:8px 10px;border-radius:var(--r);background:var(--sf);border:0.5px solid var(--bd)"><strong style="color:var(--tx2)">R${i+1}.</strong> ${r}</div>`).join('')}
+        </div>
+      </div>
+      <div style="background:var(--sf2);border:0.5px solid var(--bd);border-radius:var(--r);padding:12px 14px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx3);margin-bottom:8px">Top Observations</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:12px;background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);padding:8px 10px"><strong>Highest-loaded PTR:</strong> ${dominantLV ? `${dominantLV.id} (${Math.round(dominantLV.recMVA/dominantLV.mva*100)}%)` : '—'}</div>
+          <div style="font-size:12px;background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);padding:8px 10px"><strong>Most loaded 33 kV source:</strong> ${dominantSource ? `${dominantSource.feeder} (${dominantSource.maxRecA} A)` : '—'}</div>
+          <div style="font-size:12px;background:var(--sf);border:0.5px solid var(--bd);border-radius:var(--r);padding:8px 10px"><strong>High/overload feeders:</strong> ${[...highFeeders,...overloadedFeeders].map(f=>f.seq).join(', ') || 'None'}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function exportFilteredFeedersCSV(){
+  const rows = getFilteredFeeders();
+  const headers = ['Seq','Feeder Name','LV','Type','Max Capacity A','Max MVA','Recorded A','Recorded MVA','Load %','Status'];
+  const lines = [headers.join(',')].concat(rows.map(f=>{
+    const pct = Math.round((f.recA / f.maxA) * 100);
+    return [
+      f.seq,
+      `"${String(f.name).replace(/"/g,'""')}"`,
+      f.lv,
+      f.type,
+      f.maxA,
+      f.maxMVA,
+      f.recA,
+      f.recMVA,
+      pct,
+      getFeederStatusLabel(getFeederStatusNum(f))
+    ].join(',');
+  }));
+  const blob = new Blob([lines.join('\n')], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Golconda_SS_Filtered_Feeders.csv';
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+}
+
+function getFilteredFeeders(){
+  const q = (document.getElementById('feeder-search')?.value || '').trim().toLowerCase();
+  const s = document.getElementById('feeder-status-filter')?.value || 'all';
+  const t = document.getElementById('feeder-type-filter')?.value || 'all';
+  return FEEDERS.filter(f=>{
+    const status = getFeederStatusNum(f);
+    const hay = `${f.seq} ${f.name} ${f.lv} ${f.type}`.toLowerCase();
+    return (s==='all' || s===status) && (t==='all' || t===f.type) && (!q || hay.includes(q));
+  });
+}
+
+function applyFeederFilters(){
+  const tbody = document.getElementById('feeder-load-body');
+  const tfoot = document.getElementById('feeder-load-foot');
+  if(!tbody || !tfoot) return;
+  const rows = getFilteredFeeders();
+  const count = document.getElementById('feeder-filter-count');
+  if(count) count.textContent = `${rows.length} / ${FEEDERS.length} feeders shown`;
+
+  const statusStyle = v=>{
+    if(v==='overload') return ['var(--rb)','var(--rf)','Overload'];
+    if(v==='high') return ['var(--amb)','var(--amf)','High'];
+    return ['var(--gnb)','var(--gnf)','Normal'];
+  };
+  tbody.innerHTML = rows.map((f,i)=>{
+    const pct = Math.round((f.recA / f.maxA) * 100);
+    const status = getFeederStatusNum(f);
+    const [bg,fg,lbl] = statusStyle(status);
+    return `<tr onclick="openFeederModal('${f.seq}')">
+      <td>${i+1}</td>
+      <td style="font-weight:600">${f.name}</td>
+      <td>${f.lv}</td>
+      <td><span class="vb ${f.type==='UG'?'v132':'v33'}">${f.type}</span></td>
+      <td class="fnum">${f.maxA}</td>
+      <td class="fnum">${Number(f.maxMVA).toFixed(2)}</td>
+      <td class="fnum">${f.recA}</td>
+      <td class="fnum">${Number(f.recMVA).toFixed(2)}</td>
+      <td class="fnum" style="font-weight:700;color:${status==='overload'?'var(--dg)':status==='high'?'var(--wn)':'var(--ok)'}">${pct}%</td>
+      <td><span style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:3px;background:${bg};color:${fg}">${lbl}</span></td>
+    </tr>`;
+  }).join('');
+
+  const totals = rows.reduce((a,f)=>{
+    a.maxA += f.maxA; a.maxMVA += Number(f.maxMVA); a.recA += f.recA; a.recMVA += Number(f.recMVA); return a;
+  }, {maxA:0,maxMVA:0,recA:0,recMVA:0});
+  tfoot.innerHTML = `<tr>
+    <td colspan="4" style="text-align:right;font-weight:700">Filtered total</td>
+    <td class="fnum">${totals.maxA}</td>
+    <td class="fnum">${totals.maxMVA.toFixed(2)}</td>
+    <td class="fnum">${totals.recA}</td>
+    <td class="fnum">${totals.recMVA.toFixed(2)}</td>
+    <td class="fnum">${totals.maxA ? Math.round((totals.recA/totals.maxA)*100) : 0}%</td>
+    <td style="color:var(--tx3);font-size:11px">Live filter view</td>
+  </tr>`;
+}
+
+function bindFeederFilterControls(){
+  const search = document.getElementById('feeder-search');
+  const status = document.getElementById('feeder-status-filter');
+  const type = document.getElementById('feeder-type-filter');
+  const reset = document.getElementById('feeder-reset-btn');
+  const exportBtn = document.getElementById('feeder-export-btn');
+  [search,status,type].forEach(el=>el && el.addEventListener('input', applyFeederFilters));
+  if(status) status.addEventListener('change', applyFeederFilters);
+  if(type) type.addEventListener('change', applyFeederFilters);
+  if(reset) reset.addEventListener('click', ()=>{
+    if(search) search.value='';
+    if(status) status.value='all';
+    if(type) type.value='all';
+    applyFeederFilters();
+  });
+  if(exportBtn) exportBtn.addEventListener('click', exportFilteredFeedersCSV);
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  applyStoredIdentity();
+  applyStoredMaintLogs();
+  renderLog && Object.keys(maintLog).forEach(s=>renderLog(s));
+  renderSmartOpsSummary();
+  bindFeederFilterControls();
+  applyFeederFilters();
+  IDENTITY_FIELDS.forEach(k=>{
+    const el = document.getElementById('id-' + k);
+    if(el) el.addEventListener('input', writeDashboardStore);
+  });
+});
+
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
@@ -335,7 +612,7 @@ select.mi{cursor:pointer}
     <div class="kpi"><div class="kl">Incoming Sources</div><div class="kv">4</div><div class="ks">2 Regular · 2 Alternate</div></div>
     <div class="kpi"><div class="kl">HV Bays</div><div class="kv">4</div><div class="ks">HV-I to HV-IV</div></div>
     <div class="kpi"><div class="kl">LV Bays / PTRs</div><div class="kv">4</div><div class="ks">LV-I to LV-IV</div></div>
-    <div class="kpi"><div class="kl">11 kV Feeders</div><div class="kv">13</div><div class="ks">Across all 4 LV bays</div></div>
+    <div class="kpi"><div class="kl">11 kV Feeders</div><div class="kv">15</div><div class="ks">As listed in 18.03.2026 master data</div></div>
     <div class="kpi"><div class="kl">Stn. Transformer</div><div class="kv">100</div><div class="ks">kVA · Make: ECE</div></div>
   </div>
 
@@ -482,7 +759,7 @@ select.mi{cursor:pointer}
   <div class="panel" id="panel-sld">
 
     <div class="sec-lbl" style="margin-bottom:12px">
-      <span>Single Line Diagram — 33/11 kV Golconda SS · 4 PTRs · 13 Feeders · 3 Incomer Sources</span>
+      <span>Single Line Diagram — 33/11 kV Golconda SS · 4 PTRs · 15 Feeders · 4 Incomer Sources</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button onclick="zoomSLD(1.2)" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">＋ Zoom In</button>
         <button onclick="zoomSLD(0.83)" style="font-size:11px;padding:4px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);cursor:pointer;font-family:var(--f)">－ Zoom Out</button>
@@ -530,6 +807,16 @@ select.mi{cursor:pointer}
        TAB 2 — LOADING DETAILS (Proforma Format)
        ══════════════════════════════════════ -->
   <div class="panel" id="panel-loading">
+
+
+    <!-- Smart Ops Summary -->
+    <div class="sec">
+      <div class="sec-lbl">
+        <span>Smart Operations Summary</span>
+        <span style="font-weight:400;font-size:10px">Auto-generated from PTR, feeder and maintenance data</span>
+      </div>
+      <div id="smart-ops-summary"></div>
+    </div>
 
     <!-- ── INTERACTIVE CHARTS ── -->
     <div class="sec">
@@ -616,6 +903,23 @@ select.mi{cursor:pointer}
       <div class="sec-lbl">
         <span>3. 11 kV Feeder Loads Reached So Far</span>
         <span style="font-weight:400;font-size:10px">Click feeder row for details</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+        <input id="feeder-search" type="text" placeholder="Search feeder / LV / type" style="padding:8px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);min-width:230px;font-size:12px;font-family:var(--f);background:var(--sf);color:var(--tx)">
+        <select id="feeder-status-filter" style="padding:8px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);font-size:12px;font-family:var(--f);background:var(--sf);color:var(--tx)">
+          <option value="all">All Status</option>
+          <option value="overload">Overload</option>
+          <option value="high">High</option>
+          <option value="normal">Normal</option>
+        </select>
+        <select id="feeder-type-filter" style="padding:8px 10px;border:0.5px solid var(--bd2);border-radius:var(--r);font-size:12px;font-family:var(--f);background:var(--sf);color:var(--tx)">
+          <option value="all">All Types</option>
+          <option value="OH">OH</option>
+          <option value="UG">UG</option>
+        </select>
+        <button id="feeder-reset-btn" style="padding:8px 12px;border:0.5px solid var(--bd2);border-radius:var(--r);background:var(--sf);color:var(--tx2);font-size:12px;cursor:pointer;font-family:var(--f)">Reset</button>
+        <button id="feeder-export-btn" style="padding:8px 12px;border:0.5px solid var(--gn);border-radius:var(--r);background:var(--gnb);color:var(--gnf);font-size:12px;cursor:pointer;font-family:var(--f);font-weight:600">Export CSV</button>
+        <span id="feeder-filter-count" style="font-size:11px;color:var(--tx3);margin-left:auto"></span>
       </div>
       <div style="overflow-x:auto">
         <table class="dtbl" id="feeder-load-table">
@@ -1551,37 +1855,27 @@ function renderHierarchy(){
 // RENDER LOADING TAB
 // ══════════════════════════════════════════════════
 function renderLoading(){
-  // ── DERIVED LOADING VALUES (uniform across all tabs) ──
-  // Rule 1: LV load (A) = sum of all feeder recA on that LV
-  // Rule 2: 33kV incomer load (A) = sum of LV loads on that incomer / 3
-  // These computed values override individual PTR recA for consistency
+  // ── PTR / source loading values from the approved master dataset ──
+  // User requested that PTR loading values shown in the dashboard reflect
+  // the stated PTR loads directly (existing load / max recorded load tables),
+  // instead of being recomputed from feeder sums.
 
-  // Compute LV loads from feeder sums
-  const lvLoads = {};
-  PTRS_DETAIL.forEach(p => {
-    const pF = FEEDERS.filter(f => f.lv === p.lv);
-    lvLoads[p.lv] = pF.reduce((s,f) => s + f.recA, 0);
-  });
+  const lvLoads = Object.fromEntries(PTRS_DETAIL.map(p => [p.lv, p.recA]));
+  const lvPcts  = Object.fromEntries(PTRS_DETAIL.map(p => [p.lv, p.recPct]));
 
-  // Compute 33kV incomer loads = sum of LV loads on that incomer / 3
-  const inc33Loads = {};
-  INC33_LOADS.forEach(inc => {
-    const lvList = inc.lvs.split(',').map(s => s.trim());
-    const sumLV = lvList.reduce((s, lv) => s + (lvLoads[lv] || 0), 0);
-    inc33Loads[inc.feeder] = Math.round(sumLV / 3);
-  });
+  // For each 33kV incomer, reflect the corresponding approved source loading.
+  const inc33Loads = Object.fromEntries(INC33_LOADS.map(inc => [inc.feeder, inc.maxRecA]));
 
-  // Total station LV load (A) and % loading
-  const totLVLoad = Object.values(lvLoads).reduce((s,v) => s+v, 0);
+  // Total station LV load (A) and % loading from PTR recorded values
+  const totLVLoad = PTRS_DETAIL.reduce((s,p) => s + p.recA, 0);
   const totFLC = PTRS_DETAIL.reduce((s,p) => s+p.lvFLC, 0);
   const totSubsPct = Math.min((totLVLoad / totFLC * 100), 100).toFixed(2);
 
   // ── TABLE 1: PTR LOADS ──
   document.getElementById('ptr-load-body').innerHTML = PTRS_DETAIL.map((ptr,i)=>{
     const pct24 = ptr.sumMax24Pct;
-    // Use computed LV load (sum of feeders) for present recording
-    const compRecA = lvLoads[ptr.lv] || ptr.recA;
-    const compRecPct = Math.min((compRecA / ptr.lvFLC * 100), 100).toFixed(2);
+    const compRecA = ptr.recA;
+    const compRecPct = Number(ptr.recPct).toFixed(2);
     const c24 = pct24>=80?'var(--dg)':pct24>=50?'var(--wn)':'var(--ok)';
     const c26 = +compRecPct>=80?'var(--dg)':+compRecPct>=50?'var(--wn)':'var(--ok)';
     return `<tr>
@@ -1609,7 +1903,7 @@ function renderLoading(){
   // Footer totals row
   const totSum24A = PTRS_DETAIL.reduce((s,p)=>s+p.sumMax24A,0);
   const avgPct24 = (PTRS_DETAIL.reduce((s,p)=>s+p.sumMax24Pct,0)/PTRS_DETAIL.length).toFixed(2);
-  const avgPct26 = (Object.values(lvLoads).reduce((s,v)=>s+v,0)/totFLC*100).toFixed(2);
+  const avgPct26 = (PTRS_DETAIL.reduce((s,p)=>s+Number(p.recPct||0),0)/PTRS_DETAIL.length).toFixed(2);
   document.getElementById('ptr-load-foot').innerHTML = `<tr style="background:var(--sf3);font-weight:600">
     <td colspan="2" style="text-align:right;font-size:11px;color:var(--tx2)">Station Total / Average</td>
     <td class="fnum" style="color:var(--tx)">${totFLC} A</td>
@@ -1627,10 +1921,8 @@ function renderLoading(){
   // ── TABLE 2: 33KV FEEDER LOADS — computed from LV feeder sums / 3 ──
   document.getElementById('inc33-load-body').innerHTML = INC33_LOADS.map(inc=>{
     const comp33A = inc33Loads[inc.feeder] || inc.maxRecA;
-    const lvList  = inc.lvs.split(',').map(s=>s.trim());
-    const sumLVA  = lvList.reduce((s,lv)=>s+(lvLoads[lv]||0),0);
     const lc = `<span style="color:var(--ok);font-weight:600">${comp33A} A</span>`;
-    const lvDetail = `<span style="font-size:10px;color:var(--tx3)">(Σ LV loads: ${sumLVA} A ÷ 3)</span>`;
+    const lvDetail = `<span style="font-size:10px;color:var(--tx3)">(approved source load)</span>`;
     return `<tr>
       <td style="font-weight:600">${inc.lvs}</td>
       <td class="fnum">${PTRS_DETAIL[0].mva}</td>
@@ -2235,10 +2527,8 @@ function renderPTRLoadingSummary(){
       + '</div></div>';
     function buildPTRCards(ptrs){
       return ptrs.map(function(p){
-        // Use sum of feeder recA for this LV as the LV load (consistent with loading tab)
-        var pFdrs_ = FEEDERS.filter(function(f){ return f.lv===p.lv; });
-        var compRecA_ = pFdrs_.reduce(function(s,f){ return s+f.recA; }, 0);
-        var compRecPct_ = Math.min(Math.round(compRecA_/p.lvFLC*100),100);
+        var compRecA_ = p.recA;
+        var compRecPct_ = Math.round(Number(p.recPct||0));
         var lp    = compRecPct_;
         var lcol  = lc2(lp), lbg = lb2(lp), lfg = lf2(lp), lbl = ll2(lp);
         var pFdrs = FEEDERS.filter(function(f){ return f.lv===p.lv; });
@@ -2269,9 +2559,10 @@ function renderPTRLoadingSummary(){
             + '</div>'
             + '<div style="height:7px;background:var(--sf3);border-radius:4px;overflow:hidden;margin-bottom:7px"><div style="height:7px;border-radius:4px;width:'+lp+'%;background:'+lcol+'"></div></div>'
             + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'
-              + '<div style="font-size:10px;color:var(--tx3)">Rec (Σ feeders): <strong style="color:'+lcol+';font-family:var(--m)">'+compRecA_+' A ('+compRecPct_+'%)</strong></div>'
+              + '<div style="font-size:10px;color:var(--tx3)">Recorded PTR load: <strong style="color:'+lcol+';font-family:var(--m)">'+compRecA_+' A ('+compRecPct_+'%)</strong></div>'
               + '<div style="font-size:10px;color:var(--tx3)">Cap: <strong style="color:var(--tx);font-family:var(--m)">'+p.mva+' MVA / '+p.lvFLC+' A</strong></div>'
               + '<div style="font-size:10px;color:var(--tx3)">Date: <strong style="font-family:var(--m)">'+p.recDate+' '+p.recTime+'</strong></div>'
+              + '<div style="font-size:10px;color:var(--tx3)">Prev. summer: <strong style="font-family:var(--m)">'+p.sumMax24A+' A ('+Number(p.sumMax24Pct).toFixed(2)+'%)</strong></div>'
               + '<div style="font-size:10px;color:var(--tx3)">TAP: <strong style="font-family:var(--m)">'+p.tap+' \xb7 WTI: '+p.wti+'\xb0C \xb7 OTI: '+p.oti+'\xb0C</strong></div>'
             + '</div>'
           + '</div>'
@@ -2751,6 +3042,672 @@ function loadSLDPdf(input) {
     }
   });
 })();
+
+
+// ══════════════════════════════════════════════════
+// MASTER DATA OVERRIDES — Workbook 18.03.2026
+// ══════════════════════════════════════════════════
+(function(){
+  const hvOverrides = {
+  "HV-I": {
+    "bkrMake": "CGL",
+    "bkrSr": "Not visible",
+    "bkrMfg": "Not visible",
+    "ctrAvail": "400-200-100/1-1-1",
+    "ctrAdopt": "400-200-100/1-1-1",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "CGC090600425",
+    "mtrMake": "ESTER",
+    "mtrSr": "Not visible",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "40"
+  },
+  "HV-II": {
+    "bkrMake": "Stelmake",
+    "bkrSr": "Not visible",
+    "bkrMfg": "Not visible",
+    "ctrAvail": "400-200-100/1-1-1",
+    "ctrAdopt": "400-200-100/1-1-1",
+    "relayMake": "Siemens",
+    "relayType": "IED",
+    "relaySr": "GF1-01511972",
+    "mtrMake": "SECURE",
+    "mtrSr": "XE498091",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "2000"
+  },
+  "HV-III": {
+    "bkrMake": "CGL",
+    "bkrSr": "65146CP",
+    "bkrMfg": "2015",
+    "ctrAvail": "400-200-100/1-1-1",
+    "ctrAdopt": "400-200-100/1-1-1",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "FB762D",
+    "mtrMake": "SECURE",
+    "mtrSr": "XC531536",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "2000"
+  },
+  "HV-IV": {
+    "bkrMake": "CGL",
+    "bkrSr": "86556CP",
+    "bkrMfg": "2017",
+    "ctrAvail": "400-200-100/1-1-1",
+    "ctrAdopt": "400-200-100/1-1-1",
+    "relayMake": "CGL",
+    "relayType": "IED",
+    "relaySr": "FB762D3",
+    "mtrMake": "SECURE",
+    "mtrSr": "XC451982",
+    "mCtr": "100/1",
+    "mPtr": "33KV/110",
+    "mClass": "0.2S",
+    "mMF": "2000"
+  }
+};
+  HV_BAYS.forEach(h => { if(hvOverrides[h.id]) Object.assign(h, hvOverrides[h.id]); });
+
+  const ptrOverrides = {
+  "LV-I": {
+    "maxA": 656,
+    "lvFLC": 656,
+    "ptrMake": "KRK",
+    "ptrCap": "12.5 MVA",
+    "bkrMake": "CGL",
+    "bkrSr": "95079VP",
+    "bkrMfg": "2018",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "600/1A"
+  },
+  "LV-II": {
+    "maxA": 656,
+    "lvFLC": 656,
+    "ptrMake": "KRK",
+    "ptrCap": "12.5 MVA",
+    "bkrMake": "CGL",
+    "bkrSr": "46682VP",
+    "bkrMfg": "2012",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "600/1A"
+  },
+  "LV-III": {
+    "maxA": 656,
+    "lvFLC": 656,
+    "ptrMake": "Thoshibha",
+    "ptrCap": "12.5 MVA",
+    "bkrMake": "CGL",
+    "bkrSr": "63207VP",
+    "bkrMfg": "2015",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "600/1A"
+  },
+  "LV-IV": {
+    "maxA": 656,
+    "lvFLC": 656,
+    "ptrMake": "ECE",
+    "ptrCap": "12.5 MVA",
+    "bkrMake": "CGL",
+    "bkrSr": "88711VP",
+    "bkrMfg": "2017",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "600/1A"
+  }
+};
+  PTRS_DETAIL.forEach(p => { if(ptrOverrides[p.lv]) Object.assign(p, ptrOverrides[p.lv]); });
+
+  FEEDERS.splice(0, FEEDERS.length, ...[
+  {
+    "seq": "FEEDER-1",
+    "name": "11KV GOLKONDA OH FEEDER",
+    "lv": "LV-I",
+    "type": "OH",
+    "maxA": 120,
+    "recA": 70,
+    "maxMVA": 2.29,
+    "recMVA": 1.33,
+    "bkrMake": "CGL",
+    "bkrSr": "\u2014",
+    "bkrMfg": "2016",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-2",
+    "name": "11KV MOTIMAHAL",
+    "lv": "LV-I",
+    "type": "OH",
+    "maxA": 128,
+    "recA": 80,
+    "maxMVA": 2.44,
+    "recMVA": 1.52,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI21015496",
+    "bkrMfg": "2021",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-3",
+    "name": "11KV ADITYA NAGAR UG",
+    "lv": "LV-I",
+    "type": "UG",
+    "maxA": 63,
+    "recA": 34,
+    "maxMVA": 1.2,
+    "recMVA": 0.65,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI19102068",
+    "bkrMfg": "2019",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-4",
+    "name": "11KV DARGA OH FEEDER",
+    "lv": "LV-II",
+    "type": "OH",
+    "maxA": 75,
+    "recA": 32,
+    "maxMVA": 1.43,
+    "recMVA": 0.61,
+    "bkrMake": "CGL",
+    "bkrSr": "95077VP",
+    "bkrMfg": "2018",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "300/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "300/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-5",
+    "name": "11KV GOLKONDA CABLE FEEDER",
+    "lv": "LV-II",
+    "type": "Cable",
+    "maxA": 98,
+    "recA": 50,
+    "maxMVA": 1.87,
+    "recMVA": 0.95,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI19102069",
+    "bkrMfg": "2019",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-6",
+    "name": "11KV SHAIKPET FEEDER",
+    "lv": "LV-II",
+    "type": "OH",
+    "maxA": 108,
+    "recA": 68,
+    "maxMVA": 2.06,
+    "recMVA": 1.3,
+    "bkrMake": "CGL",
+    "bkrSr": "84354VP",
+    "bkrMfg": "2017",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-7",
+    "name": "11KV APARNA ONE",
+    "lv": "LV-III",
+    "type": "OH",
+    "maxA": 49,
+    "recA": 24,
+    "maxMVA": 0.93,
+    "recMVA": 0.46,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI21121580",
+    "bkrMfg": "2021",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-8",
+    "name": "11KV OU COLONY FEEDER",
+    "lv": "LV-III",
+    "type": "OH",
+    "maxA": 128,
+    "recA": 50,
+    "maxMVA": 2.44,
+    "recMVA": 0.95,
+    "bkrMake": "CGL",
+    "bkrSr": "46675VP",
+    "bkrMfg": "2012",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "300/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "300/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-9",
+    "name": "11KV ADITYA NAGAR FEEDER",
+    "lv": "LV-III",
+    "type": "OH",
+    "maxA": 86,
+    "recA": 58,
+    "maxMVA": 1.64,
+    "recMVA": 1.11,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI17076481",
+    "bkrMfg": "2017",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-10",
+    "name": "11KV DARGA UG FEEDER",
+    "lv": "LV-III",
+    "type": "UG",
+    "maxA": 76,
+    "recA": 56,
+    "maxMVA": 1.45,
+    "recMVA": 1.07,
+    "bkrMake": "STELMEC",
+    "bkrSr": "SLI20104999",
+    "bkrMfg": "2020",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-11",
+    "name": "11KV SA COLONY FEEDER",
+    "lv": "LV-III",
+    "type": "OH",
+    "maxA": 60,
+    "recA": 38,
+    "maxMVA": 1.14,
+    "recMVA": 0.72,
+    "bkrMake": "CGL",
+    "bkrSr": "124494VP",
+    "bkrMfg": "2024",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-12",
+    "name": "11KV DIAMOND HILLS",
+    "lv": "LV-IV",
+    "type": "OH",
+    "maxA": 80,
+    "recA": 52,
+    "maxMVA": 1.52,
+    "recMVA": 0.99,
+    "bkrMake": "CGL",
+    "bkrSr": "124492VP",
+    "bkrMfg": "2024",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-13",
+    "name": "11KV QQ TOMBS",
+    "lv": "LV-IV",
+    "type": "OH",
+    "maxA": 30,
+    "recA": 22,
+    "maxMVA": 0.57,
+    "recMVA": 0.42,
+    "bkrMake": "CGL",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-14",
+    "name": "11KV BRUNDHAVAN COLONY FEEDER",
+    "lv": "LV-IV",
+    "type": "OH",
+    "maxA": 118,
+    "recA": 80,
+    "maxMVA": 2.25,
+    "recMVA": 1.52,
+    "bkrMake": "CGL",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "600-300/1-1A",
+    "ctrAdopt": "300/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "300/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  },
+  {
+    "seq": "FEEDER-15",
+    "name": "11KV NARAYANAMMA FEEDER",
+    "lv": "LV-IV",
+    "type": "OH",
+    "maxA": 52,
+    "recA": 30,
+    "maxMVA": 0.99,
+    "recMVA": 0.57,
+    "bkrMake": "CGL",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "400-200-100/1-1A",
+    "ctrAdopt": "200/1A",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "200/1A",
+    "mPtr": "11KV/110V",
+    "mClass": "\u2014",
+    "mMF": "1",
+    "area": "\u2014",
+    "len": "\u2014"
+  }
+]);
+  INC33.splice(0, INC33.length, ...[
+  {
+    "seq": "INCOMER-1 (Regular)",
+    "name": "132/33kV Asifnagar SS -> 33kV Shaikpet",
+    "ehtSS": "132/33kV Asifnagar SS",
+    "feeder": "33kV Shaikpet",
+    "kv": 132,
+    "type": "Regular",
+    "lineType": "UG",
+    "maxCapA": 400,
+    "lvs": "LV-III, LV-IV",
+    "maxRecA": 110,
+    "maxRecDate": "18.03.2026",
+    "maxRecTime": "Workbook",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda",
+    "bkrMake": "\u2014",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "\u2014",
+    "ctrAdopt": "\u2014",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "\u2014",
+    "mPtr": "\u2014",
+    "mClass": "\u2014",
+    "mMF": "\u2014"
+  },
+  {
+    "seq": "INCOMER-2 (Regular)",
+    "name": "400/220/132/33kV Raidurgam SS -> 33kV Sandya Ckt 1",
+    "ehtSS": "400/220/132/33kV Raidurgam SS",
+    "feeder": "33kV Sandya Ckt 1",
+    "kv": 400,
+    "type": "Regular",
+    "lineType": "UG",
+    "maxCapA": 400,
+    "lvs": "LV-I, LV-II",
+    "maxRecA": 80,
+    "maxRecDate": "18.03.2026",
+    "maxRecTime": "Workbook",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda",
+    "bkrMake": "\u2014",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "\u2014",
+    "ctrAdopt": "\u2014",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "\u2014",
+    "mPtr": "\u2014",
+    "mClass": "\u2014",
+    "mMF": "\u2014"
+  },
+  {
+    "seq": "ALTERNATE-1",
+    "name": "132/33kV Asifnagar SS -> 33kV  Golconda",
+    "ehtSS": "132/33kV Asifnagar SS",
+    "feeder": "33kV  Golconda",
+    "kv": 132,
+    "type": "Alternate",
+    "lineType": "OH",
+    "maxCapA": 400,
+    "lvs": "Standby",
+    "maxRecA": 0,
+    "maxRecDate": "\u2014",
+    "maxRecTime": "\u2014",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda",
+    "bkrMake": "\u2014",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "\u2014",
+    "ctrAdopt": "\u2014",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "\u2014",
+    "mPtr": "\u2014",
+    "mClass": "\u2014",
+    "mMF": "\u2014"
+  },
+  {
+    "seq": "ALTERNATE-2",
+    "name": "132/33kV Jubileehills SS -> 33kV Golconda",
+    "ehtSS": "132/33kV Jubileehills SS",
+    "feeder": "33kV Golconda",
+    "kv": 132,
+    "type": "Alternate",
+    "lineType": "UG",
+    "maxCapA": 400,
+    "lvs": "Standby",
+    "maxRecA": 0,
+    "maxRecDate": "\u2014",
+    "maxRecTime": "\u2014",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda",
+    "bkrMake": "\u2014",
+    "bkrSr": "\u2014",
+    "bkrMfg": "\u2014",
+    "ctrAvail": "\u2014",
+    "ctrAdopt": "\u2014",
+    "relayMake": "\u2014",
+    "relayType": "\u2014",
+    "relaySr": "\u2014",
+    "mtrMake": "\u2014",
+    "mtrSr": "\u2014",
+    "mCtr": "\u2014",
+    "mPtr": "\u2014",
+    "mClass": "\u2014",
+    "mMF": "\u2014"
+  }
+]);
+  INC33_LOADS.splice(0, INC33_LOADS.length, ...[
+  {
+    "seq": "INC-1",
+    "feeder": "33kV Shaikpet",
+    "ehtSS": "132/33kV Asifnagar SS",
+    "type": "UG",
+    "maxCapA": 400,
+    "lvs": "LV-III, LV-IV",
+    "maxRecA": 110,
+    "maxRecDate": "18.03.2026",
+    "maxRecTime": "Workbook",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda"
+  },
+  {
+    "seq": "INC-2",
+    "feeder": "33kV Sandya Ckt 1",
+    "ehtSS": "400/220/132/33kV Raidurgam SS",
+    "type": "UG",
+    "maxCapA": 400,
+    "lvs": "LV-I, LV-II",
+    "maxRecA": 80,
+    "maxRecDate": "18.03.2026",
+    "maxRecTime": "Workbook",
+    "alt1": "33kV Asifnagar - Golconda",
+    "alt2": "33kV Jubilee Hills - Golconda"
+  }
+]);
+})();
+
 
 // ══════════════════════════════════════════════════
 // INIT
