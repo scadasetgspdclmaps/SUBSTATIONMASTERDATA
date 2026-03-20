@@ -4604,23 +4604,13 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
     }
   }
 
-  function patchPTRCardsText(){
-    const elPTR = byId('id-ptr-loading');
-    if(!elPTR) return;
-    // replace source banners text only after existing render
-    elPTR.innerHTML = elPTR.innerHTML
-      .replace(/Regular Source:[\s\S]*?LV-I &amp; LV-II/i, 'Regular Source: 33kV Rayadurgam - Sandhya · LV-I &amp; LV-II')
-      .replace(/Regular Source:[\s\S]*?LV-III &amp; LV-IV/i, 'Regular Source: 33kV Asifnagar - Shaikpet · LV-III &amp; LV-IV')
-      .replace(/132\/33kV ASIFNAGAR SS → 33kV GOLCONDA \(Regular\)/g, '33kV Rayadurgam - Sandhya (LV1 & LV2)')
-      .replace(/33kV Rayadurgam - Sandhya \(Regular\)/g, '33kV Rayadurgam - Sandhya (LV1 & LV2)')
-      .replace(/132\/33kV ASIFNAGAR SS → 33kV SHAIKPET \(Regular\)/g, '33kV Asifnagar - Shaikpet (LV3 & LV4)')
-      .replace(/33kV Asifnagar - Shaikpet \(Regular\)/g, '33kV Asifnagar - Shaikpet (LV3 & LV4)');
-  }
+  function patchPTRCardsText(){ return; }
 
   function runFinalFixes(){
     patchSourceLabels();
+    renderFixedIdentitySources();
+    renderFixedPTRCards();
     if (typeof renderForecastTab2 === 'function') renderForecastTab2();
-    patchPTRCardsText();
   }
 
   window.renderForecastTab = renderForecastTab2;
