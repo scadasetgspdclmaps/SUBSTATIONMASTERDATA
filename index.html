@@ -4396,5 +4396,236 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
 })();
 </script>
 
+
+<script>
+(function(){
+  function byId(id){ return document.getElementById(id); }
+  function cleanName2(s){ return String(s||'').replace(/^11\s*KV\s*/i,'').replace(/\s+FEEDER$/i,'').trim(); }
+  function currentStatus2(a){
+    a = +a || 0;
+    if(a >= 120) return {key:'critical', label:'Critical', bg:'var(--rb)', fg:'var(--rf)'};
+    if(a >= 100) return {key:'high', label:'High', bg:'var(--amb)', fg:'var(--amf)'};
+    if(a >= 80) return {key:'watch', label:'Watch', bg:'#FFF1CC', fg:'#8A5A00'};
+    return {key:'healthy', label:'Healthy', bg:'var(--gnb)', fg:'var(--gnf)'};
+  }
+  function forecastRisk2(a){
+    a = +a || 0;
+    if(a >= 120) return {key:'critical', label:'Critical', bg:'var(--rb)', fg:'var(--rf)'};
+    if(a >= 110) return {key:'watch', label:'Watch', bg:'var(--amb)', fg:'var(--amf)'};
+    return {key:'healthy', label:'Healthy', bg:'var(--gnb)', fg:'var(--gnf)'};
+  }
+  function groupForLV(lv){
+    return (lv==='LV-I' || lv==='LV-II') ? 'G1' : 'G2';
+  }
+  const GROUPS = {
+    G1: {
+      name: '33kV Asifnagar - Sandhya',
+      label: '33kV Asifnagar - Sandhya (LV1 & LV2)',
+      presentA: 111,
+      maxA: 186,
+      minA: 98
+    },
+    G2: {
+      name: '33kV Asifnagar - Shaikpet',
+      label: '33kV Asifnagar-Shaikpet (LV3 & LV4)',
+      presentA: 137,
+      maxA: 211,
+      minA: 109
+    }
+  };
+  function sourceGroupForecastA(groupKey){
+    const g = GROUPS[groupKey];
+    return +(Math.max(+g.presentA||0, +g.maxA||0) * 1.08).toFixed(1);
+  }
+  function feederForecastA2(f){
+    return +(Math.max(+f.recA||0, +f.maxRecordedA||0) * 1.08).toFixed(1);
+  }
+  function transferTargets2(f){
+    if(typeof FEEDERS === 'undefined') return [];
+    const candidates = FEEDERS
+      .filter(x => x.lv===f.lv && x.name!==f.name)
+      .sort((a,b)=>(+a.recA||0)-(+b.recA||0));
+    if(candidates.length>=2) return [candidates[0], candidates[1]];
+    // fallback to same source-group low feeders
+    const group = groupForLV(f.lv);
+    const sameGroup = FEEDERS
+      .filter(x => groupForLV(x.lv)===group && x.name!==f.name)
+      .sort((a,b)=>(+a.recA||0)-(+b.recA||0));
+    return [sameGroup[0], sameGroup[1]].filter(Boolean);
+  }
+  function feederRemedy2(f,t1,t2){
+    const cur = +f.recA||0;
+    const peak = +f.maxRecordedA||cur;
+    const fc = feederForecastA2(f);
+    if(cur >= 120){
+      return `Present load is already at/above 120 A. Immediate load relief required. Shift load in stages to ${t1 ? cleanName2(t1.name) : 'available support feeder'} after field confirmation. Keep ${t2 ? cleanName2(t2.name) : 'alternate path'} as contingency.`;
+    }
+    if(cur >= 80){
+      return `Present load is above 80 A watch threshold. Keep daily peak watch, prepare switching plan, and pre-identify blocks that can be shifted to ${t1 ? cleanName2(t1.name) : 'support feeder'}. Forecast from peak basis ${peak} A reaches ${fc} A under summer stress.`;
+    }
+    if(fc >= 120){
+      return `Present load is manageable, but historical peak basis ${peak} A gives forecast ${fc} A. Maintain as healthy now; however keep ${t1 ? cleanName2(t1.name) : 'support feeder'} ready for summer relief and verify thermography, voltage profile and protection coordination.`;
+    }
+    return `Healthy at present. Maintain routine watch and retain as support/receiving feeder subject to field confirmation.`;
+  }
+  function ptrForecastA2(ptr){
+    if(typeof FEEDERS === 'undefined') return +ptr.recA||0;
+    const lvForecast = FEEDERS
+      .filter(f => f.lv===ptr.lv)
+      .reduce((s,f)=>s+feederForecastA2(f),0);
+    const groupFc = sourceGroupForecastA(groupForLV(ptr.lv));
+    const groupPresent = GROUPS[groupForLV(ptr.lv)].presentA;
+    const sourceFactor = groupPresent>0 ? (groupFc / groupPresent) : 1.0;
+    const sourceAdjusted = (+ptr.recA||0) * sourceFactor;
+    return +(Math.max(lvForecast, sourceAdjusted, +ptr.recA||0, +ptr.sumMax24A||0)).toFixed(1);
+  }
+  function ptrForecastPct2(ptr){
+    return +(ptrForecastA2(ptr) / (+ptr.lvFLC||656) * 100).toFixed(2);
+  }
+  function ptrTrend2(ptr){
+    const group = GROUPS[groupForLV(ptr.lv)];
+    const sourceFc = sourceGroupForecastA(groupForLV(ptr.lv));
+    return `Driven by ${group.label}: source ${group.presentA} A / max ${group.maxA} A / forecast ${sourceFc} A, plus feeder-group forecast under ${ptr.lv}.`;
+  }
+  function ptrRemedy2(ptr){
+    const group = GROUPS[groupForLV(ptr.lv)];
+    const pfc = ptrForecastPct2(ptr);
+    const hotFeeders = (typeof FEEDERS !== 'undefined' ? FEEDERS.filter(f=>f.lv===ptr.lv).sort((a,b)=>(+b.maxRecordedA||0)-(+a.maxRecordedA||0)).slice(0,2).map(f=>cleanName2(f.name)).join(', ') : 'connected feeders');
+    if(pfc >= 60){
+      return `Watch ${ptr.lv} closely. Forecast is being driven by ${group.label} and feeders ${hotFeeders}. Keep OTI/WTI watch, verify load transfer options, and avoid pushing additional load onto this LV during summer peaks.`;
+    }
+    return `Normal at present. Forecast remains manageable, but rises in ${group.label} and feeders ${hotFeeders} will directly increase ${ptr.lv} loading.`;
+  }
+  function renderForecastTab2(){
+    if(typeof FEEDERS==='undefined' || typeof PTRS_DETAIL==='undefined') return;
+    const rows = FEEDERS.map(f=>{
+      const current = currentStatus2(f.recA);
+      const fcA = feederForecastA2(f);
+      const risk = forecastRisk2(fcA);
+      const [t1,t2] = transferTargets2(f);
+      return {f, current, fcA, risk, t1, t2};
+    });
+    const currentCritical = rows.filter(r=>r.current.key==='critical').length;
+    const forecastCritical = rows.filter(r=>r.risk.key==='critical').length;
+    const support = rows.filter(r=>r.current.key==='healthy').sort((a,b)=>(+a.f.recA||0)-(+b.f.recA||0)).slice(0,4);
+    const ptrWatch = PTRS_DETAIL.map(p=>({p, fcA: ptrForecastA2(p), fcPct: ptrForecastPct2(p)})).sort((a,b)=>b.fcPct-a.fcPct);
+
+    const kpi = byId('forecast-kpis');
+    if(kpi){
+      kpi.innerHTML = `
+        <div class="fc-card"><h3>Current critical feeders</h3><div class="v">${currentCritical}</div><div class="s">Based only on present feeder load</div></div>
+        <div class="fc-card"><h3>Forecast-critical feeders</h3><div class="v">${forecastCritical}</div><div class="s">Peak basis + 8% summer stress</div></div>
+        <div class="fc-card"><h3>Support feeders</h3><div class="v">${support.map(x=>cleanName2(x.f.name)).join(', ') || '—'}</div><div class="s">Lowest present-loaded feeders</div></div>
+        <div class="fc-card"><h3>Top source forecast</h3><div class="v">${GROUPS.G2.label}</div><div class="s">${sourceGroupForecastA('G2')} A forecast from 33 kV source basis</div></div>`;
+    }
+
+    const body = byId('forecast-feeder-body');
+    if(body){
+      body.innerHTML = rows
+        .sort((a,b)=> {
+          const rank = x => x.current.key==='critical'?0:x.current.key==='high'?1:x.current.key==='watch'?2:x.risk.key==='critical'?3:x.risk.key==='watch'?4:5;
+          return rank(a)-rank(b) || b.fcA-a.fcA;
+        })
+        .map(({f,current,fcA,risk,t1,t2})=>`
+          <tr>
+            <td style="font-weight:600">${cleanName2(f.name)}</td>
+            <td>${f.lv}</td>
+            <td>${f.type}</td>
+            <td class="fnum">${f.recA}</td>
+            <td><span class="vb" style="background:${current.bg};color:${current.fg}">${current.label}</span></td>
+            <td class="fnum">${f.maxRecordedA||f.recA}</td>
+            <td class="fnum">120</td>
+            <td class="fnum" style="font-weight:700;color:${risk.key==='critical'?'var(--rf)':risk.key==='watch'?'var(--amf)':'var(--gnf)'}">${fcA}</td>
+            <td><span class="vb" style="background:${risk.bg};color:${risk.fg}">${risk.label}</span></td>
+            <td class="path-cell">${t1 ? `${cleanName2(f.name)} → ${cleanName2(t1.name)}` : 'Keep on watch'}${t2 ? `<br><span class="small-muted">Alt: ${cleanName2(f.name)} → ${cleanName2(t2.name)}</span>` : ''}</td>
+            <td class="remedy-cell">${feederRemedy2(f,t1,t2)}</td>
+          </tr>
+        `).join('');
+    }
+
+    const ptrBody = byId('forecast-ptr-body');
+    if(ptrBody){
+      ptrBody.innerHTML = PTRS_DETAIL.map(p=>{
+        const fcA = ptrForecastA2(p);
+        const fcPct = ptrForecastPct2(p);
+        const group = GROUPS[groupForLV(p.lv)];
+        const hot = fcPct >= 60;
+        return `
+          <tr class="${hot?'blink-forecast-critical':''}">
+            <td style="font-weight:700">${p.lv}</td>
+            <td class="fnum">${p.sumMax24A}</td>
+            <td class="fnum">${(+p.sumMax24Pct).toFixed(2)}%</td>
+            <td class="fnum">${p.recA}</td>
+            <td class="fnum">${(+p.recPct).toFixed(2)}%</td>
+            <td class="fnum" style="font-weight:700">${fcA}</td>
+            <td class="fnum" style="font-weight:700;color:${hot?'var(--rf)':'var(--tx)'}">${fcPct.toFixed(2)}%</td>
+            <td style="font-size:11px">${ptrTrend2(p)}</td>
+            <td class="remedy-cell">${ptrRemedy2(p)}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    // only highlight current-critical feeder rows in loading tab
+    const map = Object.fromEntries(rows.map(r=>[cleanName2(r.f.name), r]));
+    document.querySelectorAll('#feeder-load-body tr').forEach(tr=>{
+      tr.classList.remove('blink-forecast-critical');
+      const first = tr.querySelector('td'); if(!first) return;
+      const row = map[cleanName2(first.textContent)];
+      if(row && row.current.key==='critical') tr.classList.add('blink-forecast-critical');
+    });
+  }
+
+  function patchSourceLabels(){
+    const title = byId('id-inc-title');
+    if(title) title.textContent = 'Incoming Sources';
+    const cards = byId('id-inc-cards');
+    if(cards){
+      cards.innerHTML = `
+        <div style="flex:1;min-width:360px;background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid var(--ok);border-radius:var(--rl);overflow:hidden">
+          <div style="padding:12px 14px;background:var(--gnb);border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:700;color:var(--gnf)">33kV Asifnagar - Sandhya</div><div style="font-size:11px;color:var(--gnf)">(LV1 & LV2)</div></div>
+            <span class="vb" style="background:var(--ok);color:#fff">Regular</span>
+          </div>
+          <div style="padding:10px 14px;font-size:12px;color:var(--tx2)">
+            <div>Present / Max / Min: <strong>111 A / 186 A / 98 A</strong></div>
+            <div style="margin-top:6px">Feeds: <strong>LV-I, LV-II</strong></div>
+          </div>
+        </div>
+        <div style="flex:1;min-width:360px;background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid var(--ok);border-radius:var(--rl);overflow:hidden">
+          <div style="padding:12px 14px;background:var(--gnb);border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:13px;font-weight:700;color:var(--gnf)">33kV Asifnagar - Shaikpet</div><div style="font-size:11px;color:var(--gnf)">(LV3 & LV4)</div></div>
+            <span class="vb" style="background:var(--ok);color:#fff">Regular</span>
+          </div>
+          <div style="padding:10px 14px;font-size:12px;color:var(--tx2)">
+            <div>Present / Max / Min: <strong>137 A / 211 A / 109 A</strong></div>
+            <div style="margin-top:6px">Feeds: <strong>LV-III, LV-IV</strong></div>
+          </div>
+        </div>`;
+    }
+  }
+
+  function patchPTRCardsText(){
+    const elPTR = byId('id-ptr-loading');
+    if(!elPTR) return;
+    // replace source banners text only after existing render
+    elPTR.innerHTML = elPTR.innerHTML
+      .replace(/Regular Source:[\s\S]*?LV-I &amp; LV-II/i, 'Regular Source: 33kV Asifnagar - Sandhya · LV-I &amp; LV-II')
+      .replace(/Regular Source:[\s\S]*?LV-III &amp; LV-IV/i, 'Regular Source: 33kV Asifnagar - Shaikpet · LV-III &amp; LV-IV')
+      .replace(/132\/33kV ASIFNAGAR SS → 33kV GOLCONDA \(Regular\)/g, '33kV Asifnagar - Sandhya (LV1 & LV2)')
+      .replace(/132\/33kV ASIFNAGAR SS → 33kV SHAIKPET \(Regular\)/g, '33kV Asifnagar - Shaikpet (LV3 & LV4)');
+  }
+
+  function runFinalFixes(){
+    patchSourceLabels();
+    if (typeof renderForecastTab2 === 'function') renderForecastTab2();
+    patchPTRCardsText();
+  }
+
+  window.renderForecastTab = renderForecastTab2;
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', runFinalFixes);
+  else runFinalFixes();
+})();
+</script>
+
 </body>
 </html>
