@@ -1481,7 +1481,7 @@ document.addEventListener('DOMContentLoaded', function(){
     <div class="sec">
       <div class="sec-lbl">
         <span>Feeder Forecast, Transfer Paths & Remedies</span>
-        <span style="font-weight:400">Critical feeders are highlighted in red and mapped to receiving feeders with spare margin</span>
+        <span style="font-weight:400">Current status and forecast risk are shown separately; transfer paths are based on spare margin feeders</span>
       </div>
       <div style="overflow-x:auto">
         <table class="dtbl">
@@ -1491,9 +1491,11 @@ document.addEventListener('DOMContentLoaded', function(){
               <th>PTR</th>
               <th>Type</th>
               <th>Current Load (A)</th>
+              <th>Current Status</th>
+              <th>Peak Basis (A)</th>
               <th>120 A Ceiling</th>
-              <th>Forecast Summer 2026 from Peak Basis (A)</th>
-              <th>Forecast Status</th>
+              <th>Forecast Summer 2026 (A)</th>
+              <th>Forecast Risk</th>
               <th>Suggested Transfer Path</th>
               <th>Forecast Remedy / Field Action</th>
             </tr>
@@ -2305,7 +2307,7 @@ function renderSelectedReport(){
     ]);
   } else if(ds==='forecast_feeders'){
     const rows=getForecastFeederRows();
-    html=makeReportTable('Feeder Forecast & Remedies','Forecast tab → feeder forecast using +8% seasonal stress on latest feeder peak',['Feeder','PTR','Type','Current A','Peak Basis A','Forecast A','Forecast % of 120A','Status','Remedy'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td>${r.f.lv}</td><td>${r.f.type}</td><td class="fnum">${r.f.recA}</td><td class="fnum">${r.f.maxRecordedA||r.f.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${reportStatusBadge(r.status)}</td><td>${r.remedy}</td></tr>`).join(''));
+    html=makeReportTable('Feeder Forecast & Remedies','Forecast tab → feeder forecast using +8% seasonal stress on latest feeder peak',['Feeder','PTR','Type','Current A','Current Status','Peak Basis A','Forecast A','Forecast % of 120A','Forecast Risk','Remedy'],rows.map(r=>`<tr><td>${r.f.seq}: ${r.f.name}</td><td>${r.f.lv}</td><td>${r.f.type}</td><td class="fnum">${r.f.recA}</td><td>${reportStatusBadge(r.f.recA>=120?'Critical':r.f.recA>=100?'High':r.f.recA>=80?'Watch':'Healthy')}</td><td class="fnum">${r.f.maxRecordedA||r.f.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${reportStatusBadge(r.status)}</td><td>${r.remedy}</td></tr>`).join(''));
   } else if(ds==='forecast_ptr'){
     const rows=getForecastPTRRows();
     html=makeReportTable('PTR Forecast & Remedies','Forecast tab → seasonal PTR watch based on previous summer and March 2026',['PTR','Prev Summer A','Mar 2026 A','Forecast A','Forecast %','Trend','Remedy'],rows.map(r=>`<tr><td>${r.p.id}</td><td class="fnum">${r.p.sumMax25A}</td><td class="fnum">${r.p.recA}</td><td class="fnum">${r.fcA}</td><td class="fnum">${r.fcPct}%</td><td>${r.trend}</td><td>${r.remedy}</td></tr>`).join(''));
@@ -4096,11 +4098,18 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
   }
   function feederStressBaseA(f){ return Math.max(+(f.recA||0), +(f.maxRecordedA||0)); }
   function feederForecastA(f){ return +(feederStressBaseA(f)*1.08).toFixed(1); }
-  function feederStatus(f){
-    const peak=feederStressBaseA(f), fc=feederForecastA(f);
-    if(peak>=120 || fc>=130) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
-    if(peak>=110 || fc>=120) return {key:'watch',label:'Watch',bg:'var(--amb)',fg:'var(--amf)'};
+  function currentStatus(f){
+    const rec = +(f.recA||0);
+    if(rec>=120) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
+    if(rec>=100) return {key:'high',label:'High',bg:'var(--amb)',fg:'var(--amf)'};
+    if(rec>=80) return {key:'watch',label:'Watch',bg:'var(--blb)',fg:'var(--blf)'};
     return {key:'healthy',label:'Healthy',bg:'var(--gnb)',fg:'var(--gnf)'};
+  }
+  function forecastRisk(f){
+    const fc=feederForecastA(f);
+    if(fc>=120) return {key:'critical',label:'Critical',bg:'var(--rb)',fg:'var(--rf)'};
+    if(fc>=110) return {key:'watch',label:'Watch',bg:'var(--amb)',fg:'var(--amf)'};
+    return {key:'low',label:'Low Risk',bg:'var(--gnb)',fg:'var(--gnf)'};
   }
   function ptrForecastA(p){ return +(Math.max(+p.sumMax24A||0,+p.recA||0)*1.08).toFixed(1); }
   function ptrForecastPct(p){ return +((ptrForecastA(p)/(+p.lvFLC||1))*100).toFixed(2); }
@@ -4111,26 +4120,30 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
     return 'Broadly stable vs previous summer';
   }
   function feederRemedy(f, target1, target2){
-    const fc=feederForecastA(f), status=feederStatus(f).key, peak=+(f.maxRecordedA||0);
+    const rec = +(f.recA||0), peak=+(f.maxRecordedA||0), fc=feederForecastA(f);
+    const now=currentStatus(f).key, risk=forecastRisk(f).key;
     const moves=[];
+    if(rec<80) moves.push(`Present feeder load is healthy at ${rec} A.`);
+    else if(rec<100) moves.push(`Present feeder load is under watch at ${rec} A.`);
+    else if(rec<120) moves.push(`Present feeder load is high at ${rec} A and needs closer daily monitoring.`);
+    else moves.push(`Present feeder load is already critical at ${rec} A.`);
     if(peak){
-      if(peak>=120) moves.push(`Actual feeder peak has already touched / exceeded the 120 A ceiling at ${peak} A.`);
-      else moves.push(`Latest recorded feeder peak is ${peak} A; monitor rise against the 120 A ceiling.`);
+      if(peak>=120) moves.push(`Peak basis is ${peak} A, which has already touched / exceeded the 120 A ceiling.`);
+      else moves.push(`Peak basis is ${peak} A; use this as the planning basis for summer escalation.`);
     }
-    if(status==='critical'){
-      moves.push('Immediate evening-peak watch and no further heavy releases on this feeder.');
-      if(target1) moves.push(`Shift 10–20 A in stages towards ${cleanName(target1.name)} after field confirmation.`);
+    if(risk==='critical'){
+      moves.push(`Forecast reaches ${fc} A, so this feeder is forecast-critical even if the present load is lower.`);
+      moves.push('Keep evening-peak watch, block further heavy releases, and review DT / apartment pockets connected to this feeder.');
+      if(target1) moves.push(`Prepare staged load transfer towards ${cleanName(target1.name)} after field feasibility, voltage-drop and protection checks.`);
       if(target2) moves.push(`Keep ${cleanName(target2.name)} as alternate receiving feeder for contingency support.`);
-      moves.push('Carry out thermography on breaker, CT terminals, jumpers and cable terminations; verify phase balance and review major DT / apartment pockets.');
-    } else if(status==='watch'){
-      moves.push('Prepare switching plan before peak season and monitor daily maximum demand.');
-      if(target1) moves.push(`Pre-identify load blocks that can be shifted to ${cleanName(target1.name)}.`);
-      moves.push('Check hot spots, loose contacts and voltage complaints before summer escalation.');
+      moves.push('Carry out thermography on breaker, CT terminals, jumpers and cable terminations; verify phase balance and loose-contact points.');
+    } else if(risk==='watch'){
+      moves.push(`Forecast reaches ${fc} A, so keep this feeder under pre-summer watch.`);
+      if(target1) moves.push(`Pre-identify shiftable load blocks that can be moved to ${cleanName(target1.name)} if demand rises.`);
+      moves.push('Monitor daily maximum demand, voltage complaints and hotspot indications.');
     } else {
-      moves.push('Maintain as support feeder with spare margin.');
-      moves.push('Can receive limited transferred load after voltage-drop and protection checks.');
+      moves.push('This feeder has spare operational margin and may receive limited transferred load after field confirmation.');
     }
-    if(fc>=120) moves.push(`Forecast crosses the 120 A ceiling at ${fc} A under summer stress.`);
     return moves.join(' ');
   }
   function ptrRemedy(p){
@@ -4161,37 +4174,45 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
   function renderForecastTab(){
     const feederRows = FEEDERS.map(f=>{
       const forecastA=feederForecastA(f);
-      const st=feederStatus(f);
+      const now=currentStatus(f);
+      const risk=forecastRisk(f);
       const [t1,t2]=transferTargets(f);
-      return {f, forecastA, st, t1, t2};
+      return {f, forecastA, now, risk, t1, t2};
     });
-    const critical = feederRows.filter(r=>r.st.key==='critical');
-    const watch = feederRows.filter(r=>r.st.key==='watch');
-    const support = feederRows.filter(r=>r.st.key==='healthy').sort((a,b)=>a.f.recA-b.f.recA).slice(0,4);
+    const currentCritical = feederRows.filter(r=>r.now.key==='critical');
+    const forecastCritical = feederRows.filter(r=>r.risk.key==='critical');
+    const support = feederRows.filter(r=>r.now.key==='healthy').sort((a,b)=>a.f.recA-b.f.recA).slice(0,4);
     const ptrWatch = PTRS_DETAIL.map(p=>({p,fcA:ptrForecastA(p),fcPct:ptrForecastPct(p)})).sort((a,b)=>b.fcPct-a.fcPct);
 
     const kpi = document.getElementById('forecast-kpis');
     if(kpi){
       kpi.innerHTML = `
-        <div class="fc-card"><h3>Critical feeders</h3><div class="v">${critical.length}</div><div class="s">At or beyond present / forecast ceiling</div></div>
-        <div class="fc-card"><h3>Watch feeders</h3><div class="v">${watch.length}</div><div class="s">Likely to tighten during summer peak</div></div>
-        <div class="fc-card"><h3>Best receiving feeders</h3><div class="v">${support.map(x=>cleanName(x.f.name)).join(', ')}</div><div class="s">Lowest recorded feeders with spare operational margin</div></div>
+        <div class="fc-card"><h3>Current critical feeders</h3><div class="v">${currentCritical.length}</div><div class="s">Based on present feeder load only</div></div>
+        <div class="fc-card"><h3>Forecast-critical feeders</h3><div class="v">${forecastCritical.length}</div><div class="s">Likely to cross 120 A on peak basis</div></div>
+        <div class="fc-card"><h3>Best receiving feeders</h3><div class="v">${support.map(x=>cleanName(x.f.name)).join(', ')}</div><div class="s">Lowest present-loaded feeders with spare margin</div></div>
         <div class="fc-card"><h3>First watch PTR</h3><div class="v">${ptrWatch[0]?.p.lv||'—'}</div><div class="s">Forecast ${ptrWatch[0]?.fcPct?.toFixed ? ptrWatch[0].fcPct.toFixed(2):'—'}% LV-side loading</div></div>`;
     }
 
     const feederBody=document.getElementById('forecast-feeder-body');
     if(feederBody){
-      feederBody.innerHTML = feederRows.sort((a,b)=> (a.st.key===b.st.key? b.forecastA-a.forecastA : (a.st.key==='critical'?-1:b.st.key==='critical'?1:a.st.key==='watch'?-1:1))).map(({f,forecastA,st,t1,t2})=>`
-        <tr class="${st.key==='critical' ? 'blink-forecast-critical' : ''}">
+      feederBody.innerHTML = feederRows
+        .sort((a,b)=> {
+          const rank = x => x.now.key==='critical'?0:x.risk.key==='critical'?1:x.now.key==='high'?2:x.now.key==='watch'?3:x.risk.key==='watch'?4:5;
+          return rank(a)-rank(b) || b.forecastA-a.forecastA;
+        })
+        .map(({f,forecastA,now,risk,t1,t2})=>`
+        <tr>
           <td style="font-weight:600">${cleanName(f.name)}</td>
           <td>${f.lv}</td>
           <td>${f.type}</td>
           <td class="fnum">${f.recA}</td>
+          <td><span class="vb" style="background:${now.bg};color:${now.fg}">${now.label}</span></td>
+          <td class="fnum">${f.maxRecordedA||f.recA}</td>
           <td class="fnum">120</td>
-          <td class="fnum" style="font-weight:700;color:${st.key==='critical'?'var(--rf)':st.key==='watch'?'var(--amf)':'var(--gnf)'}">${forecastA}</td>
-          <td><span class="vb" style="background:${st.bg};color:${st.fg}">${st.label}</span></td>
+          <td class="fnum" style="font-weight:700;color:${risk.key==='critical'?'var(--rf)':risk.key==='watch'?'var(--amf)':'var(--gnf)'}">${forecastA}</td>
+          <td><span class="vb" style="background:${risk.bg};color:${risk.fg}">${risk.label}</span></td>
           <td class="path-cell">${t1 ? `${cleanName(f.name)} → ${cleanName(t1.name)}` : 'Keep on watch'}${t2 ? `<br><span class="small-muted">Alt: ${cleanName(f.name)} → ${cleanName(t2.name)}</span>` : ''}</td>
-          <td class="remedy-cell"><div><span class="small-muted">Peak basis: ${f.maxRecordedA||f.recA} A</span><br>${feederRemedy(f,t1,t2)}</div></td>
+          <td class="remedy-cell">${feederRemedy(f,t1,t2)}</td>
         </tr>`).join('');
     }
 
@@ -4224,7 +4245,8 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
       if(!cell) return;
       const key = cleanName(cell.textContent);
       const row = feederMap[key];
-      if(row && row.st.key==='critical') tr.classList.add('blink-forecast-critical');
+      if(!row) return;
+      if(row.now.key==='critical') tr.classList.add('blink-forecast-critical');
     });
     const ptrMap = Object.fromEntries(ptrRows.map(r=>[String(r.p.lv).trim(), r]));
     document.querySelectorAll('#ptr-load-body tr').forEach(tr=>{
