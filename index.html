@@ -4419,8 +4419,8 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
   }
   const GROUPS = {
     G1: {
-      name: '33kV Asifnagar - Sandhya',
-      label: '33kV Asifnagar - Sandhya (LV1 & LV2)',
+      name: '33kV Rayadurgam - Sandhya',
+      label: '33kV Rayadurgam - Sandhya (LV1 & LV2)',
       presentA: 111,
       maxA: 186,
       minA: 98
@@ -4583,7 +4583,7 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
       cards.innerHTML = `
         <div style="flex:1;min-width:360px;background:var(--sf);border:0.5px solid var(--bd);border-left:3px solid var(--ok);border-radius:var(--rl);overflow:hidden">
           <div style="padding:12px 14px;background:var(--gnb);border-bottom:0.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center">
-            <div><div style="font-size:13px;font-weight:700;color:var(--gnf)">33kV Asifnagar - Sandhya</div><div style="font-size:11px;color:var(--gnf)">(LV1 & LV2)</div></div>
+            <div><div style="font-size:13px;font-weight:700;color:var(--gnf)">33kV Rayadurgam - Sandhya</div><div style="font-size:11px;color:var(--gnf)">(LV1 & LV2)</div></div>
             <span class="vb" style="background:var(--ok);color:#fff">Regular</span>
           </div>
           <div style="padding:10px 14px;font-size:12px;color:var(--tx2)">
@@ -4609,9 +4609,9 @@ document.getElementById('fdt').textContent='Generated: '+new Date().toLocaleDate
     if(!elPTR) return;
     // replace source banners text only after existing render
     elPTR.innerHTML = elPTR.innerHTML
-      .replace(/Regular Source:[\s\S]*?LV-I &amp; LV-II/i, 'Regular Source: 33kV Asifnagar - Sandhya · LV-I &amp; LV-II')
+      .replace(/Regular Source:[\s\S]*?LV-I &amp; LV-II/i, 'Regular Source: 33kV Rayadurgam - Sandhya · LV-I &amp; LV-II')
       .replace(/Regular Source:[\s\S]*?LV-III &amp; LV-IV/i, 'Regular Source: 33kV Asifnagar - Shaikpet · LV-III &amp; LV-IV')
-      .replace(/132\/33kV ASIFNAGAR SS → 33kV GOLCONDA \(Regular\)/g, '33kV Asifnagar - Sandhya (LV1 & LV2)')
+      .replace(/132\/33kV ASIFNAGAR SS → 33kV GOLCONDA \(Regular\)/g, '33kV Rayadurgam - Sandhya (LV1 & LV2)')
       .replace(/132\/33kV ASIFNAGAR SS → 33kV SHAIKPET \(Regular\)/g, '33kV Asifnagar - Shaikpet (LV3 & LV4)');
   }
 
